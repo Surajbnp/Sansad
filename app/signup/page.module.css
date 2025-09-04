@@ -1,14 +1,16 @@
 .page {
   font-family: var(--font-geist-sans);
-  padding: 0px;
   margin: 0px;
   width: 100%;
+  min-height: fit-content;
   background-color: white;
+  margin-top: 80px;
 }
 
 .hero {
   width: 100%;
   background-image: url("https://res.cloudinary.com/dddnxiqpq/image/upload/v1753632505/hero_assn8d.png");
+  min-height: 90vh;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -22,6 +24,6 @@
 }
 
 .form {
-  max-width: 800px;
+  max-width: 1000px;
   margin: auto;
 }

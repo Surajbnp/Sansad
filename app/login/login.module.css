@@ -3,16 +3,19 @@
   padding: 0px;
   margin: 0px;
   width: 100%;
-  background-color: white;
+  min-height: 80vh;
+  margin-top: 8vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .hero {
   width: 100%;
   background-image: url("https://res.cloudinary.com/dddnxiqpq/image/upload/v1753632505/hero_assn8d.png");
+  min-height: 90vh;
   background-repeat: no-repeat;
   background-size: cover;
-  background-position: center;
-  margin-top: 8vh;
 }
 
 .icons {
@@ -22,6 +25,6 @@
 }
 
 .form {
-  max-width: 800px;
+  max-width: 600px;
   margin: auto;
 }
