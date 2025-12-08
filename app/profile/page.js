@@ -259,7 +259,7 @@ const Page = () => {
               boxShadow="md"
               cursor="pointer"
               _hover={{ bg: "#fa7602", color: "white" }}
-              onClick={() => router.push("/tickets/new")}
+              onClick={() => router.push("/create-ticket")}
             >
               <Box
                 w="40px"
