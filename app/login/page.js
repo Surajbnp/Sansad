@@ -120,7 +120,16 @@ export default function Login() {
   };
 
   return (
-    <Box className={styles.page}>
+    <Box className={styles.page} >
+      <Box className={styles.hero} mt={{base : "4vh", md : 0}} minH={{ base: "28vh", md: "90vh" }}></Box>
+      <Box
+        w="100%"
+        h="30vh"
+        backgroundSize={{ base: "350px", md: "600px", lg: "700px" }}
+        className={styles.icons}
+      ></Box>
+      <Divider maxW={"80%"} m={"auto"} borderColor="gray.300" />
+
       <Box
         p={{ base: "30px", md: "50px" }}
         borderRadius="lg"
@@ -193,7 +202,11 @@ export default function Login() {
             py={6}
             fontSize="lg"
           >
-            {isLoading ? <Spinner size="md" color="#fa7602" /> : "लॉग इन करें"}
+            {isLoading ? (
+              <Spinner size="md" color="white"  />
+            ) : (
+              "लॉग इन करें"
+            )}
           </Button>
         </Grid>
         <Text mt={8} textAlign={"center"} fontSize="md" color="gray.600">

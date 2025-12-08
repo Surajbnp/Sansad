@@ -17,6 +17,7 @@ import {
   Stack,
   Link,
   Image,
+  Container,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/navigation";
@@ -24,7 +25,7 @@ import { useAuth } from "@/context/AuthContext";
 import { MdConfirmationNumber, MdPerson, MdLogout } from "react-icons/md";
 import { IoMdCreate } from "react-icons/io";
 import { GrUserWorker } from "react-icons/gr";
-
+import { FaInstagram, FaTwitter, FaYoutube } from "react-icons/fa";
 
 const Links = [
   { name: "Home", href: "/" },
@@ -85,9 +86,48 @@ export default function Navbar() {
         top={0}
         minH={"8vh"}
         zIndex={1000}
-        px={4}
       >
-        <Flex h={"8vh"} alignItems={"center"} justifyContent={"space-between"}>
+        <Box
+          display={"flex"}
+          alignItems={"center"}
+          bg={"#773903ff"}
+          h={"4vh"}
+          color={"white"}
+          justifyContent={"space-around"}
+        >
+          <Flex fontSize={{ base: "10px", md: "12px" }} gap={2}>
+            <Text>{"झारखंड सरकार"}</Text>
+            <div style={{ width: "2px", background: "white" }}></div>
+            <Text>{"GOVERNMENT OF JHARKHAND"}</Text>
+          </Flex>
+          <Box
+            borderTopWidth={1}
+            borderStyle={"solid"}
+            borderColor={"gray.700"}
+          >
+            <Container
+              as={Stack}
+              maxW={"6xl"}
+              py={4}
+              direction={{ base: "column", md: "row" }}
+              spacing={4}
+              justify={{ base: "center", md: "space-between" }}
+              align={{ base: "center", md: "center" }}
+            >
+              <Stack direction={"row"} spacing={6}>
+                <FaTwitter cursor={"pointer"} />
+                <FaYoutube cursor={"pointer"} />
+                <FaInstagram cursor={"pointer"} />
+              </Stack>
+            </Container>
+          </Box>
+        </Box>
+        <Flex
+          h={"8vh"}
+          alignItems={"center"}
+          justifyContent={"space-between"}
+          px={4}
+        >
           <HStack spacing={8} alignItems={"center"}>
             <Box
               borderRadius={"md"}
@@ -102,17 +142,14 @@ export default function Navbar() {
                 src="https://res.cloudinary.com/dddnxiqpq/image/upload/t_logos/v1755846625/a658e615-95d3-4025-b46c-35d326dc4f4b.webp"
               />
             </Box>
-            <HStack
-              as={"nav"}
-              spacing={4}
-              display={{ base: "none", md: "flex" }}
-            >
-              {Links.map((link, index) => (
-                <NavLink href={link.href} key={index}>
-                  {link.name}
-                </NavLink>
-              ))}
-            </HStack>
+          </HStack>
+
+          <HStack as={"nav"} spacing={8} display={{ base: "none", md: "flex" }}>
+            {Links.map((link, index) => (
+              <NavLink href={link.href} key={index}>
+                {link.name}
+              </NavLink>
+            ))}
           </HStack>
 
           <Flex gap={4} alignItems={"center"}>
@@ -150,6 +187,8 @@ export default function Navbar() {
                   minW={0}
                   w={"40px"}
                   h={"40px"}
+                  _focus={{ bg: "#fa7602", boxShadow: "none" }}
+                  _active={{ bg: "#fa7602" }}
                   aria-label={"Open menu"}
                   icon={menuOpen ? <CloseIcon /> : <HamburgerIcon />}
                   _hover={{ bg: "#fa7602", color: "white" }}

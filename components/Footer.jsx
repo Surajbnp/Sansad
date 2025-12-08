@@ -9,102 +9,107 @@ import {
   Text,
   useColorModeValue,
   VisuallyHidden,
+  HStack,
+  Divider,
+  Flex,
+  VStack,
 } from "@chakra-ui/react";
 import { FaInstagram, FaTwitter, FaYoutube } from "react-icons/fa";
-import { ReactNode } from "react";
 
-const Logo = (props) => {
+const Logo = () => {
   return (
-    <Image
-      width="60px"
-      src="https://res.cloudinary.com/dddnxiqpq/image/upload/t_logos/v1755846625/a658e615-95d3-4025-b46c-35d326dc4f4b.webp"
-    />
+    <VStack spacing={3} align={{ base: "center", md: "start" }}>
+      <Image
+        width="55px"
+        src="https://res.cloudinary.com/dddnxiqpq/image/upload/t_logos/v1755846625/a658e615-95d3-4025-b46c-35d326dc4f4b.webp"
+      />
+      <Text fontSize="sm" color="white">
+        © 2025 Sansad App. All rights reserved.
+      </Text>
+    </VStack>
   );
 };
 
 const SocialButton = ({ children, label, href }) => {
   return (
-    <chakra.button
-      bg={useColorModeValue("blackAlpha.100", "whiteAlpha.100")}
-      rounded={"full"}
-      w={8}
-      h={8}
-      cursor={"pointer"}
-      as={"a"}
+    <chakra.a
+      bg="whiteAlpha.200"
+      color="white"
+      rounded="full"
+      w="36px"
+      h="36px"
+      display="inline-flex"
+      alignItems="center"
+      justifyContent="center"
       href={href}
-      display={"inline-flex"}
-      alignItems={"center"}
-      justifyContent={"center"}
-      transition={"background 0.3s ease"}
+      transition="0.2s"
       _hover={{
-        bg: useColorModeValue("blackAlpha.200", "whiteAlpha.200"),
+        bg: "whiteAlpha.300",
+        transform: "scale(1.1)",
       }}
     >
       <VisuallyHidden>{label}</VisuallyHidden>
       {children}
-    </chakra.button>
+    </chakra.a>
   );
 };
 
 export default function Footer() {
   return (
-    <Box
-      bg={useColorModeValue("gray.50", "gray.900")}
-      color={useColorModeValue("gray.700", "gray.200")}
-    >
-      <Container
-        as={Stack}
-        maxW={"6xl"}
-        py={4}
-        spacing={4}
-        justify={"center"}
-        align={"center"}
-      >
-        <Logo />
-        <Stack direction={"row"} spacing={6}>
-          <Box as="a" href={"#"}>
-            Home
-          </Box>
-          <Box as="a" href={"#"}>
-            About
-          </Box>
-          <Box as="a" href={"#"}>
-            Blog
-          </Box>
-          <Box as="a" href={"#"}>
-            Contact
-          </Box>
-        </Stack>
-      </Container>
-
-      <Box
-        borderTopWidth={1}
-        borderStyle={"solid"}
-        borderColor={useColorModeValue("gray.200", "gray.700")}
-      >
-        <Container
-          as={Stack}
-          maxW={"6xl"}
-          py={4}
+    <Box bg="#773903ff" color="gray.300" py={8} px={4}>
+      {/* TOP */}
+      <Container maxW="7xl">
+        <Flex
+          justify="space-between"
           direction={{ base: "column", md: "row" }}
-          spacing={4}
-          justify={{ base: "center", md: "space-between" }}
-          align={{ base: "center", md: "center" }}
+          align="center"
+          gap={6}
         >
-          <Text>© 2025 Sansad App. All rights reserved</Text>
-          <Stack direction={"row"} spacing={6}>
-            <SocialButton label={"Twitter"} href={"#"}>
-              <FaTwitter />
-            </SocialButton>
-            <SocialButton label={"YouTube"} href={"#"}>
-              <FaYoutube />
-            </SocialButton>
-            <SocialButton label={"Instagram"} href={"#"}>
-              <FaInstagram />
-            </SocialButton>
-          </Stack>
-        </Container>
-      </Box>
+          <Logo />
+
+          {/* BOTTOM ROW */}
+          <Flex
+            align="center"
+            justify="space-between"
+            direction={{ base: "column", md: "row" }}
+            gap={4}
+          >
+            <VStack spacing={5} align={{ base: "center", md: "start" }}>
+              <HStack
+                spacing={10}
+                fontSize="sm"
+                fontWeight="medium"
+                color="white"
+              >
+                <chakra.a href="#" _hover={{ color: "#fa7602" }}>
+                  Home
+                </chakra.a>
+                <chakra.a href="#" _hover={{ color: "#fa7602" }}>
+                  About
+                </chakra.a>
+                <chakra.a href="#" _hover={{ color: "#fa7602" }}>
+                  Blog
+                </chakra.a>
+                <chakra.a href="#" _hover={{ color: "#fa7602" }}>
+                  Contact
+                </chakra.a>
+              </HStack>
+
+              <HStack gap={8}>
+                <SocialButton label="Twitter" href="#">
+                  <FaTwitter size={18} />
+                </SocialButton>
+                <SocialButton label="YouTube" href="#">
+                  <FaYoutube size={18} />
+                </SocialButton>
+                <SocialButton label="Instagram" href="#">
+                  <FaInstagram size={18} />
+                </SocialButton>
+              </HStack>
+            </VStack>
+          </Flex>
+        </Flex>
+      </Container>
     </Box>
   );
 }

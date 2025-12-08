@@ -64,5 +64,3 @@ export async function POST(req) {
   }
 }
 
-// adding ticket creation route
-// Schema ->

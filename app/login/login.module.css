@@ -4,10 +4,11 @@
   margin: 0px;
   width: 100%;
   min-height: 80vh;
-  margin-top: 8vh;
+  margin-top: 12vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
 }
 
 .hero {
@@ -16,6 +17,8 @@
   min-height: 90vh;
   background-repeat: no-repeat;
   background-size: cover;
+  background-position: center;
+  margin-top: 8vh;
 }
 
 .icons {

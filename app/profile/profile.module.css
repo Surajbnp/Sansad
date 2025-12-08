@@ -7,3 +7,9 @@
   align-items: center;
   justify-content: center;
 }
+
+.icons {
+  background-image: url("https://res.cloudinary.com/dddnxiqpq/image/upload/v1753632500/icons_gotiyz.png");
+  background-repeat: no-repeat;
+  background-position: center;
+}

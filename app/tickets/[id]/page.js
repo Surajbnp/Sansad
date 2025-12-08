@@ -169,9 +169,6 @@ export default function TicketDetailsPage() {
         </Box>
       ) : (
         <>
-          {/* <Text py={4} fontSize={"xl"} fontWeight={"md"}>
-            Ticket Details
-          </Text> */}
           <Box
             mb={6}
             p={4}

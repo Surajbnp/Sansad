@@ -4,140 +4,292 @@ import {
   Avatar,
   Box,
   Text,
-  Stack,
   Button,
   SimpleGrid,
   Skeleton,
+  Flex,
+  HStack,
+  VStack,
+  Icon,
+  Divider,
 } from "@chakra-ui/react";
+import { DownloadIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { useAuth } from "@/context/AuthContext";
 import withAuth from "@/utils/withAuth";
 import { useRouter } from "next/navigation";
-
-const fields = [
-  ["Name", "name"],
-  ["Address", "address"],
-  ["Sex", "sex"],
-  ["Voter ID", "voterId"],
-  ["Aadhar", "aadhar"],
-  ["WhatsApp", "whatsapp"],
-];
+import { FiPlusCircle, FiEye, FiCheckCircle, FiFileText } from "react-icons/fi";
+import styles from "./profile.module.css";
 
 const Page = () => {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
 
+  const ticketsCreated = user?.ticketsCreated || 0;
+  const ticketsResolved = user?.ticketsResolved || 0;
+
   return (
     <Box
-      minH="80vh"
-      w="100vw"
+      w="100%"
+      color="black"
+      pt="90px"
+      pb="40px"
       display="flex"
       justifyContent="center"
-      alignItems="center"
-      overflowX="hidden"
-      px={{ base: 0, md: 4 }}
-      mt={'80px'}
-      pb={0}
+      px={{ base: 3, md: 6 }}
+      mt={"12vh"}
     >
       {loading ? (
-        <Box
-          w={{ base: "96vw", sm: "380px", md: "600px" }}
-          mx="auto"
-          p={{ base: 4, md: 8 }}
-        >
-          <Skeleton height="400px" borderRadius="2xl" />
+        <Box w="100%" maxW="1100px">
+          <Skeleton height="420px" borderRadius="md" />
         </Box>
       ) : (
-        <Box
-          w="100%"
-          maxW={{ base: "96vw", sm: "380px", md: "600px" }}
-          px={{ base: 2, sm: 6, md: 10 }}
-          py={{ base: 4, sm: 8 }}
-          bg="white"
- 
-          rounded="2xl"
-          position="relative"
-        >
-          {/* Header / Avatar */}
-          <Box
-            h={{ base: "10px", sm: "100px" }}
-            position="relative"
-            roundedTop="2xl"
-          >
-            <Avatar
-              size={{ base: "xl", md: "2xl" }}
-              name={user?.name}
-              src={user?.avatar || undefined}
-              position="absolute"
-              left="50%"
-              bottom={-12}
-              transform="translateX(-50%)"
-              border="4px solid white"
-              shadow="lg"
-            />
-          </Box>
-
-          {/* Info Section */}
-          <Box pt={16} pb={4}>
-            <Text
-              fontSize={{ base: "lg", md: "2xl" }}
-              fontWeight="bold"
-              textAlign="center"
-              color="gray.800"
-              mb={2}
+        <Box w="100%" maxW="1100px">
+          {/* TOP HEADER CARD */}
+          <Box rounded="md" py={6} px={{ base: 4, md: 8 }} boxShadow="lg">
+            {/* Top row: title + filters/buttons */}
+            <Flex
+              justify="space-between"
+              align="center"
+              mb={6}
+              gap={4}
+              direction={{ base: "row", md: "row" }}
+              w={"100%"}
             >
-              {user?.name || "Unnamed User"}
-            </Text>
-            <SimpleGrid columns={{ base: 2, sm: 2 }} spacing={4} px={1} mt={4}>
-              {fields.map(([label, key]) => (
-                <Box
-                  key={key}
-                  rounded="lg"
-                  p={3}
-                  bg="gray.50"
-                  boxShadow="sm"
-                  textAlign="center"
+              <HStack align="center">
+                <Box w="4px" h="28px" bg="#fa7602" rounded="full" mr={2} />
+                <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold">
+                  Profile Details
+                </Text>
+              </HStack>
+
+              <HStack spacing={3}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  borderColor="red.400"
+                  color="red.400"
+                  _hover={{ bg: "#fa7602", color: "white" }}
+                  onClick={() => {
+                    logout();
+                    router.push("/");
+                  }}
                 >
-                  <Text
-                    fontSize="xs"
-                    color="gray.500"
-                    textTransform="uppercase"
-                    fontWeight="medium"
-                    letterSpacing="wide"
-                  >
-                    {label}
-                  </Text>
-                  <Text fontSize="md" fontWeight="semibold" color="gray.800">
-                    {user?.[key] || "-"}
+                  Logout
+                </Button>
+              </HStack>
+            </Flex>
+
+            {/* Middle row: avatar + info row */}
+            <Flex
+              align={{ base: "flex-start", md: "center" }}
+              gap={12}
+              direction={{ base: "column", md: "row" }}
+            >
+              {/* Avatar + name */}
+              <HStack spacing={4}>
+                <Avatar
+                  size="xl"
+                  name={user?.name}
+                  src={user?.avatar || undefined}
+                />
+                <Box>
+                  <Text fontSize={{ base: "xl", md: "md" }} fontWeight="bold">
+                    {user?.name || "Unnamed User"}
                   </Text>
                 </Box>
-              ))}
-            </SimpleGrid>
-            {/* Logout */}
-            <Stack mt={8} align="center">
-              <Button
-                w={{ base: "full", sm: "60%" }}
-                size="lg"
-                bg="orange.400"
-                color="white"
-                rounded="lg"
-                fontWeight="semibold"
-                boxShadow="base"
-                _hover={{
-                  bg: "white",
-                  color: "orange.400",
-                  border: "2px solid",
-                  borderColor: "orange.400",
-                  shadow: "md",
-                }}
-                transition="all 0.2s"
-                onClick={() => {
-                  logout();
-                  router.push("/");
-                }}
+              </HStack>
+
+              {/* Info columns like reference: Role / Phone / Email */}
+              <Flex
+                flex="1"
+                justify="space-between"
+                gap={6}
+                wrap="wrap"
+                mt={{ base: 4, md: 0 }}
               >
-                Logout
-              </Button>
-            </Stack>
+                <VStack align="flex-start" spacing={1} minW="150px">
+                  <Text fontSize="xs" color="gray.400">
+                    Role
+                  </Text>
+                  <Text fontSize="sm" fontWeight="semibold">
+                    {user?.role || "User"}
+                  </Text>
+                </VStack>
+
+                <VStack align="flex-start" spacing={1} minW="150px">
+                  <Text fontSize="xs" color="gray.400">
+                    Phone Number
+                  </Text>
+                  <Text fontSize="sm" fontWeight="semibold">
+                    {user?.whatsapp || user?.phone || "Not Provided"}
+                  </Text>
+                </VStack>
+
+                <VStack align="flex-start" spacing={1} minW="200px">
+                  <Text fontSize="xs" color="gray.400">
+                    Email Address
+                  </Text>
+                  <Text fontSize="sm" fontWeight="semibold">
+                    {user?.email || "Not Provided"}
+                  </Text>
+                </VStack>
+                <VStack align="flex-start" spacing={1} minW="200px">
+                  <Text fontSize="xs" color="gray.400">
+                    Aadhar
+                  </Text>
+                  <Text fontSize="sm" fontWeight="semibold">
+                    {user?.aadhar || "Not Provided"}
+                  </Text>
+                </VStack>
+              </Flex>
+            </Flex>
+          </Box>
+
+          {/* BOTTOM STRIP: OPTIONS – matches horizontal cards in reference */}
+          <Flex mt={6} gap={4} direction={{ base: "column", md: "row" }}>
+            {/* Tickets Created */}
+            <Box
+              flex="1"
+              rounded="md"
+              py={4}
+              px={5}
+              display="flex"
+              alignItems="center"
+              gap={4}
+              boxShadow="md"
+            >
+              <Box
+                w="40px"
+                h="40px"
+                rounded="full"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Icon as={FiFileText} fontSize="20px" />
+              </Box>
+              <Box>
+                <Text fontSize="lg" fontWeight="bold">
+                  {ticketsCreated}
+                </Text>
+                <Text fontSize="xs" color="gray.600">
+                  Tickets Created
+                </Text>
+              </Box>
+            </Box>
+
+            {/* Tickets Resolved */}
+            <Box
+              flex="1"
+              rounded="md"
+              py={4}
+              px={5}
+              display="flex"
+              alignItems="center"
+              gap={4}
+              boxShadow="md"
+            >
+              <Box
+                w="40px"
+                h="40px"
+                rounded="full"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Icon as={FiCheckCircle} fontSize="20px" />
+              </Box>
+              <Box>
+                <Text fontSize="lg" fontWeight="bold">
+                  {ticketsResolved}
+                </Text>
+                <Text fontSize="xs" color="gray.600">
+                  Tickets Resolved
+                </Text>
+              </Box>
+            </Box>
+
+            {/* View Tickets */}
+            <Box
+              flex="1"
+              rounded="md"
+              py={4}
+              px={5}
+              display="flex"
+              alignItems="center"
+              gap={4}
+              boxShadow="md"
+              color="gray.600"
+              cursor="pointer"
+              _hover={{ bg: "#fa7602", color: "white" }}
+              onClick={() => router.push("/tickets")}
+            >
+              <Box
+                w="40px"
+                h="40px"
+                rounded="full"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Icon as={FiEye} fontSize="20px" />
+              </Box>
+              <Box>
+                <Text fontSize="md" fontWeight="bold">
+                  View Tickets
+                </Text>
+                <Text
+                  fontSize="xs"
+                  _hover={{ color: "white" }}
+                >
+                  See all your tickets
+                </Text>
+              </Box>
+            </Box>
+
+            {/* Create New Ticket */}
+            <Box
+              flex="1"
+              rounded="md"
+              py={4}
+              px={5}
+              display="flex"
+              alignItems="center"
+              gap={4}
+              boxShadow="md"
+              cursor="pointer"
+              _hover={{ bg: "#fa7602", color: "white" }}
+              onClick={() => router.push("/tickets/new")}
+            >
+              <Box
+                w="40px"
+                h="40px"
+                rounded="full"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                _hover={{ color: "white" }}
+                color="gray.600"
+              >
+                <Icon as={FiPlusCircle} fontSize="20px" />
+              </Box>
+              <Box>
+                <Text fontSize="md" fontWeight="bold">
+                  Create New Ticket
+                </Text>
+                <Text fontSize="xs">Raise an issue</Text>
+              </Box>
+            </Box>
+          </Flex>
+          {/* icons  */}
+          <Box mt={"12vh"}>
+            <Divider maxW={"80%"} m={"auto"} borderColor="gray.300" />
+            <Box
+              w="100%"
+              h="30vh"
+              backgroundSize={{ base: "350px", md: "600px", lg: "700px" }}
+              className={styles.icons}
+            ></Box>
           </Box>
         </Box>
       )}

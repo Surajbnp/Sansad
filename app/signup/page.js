@@ -203,6 +203,15 @@ export default function Home() {
 
   return (
     <Box className={styles.page}>
+      <Box className={styles.hero} minH={{ base: "28vh", md: "90vh" }}></Box>
+      <Box
+        w="100%"
+        h="30vh"
+        backgroundSize={{ base: "350px", md: "600px", lg: "700px" }}
+        className={styles.icons}
+      ></Box>
+      <Divider maxW={"80%"} m={"auto"} borderColor="gray.300" />
+
       <Box className={styles.form} p={{ base: "40px", md: "80px" }}>
         <Box maxW="900px" p={4}>
           <Text
