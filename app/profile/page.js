@@ -36,7 +36,7 @@ const Page = () => {
       display="flex"
       justifyContent="center"
       px={{ base: 3, md: 6 }}
-      mt={"12vh"}
+      mt={"8vh"}
     >
       {loading ? (
         <Box w="100%" maxW="1100px">

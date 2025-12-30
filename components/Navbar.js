@@ -96,9 +96,14 @@ export default function Navbar() {
           justifyContent={"space-around"}
         >
           <Flex fontSize={{ base: "10px", md: "12px" }} gap={2}>
-            <Text>{"झारखंड सरकार"}</Text>
-            <div style={{ width: "2px", background: "white" }}></div>
-            <Text>{"GOVERNMENT OF JHARKHAND"}</Text>
+            {/* <Text>{"झारखंड सरकार"}</Text>
+            <div style={{ width: "2px", background: "white" }}></div> */}
+            <Text>
+              Office of hon&apos;ble Member of Parliament{" "}
+              <Text as="span" color="white" fontWeight="bold">
+                Shri Ganesh Ji
+              </Text>
+            </Text>
           </Flex>
           <Box
             borderTopWidth={1}
@@ -136,6 +141,7 @@ export default function Navbar() {
               fontSize="lg"
               cursor="default"
               onClick={() => router.push("/")}
+              cursor={"pointer"}
             >
               <Image
                 width={{ base: "80px", md: "100px" }}

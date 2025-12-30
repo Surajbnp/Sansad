@@ -61,13 +61,13 @@ export default function Home() {
             }}
             transition="all 0.2s ease"
           >
-            अभी रजिस्टर करें
+            रजिस्टर/लॉग इन
           </Button>
 
           <Button
             bg="#2fa70b"
             color="white"
-            onClick={() => (window.location.href = "/login")}
+            onClick={() => (window.location.href = "/ticket-status")}
             _hover={{
               bg: "#248a09",
               transform: "translateY(-2px)",
@@ -77,7 +77,7 @@ export default function Home() {
             }}
             transition="all 0.2s ease"
           >
-            लॉग इन करें
+            टिकट स्टेटस देखें
           </Button>
         </Flex>
 
