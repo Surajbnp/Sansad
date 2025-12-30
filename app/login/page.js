@@ -120,15 +120,13 @@ export default function Login() {
   };
 
   return (
-    <Box className={styles.page} >
-      <Box className={styles.hero} mt={{base : "4vh", md : 0}} minH={{ base: "28vh", md: "90vh" }}></Box>
-      <Box
-        w="100%"
-        h="30vh"
-        backgroundSize={{ base: "350px", md: "600px", lg: "700px" }}
-        className={styles.icons}
+    <Box className={styles.page}>
+      {/* <Box
+        className={styles.hero}
+        mt={{ base: "4vh", md: 0 }}
+        minH={{ base: "28vh", md: "90vh" }}
       ></Box>
-      <Divider maxW={"80%"} m={"auto"} borderColor="gray.300" />
+      <Divider maxW={"80%"} m={"auto"} borderColor="gray.300" /> */}
 
       <Box
         p={{ base: "30px", md: "50px" }}
@@ -202,13 +200,20 @@ export default function Login() {
             py={6}
             fontSize="lg"
           >
-            {isLoading ? (
-              <Spinner size="md" color="white"  />
-            ) : (
-              "लॉग इन करें"
-            )}
+            {isLoading ? <Spinner size="md" color="white" /> : "लॉग इन करें"}
           </Button>
         </Grid>
+        <Text mt={8} textAlign={"center"} fontSize="md" color="gray.600">
+          <Link
+            as={NextLink}
+            href="/forgot-password"
+            color="blue"
+            fontWeight="sm"
+            _hover={{ textDecoration: "underline" }}
+          >
+            Forget password?
+          </Link>
+        </Text>
         <Text mt={8} textAlign={"center"} fontSize="md" color="gray.600">
           Not a user?{" "}
           <Link
@@ -225,3 +230,21 @@ export default function Login() {
     </Box>
   );
 }
+
+
+// forget password route is missing
+// sending reset link functionality is missing
+// sending email functionality is missing
+// sending token generation is missing
+// reset password route is missing
+// reset password functionality is missing
+// token verification is missing
+// password update functionality is missing
+// success and error handling for all above functionalities is missing
+// UI for all above functionalities is missing
+// validation for all above functionalities is missing
+// loading states for all above functionalities is missing
+// integration with backend for all above functionalities is missing
+// security measures for all above functionalities is missing
+// accessibility considerations for all above functionalities is missing
+// responsiveness for all above functionalities is missing

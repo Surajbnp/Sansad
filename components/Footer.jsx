@@ -20,8 +20,8 @@ const Logo = () => {
   return (
     <VStack spacing={3} align={{ base: "center", md: "start" }}>
       <Image
-        width="55px"
-        src="https://res.cloudinary.com/dddnxiqpq/image/upload/t_logos/v1755846625/a658e615-95d3-4025-b46c-35d326dc4f4b.webp"
+        width="100px"
+        src="https://res.cloudinary.com/dddnxiqpq/image/upload/v1767013159/ChatGPT_Image_Dec_29_2025_06_28_24_PM_rd3f8w.webp"
       />
       <Text fontSize="sm" color="white">
         © 2025 Sansad App. All rights reserved.

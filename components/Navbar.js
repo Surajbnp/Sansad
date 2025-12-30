@@ -138,8 +138,8 @@ export default function Navbar() {
               onClick={() => router.push("/")}
             >
               <Image
-                width={{ base: "50px", md: "60px" }}
-                src="https://res.cloudinary.com/dddnxiqpq/image/upload/t_logos/v1755846625/a658e615-95d3-4025-b46c-35d326dc4f4b.webp"
+                width={{ base: "80px", md: "100px" }}
+                src="https://res.cloudinary.com/dddnxiqpq/image/upload/v1767013156/ChatGPT_Image_Dec_29_2025_06_28_20_PM_okhqrs.webp"
               />
             </Box>
           </HStack>
