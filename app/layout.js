@@ -22,7 +22,62 @@ const config = {
   initialColorMode: "light",
   useSystemColorMode: false,
 };
-const theme = extendTheme({ config });
+
+const theme = extendTheme({
+  config,
+
+  colors: {
+    brand: {
+      primary: "#fa7602",
+    },
+  },
+
+  components: {
+    Input: {
+      baseStyle: {
+        field: {
+          _focus: {
+            borderColor: "brand.primary",
+            boxShadow: "0 0 0 1px #fa7602",
+          },
+          _focusVisible: {
+            borderColor: "brand.primary",
+            boxShadow: "0 0 0 1px #fa7602",
+          },
+        },
+      },
+    },
+    Textarea: {
+      baseStyle: {
+        field: {
+          _focus: {
+            borderColor: "brand.primary",
+            boxShadow: "0 0 0 0.4px #fa7602",
+          },
+          _focusVisible: {
+            borderColor: "brand.primary",
+            boxShadow: "0 0 0 0.4px #fa7602",
+          },
+        },
+      },
+    },
+    Select: {
+      baseStyle: {
+        field: {
+          _focus: {
+            borderColor: "brand.primary",
+            boxShadow: "0 0 0 1px #fa7602",
+          },
+          _focusVisible: {
+            borderColor: "brand.primary",
+            boxShadow: "0 0 0 1px #fa7602",
+          },
+        },
+      },
+    },
+  },
+});
+
 function RootLayout({ children }) {
   return (
     <html lang="en">

@@ -2,7 +2,6 @@
   font-family: var(--font-geist-sans);
   margin: 0px;
   width: 100%;
-  min-height: fit-content;
   background-color: white;
   margin-top: 12vh;
 }

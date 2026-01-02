@@ -10,3 +10,21 @@
   justify-content: center;
   flex-direction: column;
 }
+
+/* 🔥 Brand focus styles for all inputs inside .page */
+.page input:focus,
+.page textarea:focus,
+.page select:focus {
+  border-color: #fa7602 !important;
+  box-shadow: 0 0 0 1px #fa7602 !important;
+  outline: none;
+}
+
+/* Accessibility (keyboard focus) */
+.page input:focus-visible,
+.page textarea:focus-visible,
+.page select:focus-visible {
+  border-color: #fa7602 !important;
+  box-shadow: 0 0 0 1px #fa7602 !important;
+  outline: none;
+}
