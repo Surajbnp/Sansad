@@ -22,7 +22,7 @@ export async function GET(req) {
 
     if (!user || user.role !== "Admin") {
       return NextResponse.json(
-        { success: false, message: "Forbidden: Admins only" },
+        { success: false, message: "Forbidden: Admins only"},
         { status: 403 }
       );
     }

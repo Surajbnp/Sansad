@@ -7,7 +7,7 @@ import UserModel from "@/models/User.model";
 
 export async function POST(req) {
   try {
-    const { email } = await req.json();
+    const { email, mailHeading, mailSubject } = await req.json();
 
     if (!email) {
       return NextResponse.json(
@@ -62,10 +62,10 @@ export async function POST(req) {
     await transporter.sendMail({
       from: `"Sansad App" <${process.env.SMTP_EMAIL}>`,
       to: email,
-      subject: "Your Password Reset OTP",
+      subject: mailSubject || "Your OTP Code",
       html: `
         <div style="font-family: Arial, sans-serif;">
-          <h2>Password Reset OTP</h2>
+          <h2>${mailHeading}</h2>
           <p>Your OTP is:</p>
           <h1 style="letter-spacing: 4px;">${otp}</h1>
           <p>This OTP is valid for <b>5 minutes</b>.</p>
@@ -86,4 +86,3 @@ export async function POST(req) {
     );
   }
 }
-

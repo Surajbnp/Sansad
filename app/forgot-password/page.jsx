@@ -28,6 +28,9 @@ const Page = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
 
+  let mailHeading = "Password Reset OTP";
+  let mailSubject = "Your Password Reset OTP";
+
   const sendOtp = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -38,7 +41,7 @@ const Page = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, mailHeading, mailSubject }),
       });
 
       const data = await res.json();

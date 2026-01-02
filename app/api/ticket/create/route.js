@@ -19,7 +19,6 @@ export async function POST(req) {
     const { user, title, description, fileUrl, assignedDept } =
       await req.json();
 
-
     const newTicket = new TicketModel({
       user: user,
       title,
