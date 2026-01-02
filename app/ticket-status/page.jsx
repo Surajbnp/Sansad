@@ -112,16 +112,19 @@ const Page = () => {
   const activeStep = steps.length - 1;
 
   return (
-    <Box className={styles.page} px={{ base: 3, md: 0 }}>
+    <Box className={styles.page} px={{ base: 3, md: 0 }} minH={{base : "60vh", md : "80vh"}}>
       <Box
         maxW="460px"
         w="100%"
         bg="white"
         p={{ base: 5, md: 8 }}
         borderRadius="xl"
-        boxShadow="rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em"
+        boxShadow={{
+          base: "none",
+          md: "rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em",
+        }}
       >
-        <VStack spacing={5} align="stretch" pb={4}  >
+        <VStack spacing={5} align="stretch" pb={4}>
           <Text fontSize="22px" fontWeight="600" textAlign="center">
             Ticket Status
           </Text>
