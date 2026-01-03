@@ -30,6 +30,11 @@ const ticketSchema = new mongoose.Schema(
       type: String,
     },
 
+    phone: {
+      type: Number,
+      required: true,
+    },
+
     status: {
       type: String,
       enum: [

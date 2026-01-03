@@ -34,7 +34,7 @@ export async function POST(req) {
     }
 
     const token = jwt.sign(
-      { userId: user._id, name: user.name, role: user.role },
+      { userId: user._id, name: user.name, role: user.role, department : user.department },
       "sansadappsecret",
       { expiresIn: "7d" }
     );

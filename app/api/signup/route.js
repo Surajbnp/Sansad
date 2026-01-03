@@ -6,10 +6,28 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { name, address, sex, email, voterId, whatsapp, password, vidhansabha } = body;
+    const {
+      name,
+      address,
+      sex,
+      email,
+      voterId,
+      whatsapp,
+      password,
+      vidhansabha,
+    } = body;
     const aadhar = body?.aadhar ? Number(body.aadhar) : null;
 
+    if (role === "User") {
+      if (!aadhar || !vidhansabha) {
+        return res.status(400).json({
+          message: "Aadhar and Vidhansabha are required for users",
+        });
+      }
+    }
+
     await database();
+
     const query = {
       $or: [{ email }, { aadhar }],
     };
@@ -63,4 +81,3 @@ export async function POST(req) {
     );
   }
 }
-

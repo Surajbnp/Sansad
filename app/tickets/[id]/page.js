@@ -32,6 +32,7 @@ import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 import { useParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import ImagePreviewModal from "@/components/ImagePreviewModal";
 
 export default function TicketDetailsPage() {
   const [ticket, setTicket] = useState(null);
@@ -57,6 +58,8 @@ export default function TicketDetailsPage() {
   const { id } = useParams();
   const { accessToken, user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
 
   const fetchTicket = async () => {
     try {
@@ -160,7 +163,8 @@ export default function TicketDetailsPage() {
       minH={"70vh"}
       mx="auto"
       px={4}
-      py={4}
+      py={8}
+      mb={16}
     >
       {!ticket ? (
         <Box m={" auto"} maxW={"800px"} minH={"70vh"}>
@@ -218,6 +222,18 @@ export default function TicketDetailsPage() {
                   alt="Ticket Attachment"
                   maxH="200px"
                   borderRadius="md"
+                  onClick={() => {
+                    setPreviewImage(ticket.fileUrl);
+                    setPreviewOpen(true);
+                  }}
+                  cursor={"pointer"}
+                />
+
+                {/* Image Preview Modal */}
+                <ImagePreviewModal
+                  isOpen={previewOpen}
+                  onClose={() => setPreviewOpen(false)}
+                  imageUrl={previewImage}
                 />
               </Box>
             )}

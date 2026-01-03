@@ -138,6 +138,8 @@ export default function Page() {
     </Flex>
   );
 
+  console.log(tickets)
+
   return (
     <Box className={styles.container} minH="70vh">
       {loading || isFetching ? (

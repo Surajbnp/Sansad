@@ -81,6 +81,12 @@ const theme = extendTheme({
 function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <script
+          src="https://upload-widget.cloudinary.com/latest/global/all.js"
+          type="text/javascript"
+        ></script>
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ChakraProvider theme={theme}>
           <AuthProvider>

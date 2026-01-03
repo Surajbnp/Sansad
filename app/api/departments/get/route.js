@@ -9,26 +9,34 @@ export async function GET(req) {
     await database();
 
     const token = req.headers.get("authorization");
-    const decodedUserId = verifyUser(token);
+    const decoded = verifyUser(token);
 
-    if (!decodedUserId) {
+    if (!decoded?.userId) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    const user = await UserModel.findById(decodedUserId?.userId).lean();
+    const admin = await UserModel.findById(decoded.userId);
 
-    if (!user || user.role !== "Admin") {
+    if (!admin || admin.role !== "Admin") {
       return NextResponse.json(
-        { success: false, message: "Forbidden: Admins only"},
+        { success: false, message: "Forbidden: Admins only" },
         { status: 403 }
       );
     }
 
-    const departments = await DepartmentModel.find({});
-    return NextResponse.json({ success: true, departments });
+    // ✅ Fetch departments with assigned user info
+    const departments = await DepartmentModel.find()
+      .populate("assignedUser", "name email role department")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return NextResponse.json({
+      success: true,
+      departments,
+    });
   } catch (error) {
     console.error("Error fetching departments:", error);
     return NextResponse.json(

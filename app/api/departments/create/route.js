@@ -1,49 +1,112 @@
 import { NextResponse } from "next/server";
-import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
+import database from "@/lib/database";
 import DepartmentModel from "@/models/Department.model";
 import UserModel from "@/models/User.model";
-import database from "@/lib/database";
 import verifyUser from "../../authMiddleware";
+
+/* ------------------ slug generator ------------------ */
+const generateSlug = async (name) => {
+  let baseSlug = name
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+  let slug = baseSlug;
+  let counter = 1;
+
+  while (await DepartmentModel.findOne({ slug })) {
+    slug = `${baseSlug}-${counter++}`;
+  }
+
+  return slug;
+};
 
 export async function POST(req) {
   try {
     await database();
 
+    /* ------------------ AUTH ------------------ */
     const token = req.headers.get("authorization");
     const decoded = verifyUser(token);
 
-    console.log(decoded);
+    if (!decoded?.userId) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
-    const user = await UserModel.findById(decoded.userId);
-    if (!user || user.role !== "Admin") {
+    const admin = await UserModel.findById(decoded.userId);
+
+    if (!admin || admin.role !== "Admin") {
       return NextResponse.json(
         { success: false, message: "Only admin can create departments" },
         { status: 403 }
       );
     }
 
+    /* ------------------ BODY ------------------ */
     const body = await req.json();
-    const { name, assignedTo } = body;
+    const {
+      name,
+      assignedName,
+      assignedEmail,
+      assignedPassword,
+      assignedContact,
+    } = body;
 
-    const existing = await DepartmentModel.findOne({ name });
-    if (existing) {
+    if (!name || !assignedName || !assignedEmail || !assignedPassword) {
       return NextResponse.json(
-        { success: false, message: "Department already exists" },
+        { success: false, message: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    const payload = {
-      name,
-      createdBy: {
-        name: user?.name,
-        userId: user._id.toString(),
-      },
-      assignedTo,
-    };
+    /* ------------------ CHECK DEPT ------------------ */
+    const existingDept = await DepartmentModel.findOne({ name });
+    if (existingDept) {
+      return NextResponse.json(
+        { success: false, message: "Department already exists" },
+        { status: 409 }
+      );
+    }
 
-    const department = new DepartmentModel(payload);
-    await department.save();
+    /* ------------------ CHECK USER ------------------ */
+    const existingUser = await UserModel.findOne({ email: assignedEmail });
+    if (existingUser) {
+      return NextResponse.json(
+        { success: false, message: "Department user already exists" },
+        { status: 409 }
+      );
+    }
+
+    /* ------------------ CREATE USER ------------------ */
+    const hashedPassword = await bcrypt.hash(assignedPassword, 10);
+
+    const deptUser = await UserModel.create({
+      name: assignedName,
+      email: assignedEmail,
+      password: hashedPassword,
+      whatsapp: assignedContact || null,
+      role: "Department",
+      department: name,
+    });
+
+    /* ------------------ CREATE DEPARTMENT ------------------ */
+    const slug = await generateSlug(name);
+
+    const department = await DepartmentModel.create({
+      name,
+      slug,
+      createdBy: {
+        userId: admin._id,
+        name: admin.name,
+      },
+      assignedUser: deptUser._id,
+    });
 
     return NextResponse.json({ success: true, department }, { status: 201 });
   } catch (error) {
