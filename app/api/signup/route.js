@@ -18,13 +18,6 @@ export async function POST(req) {
     } = body;
     const aadhar = body?.aadhar ? Number(body.aadhar) : null;
 
-    if (role === "User") {
-      if (!aadhar || !vidhansabha) {
-        return res.status(400).json({
-          message: "Aadhar and Vidhansabha are required for users",
-        });
-      }
-    }
 
     await database();
 

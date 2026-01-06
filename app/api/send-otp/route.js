@@ -18,16 +18,16 @@ export async function POST(req) {
 
     await database();
 
-    // 🔍 Check if user exists
-    const user = await UserModel.findOne({ email }).select("_id");
+    // // 🔍 Check if user exists
+    // const user = await UserModel.findOne({ email }).select("_id");
 
-    // 🚫 Do NOT reveal if user exists or not
-    if (!user) {
-      return NextResponse.json({
-        success: true,
-        message: "If this email exists, OTP has been sent",
-      });
-    }
+    // // 🚫 Do NOT reveal if user exists or not
+    // if (!user) {
+    //   return NextResponse.json({
+    //     success: true,
+    //     message: "If this email exists, OTP has been sent",
+    //   });
+    // }
 
     // 🔢 Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
