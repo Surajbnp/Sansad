@@ -40,18 +40,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       unique: true,
       sparse: true,
-      required: function () {
-        return this.role === "User";
-      },
     },
 
     aadhar: {
       type: Number,
       unique: true,
       sparse: true,
-      required: function () {
-        return this.role === "User";
-      },
     },
 
     vidhansabha: {

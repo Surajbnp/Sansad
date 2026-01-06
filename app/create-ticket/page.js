@@ -20,7 +20,7 @@ import { useAuth } from "@/context/AuthContext";
 const initialState = {
   title: "",
   description: "",
-  mobile: "",
+  phone: "",
   fileUrl: "",
 };
 
@@ -47,10 +47,10 @@ export default function TicketCreatePage() {
     if (!formData.description.trim())
       newErrors.description = "विवरण आवश्यक है";
 
-    if (!formData.mobile)
-      newErrors.mobile = "मोबाइल नंबर आवश्यक है";
-    else if (!/^\d{10}$/.test(formData.mobile))
-      newErrors.mobile = "मोबाइल नंबर 10 अंकों का होना चाहिए";
+    if (!formData.phone)
+      newErrors.phone = "मोबाइल नंबर आवश्यक है";
+    else if (!/^\d{10}$/.test(formData.phone))
+      newErrors.phone = "मोबाइल नंबर 10 अंकों का होना चाहिए";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -76,6 +76,8 @@ export default function TicketCreatePage() {
           userId: user?.userId,
         },
       };
+
+      console.log(payload)
 
       const response = await fetch("/api/ticket/create", {
         method: "POST",
@@ -199,14 +201,14 @@ export default function TicketCreatePage() {
         <FormErrorMessage>{errors.description}</FormErrorMessage>
       </FormControl>
 
-      {/* ===== MOBILE ===== */}
-      <FormControl isInvalid={errors.mobile} mb={4}>
+      {/* ===== phone ===== */}
+      <FormControl isInvalid={errors.phone} mb={4}>
         <Text mb={1}>
-          मोबाइल नंबर (Mobile Number) <Text as="span" color="red">*</Text>
+          मोबाइल नंबर (phone Number) <Text as="span" color="red">*</Text>
         </Text>
         <Input
-          value={formData.mobile}
-          onChange={(e) => handleChange("mobile", e.target.value)}
+          value={formData.phone}
+          onChange={(e) => handleChange("phone", e.target.value)}
           bg="gray.50"
           borderColor="gray.300"
           _focus={{
@@ -214,7 +216,7 @@ export default function TicketCreatePage() {
             boxShadow: "0 0 0 1px #fa7602",
           }}
         />
-        <FormErrorMessage>{errors.mobile}</FormErrorMessage>
+        <FormErrorMessage>{errors.phone}</FormErrorMessage>
       </FormControl>
 
       {/* ===== IMAGE UPLOAD ===== */}

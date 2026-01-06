@@ -50,6 +50,7 @@ export async function POST(req) {
 
     /* ------------------ BODY ------------------ */
     const body = await req.json();
+    console.log(body)
     const {
       name,
       assignedName,

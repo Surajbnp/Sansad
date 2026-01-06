@@ -155,6 +155,8 @@ export default function TicketDetailsPage() {
     }
   };
 
+
+
   return (
     <Box
       className={styles.container}
@@ -367,7 +369,7 @@ export default function TicketDetailsPage() {
                     onChange={(e) => setSelectedDept(e.target.value)}
                   >
                     {departments.map((dept) => (
-                      <option key={dept._id} value={dept.name}>
+                      <option style={{textDecoration : "capitalize"}} key={dept._id} value={dept.name}>
                         {dept.name}
                       </option>
                     ))}
