@@ -12,10 +12,12 @@ import {
   Spinner,
   HStack,
   Image,
+  Flex,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import styles from "./page.module.css";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 const initialState = {
   title: "",
@@ -30,6 +32,7 @@ export default function TicketCreatePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const toast = useToast();
+  const router = useRouter();
   const { user, accessToken } = useAuth();
 
   const handleChange = (key, value) => {
@@ -41,14 +44,11 @@ export default function TicketCreatePage() {
   const validate = () => {
     const newErrors = {};
 
-    if (!formData.title.trim())
-      newErrors.title = "शीर्षक आवश्यक है";
+    if (!formData.title.trim()) newErrors.title = "शीर्षक आवश्यक है";
 
-    if (!formData.description.trim())
-      newErrors.description = "विवरण आवश्यक है";
+    if (!formData.description.trim()) newErrors.description = "विवरण आवश्यक है";
 
-    if (!formData.phone)
-      newErrors.phone = "मोबाइल नंबर आवश्यक है";
+    if (!formData.phone) newErrors.phone = "मोबाइल नंबर आवश्यक है";
     else if (!/^\d{10}$/.test(formData.phone))
       newErrors.phone = "मोबाइल नंबर 10 अंकों का होना चाहिए";
 
@@ -77,7 +77,7 @@ export default function TicketCreatePage() {
         },
       };
 
-      console.log(payload)
+      console.log(payload);
 
       const response = await fetch("/api/ticket/create", {
         method: "POST",
@@ -92,8 +92,31 @@ export default function TicketCreatePage() {
       if (!response.ok) throw new Error(result.message);
 
       toast({
-        title: "शिकायत सफलतापूर्वक दर्ज की गई",
-        status: "success",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-center",
+        render: () => (
+          <Box
+            bg="green.700"
+            color="white"
+            px={4}
+            py={3}
+            borderRadius="md"
+            boxShadow="lg"
+          >
+            <Flex align="center" justify="space-between" gap={4}>
+              <Text fontWeight="bold">शिकायत सफलतापूर्वक दर्ज की गई</Text>
+
+              <Button
+                size="sm"
+                colorScheme="whiteAlpha"
+                onClick={() => router.push(`/tickets/${result.ticket?._id}`)}
+              >
+                View Ticket
+              </Button>
+            </Flex>
+          </Box>
+        ),
       });
 
       setFormData(initialState);
@@ -168,7 +191,10 @@ export default function TicketCreatePage() {
       {/* ===== TITLE ===== */}
       <FormControl isInvalid={errors.title} mb={4}>
         <Text mb={1}>
-          शीर्षक (Title) <Text as="span" color="red">*</Text>
+          शीर्षक (Title){" "}
+          <Text as="span" color="red">
+            *
+          </Text>
         </Text>
         <Input
           value={formData.title}
@@ -186,7 +212,10 @@ export default function TicketCreatePage() {
       {/* ===== DESCRIPTION ===== */}
       <FormControl isInvalid={errors.description} mb={4}>
         <Text mb={1}>
-          विवरण (Description) <Text as="span" color="red">*</Text>
+          विवरण (Description){" "}
+          <Text as="span" color="red">
+            *
+          </Text>
         </Text>
         <Textarea
           value={formData.description}
@@ -204,7 +233,10 @@ export default function TicketCreatePage() {
       {/* ===== phone ===== */}
       <FormControl isInvalid={errors.phone} mb={4}>
         <Text mb={1}>
-          मोबाइल नंबर (phone Number) <Text as="span" color="red">*</Text>
+          मोबाइल नंबर (phone Number){" "}
+          <Text as="span" color="red">
+            *
+          </Text>
         </Text>
         <Input
           value={formData.phone}

@@ -28,6 +28,7 @@ import {
   InputGroup,
   InputRightElement,
   IconButton,
+  Badge,
 } from "@chakra-ui/react";
 import { AddIcon, ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { useAuth } from "@/context/AuthContext";
@@ -38,12 +39,15 @@ const DepartmentsPage = () => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  console.log(departments, "dep");
+
   // form fields
   const [newDepName, setNewDepName] = useState("");
   const [assignedName, setAssignedName] = useState("");
   const [assignedEmail, setAssignedEmail] = useState("");
   const [assignedPassword, setAssignedPassword] = useState("");
   const [assignedContact, setAssignedContact] = useState("");
+  const [assignedDesignation, setAssignedDesignation] = useState("");
 
   // ui states
   const [showPassword, setShowPassword] = useState(false);
@@ -76,6 +80,11 @@ const DepartmentsPage = () => {
     const e = {};
     if (!newDepName.trim()) e.newDepName = "Department name is required";
     if (!assignedName.trim()) e.assignedName = "Staff name is required";
+    if (!assignedDesignation.trim())
+      e.assignedDesignation = "Designation is required";
+
+    if (!assignedContact.trim()) e.assignedContact = "Contact is required";
+
     if (
       !assignedEmail.trim() ||
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(assignedEmail)
@@ -178,6 +187,7 @@ const DepartmentsPage = () => {
           assignedEmail,
           assignedPassword,
           assignedContact,
+          assignedDesignation,
         }),
       });
 
@@ -232,13 +242,18 @@ const DepartmentsPage = () => {
               boxShadow="rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em"
               bg="white"
             >
-              <Flex justify="space-between" align="start" gap={4}>
+              <Flex
+                justify="space-between"
+                align="start"
+                gap={4}
+              >
                 {/* LEFT INFO */}
                 <Box>
                   <Text
                     fontSize="lg"
                     fontWeight="600"
                     textTransform="capitalize"
+                    w={"100%"}
                   >
                     {dep.name}
                   </Text>
@@ -247,13 +262,24 @@ const DepartmentsPage = () => {
                     Slug: <b>{dep.slug}</b>
                   </Text>
 
-                  <Box mt={2}>
-                    <Text fontWeight={600} fontSize="sm" textTransform={'capitalize'}>
-                      <b>Assigned Staff:</b>{" "}
-                      {dep.assignedUser?.name || "Not assigned"}
+                  <Box mt={2}  w={'100%'}>
+                    <Flex align={"center"} gap={2}>
+                      <Text
+                        fontWeight={600}
+                        fontSize="sm"
+                        textTransform={"capitalize"}
+                      >
+                        <b>Assigned Staff:</b>{" "}
+                        {dep.assignedUser?.name || "Not assigned"}
+                      </Text>
+                      <Badge colorScheme="green">{dep?.designation}</Badge>
+                    </Flex>
+
+                    <Text fontSize="sm" color="gray.600">
+                      {`Email : ${dep.assignedUser?.email}`}
                     </Text>
                     <Text fontSize="sm" color="gray.600">
-                      {dep.assignedUser?.email}
+                      {`Contact : ${dep?.phone}`}
                     </Text>
                   </Box>
 
@@ -271,7 +297,7 @@ const DepartmentsPage = () => {
                 <Flex direction="column" gap={2}>
                   {/* FUTURE: reassign staff */}
                   <Button size="sm" variant="outline" colorScheme="orange">
-                   Reassign
+                    Reassign
                   </Button>
                 </Flex>
               </Flex>
@@ -307,6 +333,25 @@ const DepartmentsPage = () => {
                     onChange={(e) => setNewDepName(e.target.value)}
                   />
                   <FormErrorMessage>{errors.newDepName}</FormErrorMessage>
+                </FormControl>
+
+                <FormControl isInvalid={errors.assignedDesignation} mb={3}>
+                  <FormLabel>
+                    Designation{" "}
+                    <Text as="span" color="red">
+                      *
+                    </Text>
+                  </FormLabel>
+                  <Input
+                    value={assignedDesignation}
+                    onChange={(e) =>
+                      setAssignedDesignation(e.target.value.replace(/\s/g, ""))
+                    }
+                    placeholder="No spaces allowed"
+                  />
+                  <FormErrorMessage>
+                    {errors.assignedDesignation}
+                  </FormErrorMessage>
                 </FormControl>
 
                 <FormControl isInvalid={errors.assignedName} mb={3}>
@@ -364,6 +409,22 @@ const DepartmentsPage = () => {
                   </InputGroup>
 
                   <FormErrorMessage>{errors.assignedPassword}</FormErrorMessage>
+                </FormControl>
+
+                <FormControl isInvalid={errors.assignedContact} mb={3}>
+                  <FormLabel>
+                    Contact Number{" "}
+                    <Text as="span" color="red">
+                      *
+                    </Text>
+                  </FormLabel>
+                  <Input
+                    type="tel"
+                    value={assignedContact}
+                    onChange={(e) => setAssignedContact(e.target.value)}
+                    placeholder="e.g. 9876543210"
+                  />
+                  <FormErrorMessage>{errors.assignedContact}</FormErrorMessage>
                 </FormControl>
               </>
             )}

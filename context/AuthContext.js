@@ -1,7 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { Box, Skeleton } from "@chakra-ui/react";
+import { Box, Skeleton, useToast } from "@chakra-ui/react";
+import { useRouter } from "next/navigation";
 
 const AuthContext = createContext();
 
@@ -9,28 +10,61 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const toast = useToast();
+
+  console.log("calling authprovider");
 
   useEffect(() => {
-    const token = localStorage.getItem("sansadapptoken");
-    const userData = localStorage.getItem("sansadappuser");
+    const bootstrapAuth = async () => {
+      const token = localStorage.getItem("sansadapptoken");
+      if (!token) {
+        router.push("/login");
+        setLoading(false);
+        return;
+      }
 
-    if (token && userData) {
-      setUser(JSON.parse(userData));
-      setAccessToken(token);
-    }
+      try {
+        const res = await fetch("/api/user/get", {
+          headers: { authorization: token },
+        });
 
-    setLoading(false);
+        if (res.status === 401) {
+          router.push("/login");
+          throw new Error("SESSION_EXPIRED");
+        }
+
+        const data = await res.json();
+
+        setUser(data.user);
+        setAccessToken(token);
+      } catch (err) {
+        logout();
+
+        toast({
+          title: "Session expired",
+          description: "Please login again",
+          status: "warning",
+          duration: 3000,
+          isClosable: true,
+        });
+
+        router.push("/login");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    bootstrapAuth();
   }, []);
 
   const login = (userData, token) => {
     localStorage.setItem("sansadapptoken", token);
-    localStorage.setItem("sansadappuser", JSON.stringify(userData));
     setUser(userData);
   };
 
   const logout = () => {
     localStorage.removeItem("sansadapptoken");
-    localStorage.removeItem("sansadappuser");
     setUser(null);
   };
 

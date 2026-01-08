@@ -8,7 +8,7 @@ function verifyUser(token) {
     );
     return decoded;
   } catch (err) {
-    throw new Error("Invalid or expired token");
+    return null;
   }
 }
 

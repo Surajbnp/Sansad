@@ -191,16 +191,15 @@ export default function Page() {
               {user?.role !== "Admin" && (
                 <Button
                   _hover={{
-                    bg: "white",
-                    color: "#fa7602",
-                    outline: "2px solid #fa7602",
+                    bg:"green.600",
+                    color: "green.700",
                   }}
-                  colorScheme="green"
+                  bg="green.700"
                   minW="fit-content"
                   fontWeight={400}
                   onClick={() => router.push("/create-ticket")}
                 >
-                  <IoMdCreate />
+                  <IoMdCreate color="white" />
                 </Button>
               )}
             </Flex>

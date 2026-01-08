@@ -50,16 +50,24 @@ export async function POST(req) {
 
     /* ------------------ BODY ------------------ */
     const body = await req.json();
-    console.log(body)
+    console.log(body);
     const {
       name,
       assignedName,
       assignedEmail,
       assignedPassword,
       assignedContact,
+      assignedDesignation,
     } = body;
 
-    if (!name || !assignedName || !assignedEmail || !assignedPassword) {
+    if (
+      !name ||
+      !assignedName ||
+      !assignedEmail ||
+      !assignedPassword ||
+      !assignedDesignation ||
+      !assignedContact
+    ) {
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
         { status: 400 }
@@ -102,6 +110,8 @@ export async function POST(req) {
     const department = await DepartmentModel.create({
       name,
       slug,
+      designation: assignedDesignation,
+      phone: assignedContact,
       createdBy: {
         userId: admin._id,
         name: admin.name,
