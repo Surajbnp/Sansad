@@ -22,10 +22,15 @@ import {
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { MdConfirmationNumber, MdPerson, MdLogout } from "react-icons/md";
+import {
+  MdConfirmationNumber,
+  MdPerson,
+  MdLogout,
+  MdDashboard,
+} from "react-icons/md";
 import { IoMdCreate } from "react-icons/io";
 import { GrUserWorker } from "react-icons/gr";
-import { FaInstagram, FaTwitter, FaYoutube } from "react-icons/fa";
+import { FaInstagram, FaTwitter, FaUser, FaYoutube } from "react-icons/fa";
 
 const Links = [
   { name: "Home", href: "/" },
@@ -139,7 +144,6 @@ export default function Navbar() {
               overflow={"hidden"}
               fontWeight="bold"
               fontSize="lg"
-              cursor="default"
               onClick={() => router.push("/")}
               cursor={"pointer"}
             >
@@ -214,48 +218,68 @@ export default function Navbar() {
                     </Flex>
                   </MenuItem>
 
-                  {user.role === "Admin" ? (
+                  {/* ADMIN MENU */}
+                  {user?.role === "Admin" && (
                     <>
                       <MenuItem
                         icon={<GrUserWorker />}
-                        _hover={{
-                          bg: "#fa7602",
-                          color: "white",
-                          textDecoration: "none",
-                        }}
-                        bg={"transparent"}
-                        color={"black"}
+                        _hover={{ bg: "#fa7602", color: "white" }}
+                        bg="transparent"
+                        color="black"
                         as={Link}
                         href="/admin/departments"
                       >
                         View Departments
                       </MenuItem>
+
                       <MenuItem
                         icon={<MdConfirmationNumber />}
-                        _hover={{
-                          bg: "#fa7602",
-                          color: "white",
-                          textDecoration: "none",
-                        }}
-                        bg={"transparent"}
-                        color={"black"}
+                        _hover={{ bg: "#fa7602", color: "white" }}
+                        bg="transparent"
+                        color="black"
                         as={Link}
                         href="/tickets"
                       >
                         View Tickets
                       </MenuItem>
                     </>
-                  ) : (
+                  )}
+
+                  {/* DEPARTMENT MENU */}
+                  {user?.role === "Department" && (
+                    <>
+                      <MenuItem
+                        icon={<MdDashboard />}
+                        _hover={{ bg: "#fa7602", color: "white" }}
+                        bg="transparent"
+                        color="black"
+                        as={Link}
+                        href="/dashboard"
+                      >
+                        Dashboard
+                      </MenuItem>
+
+                      <MenuItem
+                        icon={<MdConfirmationNumber />}
+                        _hover={{ bg: "#fa7602", color: "white" }}
+                        bg="transparent"
+                        color="black"
+                        as={Link}
+                        href="/tickets"
+                      >
+                        Tickets
+                      </MenuItem>
+                    </>
+                  )}
+
+                  {/* NORMAL USER MENU */}
+                  {user?.role === "User" && (
                     <>
                       <MenuItem
                         icon={<IoMdCreate />}
-                        _hover={{
-                          bg: "#fa7602",
-                          color: "white",
-                          textDecoration: "none",
-                        }}
-                        bg={"transparent"}
-                        color={"black"}
+                        _hover={{ bg: "#fa7602", color: "white" }}
+                        bg="transparent"
+                        color="black"
                         as={Link}
                         href="/create-ticket"
                       >
@@ -264,14 +288,10 @@ export default function Navbar() {
 
                       <MenuItem
                         icon={<MdConfirmationNumber />}
-                        _hover={{
-                          bg: "#fa7602",
-                          color: "white",
-                          textDecoration: "none",
-                        }}
+                        _hover={{ bg: "#fa7602", color: "white" }}
+                        bg="transparent"
+                        color="black"
                         as={Link}
-                        bg={"transparent"}
-                        color={"black"}
                         href="/tickets"
                       >
                         Your Tickets

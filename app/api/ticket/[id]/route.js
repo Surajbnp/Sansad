@@ -21,7 +21,7 @@ export async function GET(req, { params }) {
 
     let ticket;
 
-    if (isVerified?.role === "Admin") {
+    if (isVerified?.role === "Admin" || isVerified?.role === "Department") {
       ticket = await TicketModel.findOne({
         _id: id,
       });

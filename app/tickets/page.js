@@ -138,7 +138,7 @@ export default function Page() {
     </Flex>
   );
 
-  console.log(tickets)
+  console.log(tickets);
 
   return (
     <Box className={styles.container} minH="70vh">
@@ -188,20 +188,21 @@ export default function Page() {
               )}
 
               {/* Normal User Create Ticket */}
-              {user?.role !== "Admin" && (
-                <Button
-                  _hover={{
-                    bg:"green.600",
-                    color: "green.700",
-                  }}
-                  bg="green.700"
-                  minW="fit-content"
-                  fontWeight={400}
-                  onClick={() => router.push("/create-ticket")}
-                >
-                  <IoMdCreate color="white" />
-                </Button>
-              )}
+              {user?.role !== "Admin" ||
+                (user?.role === "Department" && (
+                  <Button
+                    _hover={{
+                      bg: "green.600",
+                      color: "green.700",
+                    }}
+                    bg="green.700"
+                    minW="fit-content"
+                    fontWeight={400}
+                    onClick={() => router.push("/create-ticket")}
+                  >
+                    <IoMdCreate color="white" />
+                  </Button>
+                ))}
             </Flex>
 
             <Box>
@@ -304,4 +305,4 @@ export default function Page() {
 
 */
 
-// adding the data for the infinte 
+// adding the data for the infinte

@@ -26,6 +26,7 @@ import {
   Select,
   useDisclosure,
   Spinner,
+  Checkbox,
 } from "@chakra-ui/react";
 import { CheckCircleIcon, TimeIcon } from "@chakra-ui/icons";
 import { useEffect, useState } from "react";
@@ -41,8 +42,12 @@ export default function TicketDetailsPage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [departments, setDepartments] = useState([]);
   const [selectedDept, setSelectedDept] = useState("");
-  const [status, setStatus] = useState("");
-  const [remarks, setRemarks] = useState("");
+  const [updateStatus, setUpdateStatus] = useState("");
+  const [updateRemarks, setUpdateRemarks] = useState("");
+  const [requireFile, setRequireFile] = useState(false);
+  const [expectedResolvedDate, setExpectedResolvedDate] = useState("");
+  const [updating, setUpdating] = useState(false);
+
   const {
     isOpen: isAssignOpen,
     onOpen: onAssignOpen,
@@ -116,6 +121,17 @@ export default function TicketDetailsPage() {
 
   const handleAssign = async () => {
     setLoading(true);
+    if (selectedDept === "") {
+      toast({
+        title: "Please select a department",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       const payload = {
         status: "Assigned",
@@ -155,7 +171,56 @@ export default function TicketDetailsPage() {
     }
   };
 
+  const handleUpdateTicket = async () => {
+    if (!updateStatus) {
+      toast({
+        title: "Please select status",
+        status: "warning",
+        duration: 3000,
+      });
+      return;
+    }
 
+    try {
+      setUpdating(true);
+
+      const payload = {
+        status: updateStatus,
+        remarks: updateRemarks,
+        requireFileFromUser: requireFile,
+      };
+
+      const res = await fetch(`/api/ticket/${id}/update`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: accessToken,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      toast({
+        title: data.message || "Ticket updated",
+        status: "success",
+        duration: 3000,
+      });
+
+      onUpdateClose();
+      setUpdateStatus("");
+      setUpdateRemarks("");
+      setRequireFile(false);
+      fetchTicket();
+    } catch (err) {
+      toast({
+        title: "Update failed",
+        status: "error",
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   return (
     <Box
@@ -294,7 +359,6 @@ export default function TicketDetailsPage() {
                   </Box>
 
                   <Box pl={8}>
-                    {/* <Text fontWeight="bold">{item.status}</Text> */}
                     {item.remarks && (
                       <Text fontWeight="bold">{item.remarks}</Text>
                     )}
@@ -369,25 +433,16 @@ export default function TicketDetailsPage() {
                     onChange={(e) => setSelectedDept(e.target.value)}
                   >
                     {departments.map((dept) => (
-                      <option style={{textDecoration : "capitalize"}} key={dept._id} value={dept.name}>
+                      <option
+                        style={{ textDecoration: "capitalize" }}
+                        key={dept._id}
+                        value={dept.name}
+                      >
                         {dept.name}
                       </option>
                     ))}
                   </Select>
                 </Box>
-                {/* <Box mt={4}>
-                  <Text mb={1} color="gray.600">
-                    Remarks{" "}
-                    <Text as="span" fontStyle="italic" color="gray.500">
-                      (optional)
-                    </Text>
-                  </Text>
-
-                  <Input
-                    onChange={(e) => setRemarks(e?.target?.value)}
-                    placeholder={"Add remarks"}
-                  />
-                </Box> */}
               </ModalBody>
               <ModalFooter>
                 <Button variant="ghost" onClick={onAssignClose}>
@@ -395,6 +450,91 @@ export default function TicketDetailsPage() {
                 </Button>
                 <Button colorScheme="purple" ml={3} onClick={handleAssign}>
                   {loading ? <Spinner /> : "Assign"}
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+
+          {/* ================= UPDATE MODAL ================= */}
+          <Modal
+            isOpen={isUpdateOpen}
+            onClose={onUpdateClose}
+            isCentered
+            closeOnOverlayClick={false}
+          >
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Update Ticket</ModalHeader>
+              <ModalCloseButton />
+
+              <ModalBody>
+                {/* Status */}
+                <Box mb={4}>
+                  <Text mb={1} color="gray.600">
+                    Update Status
+                  </Text>
+                  <Select
+                    placeholder="Select status"
+                    value={updateStatus}
+                    onChange={(e) => setUpdateStatus(e.target.value)}
+                  >
+                    <option value="In Progress">In Progress</option>
+                    <option value="Awaiting User Response">
+                      Awaiting User Response
+                    </option>
+                    <option value="Resolved">Resolved</option>
+                    <option value="Closed">Closed</option>
+                  </Select>
+                </Box>
+                {/* Remarks */}
+                <Box mb={4}>
+                  <Text mb={1} color="gray.600">
+                    Remarks
+                  </Text>
+                  <Textarea
+                    placeholder="Add remarks"
+                    value={updateRemarks}
+                    onChange={(e) => setUpdateRemarks(e.target.value)}
+                  />
+                </Box>
+                {/* Expected Resolved Date */}
+                {updateStatus === "In Progress" && (
+                  <Box mb={4}>
+                    <Text mb={1} color="gray.600">
+                      Expected Resolved Date
+                    </Text>
+                    <Input
+                      type="date"
+                      value={expectedResolvedDate}
+                      min={new Date().toISOString().split("T")[0]} // ⛔ past dates
+                      onChange={(e) => setExpectedResolvedDate(e.target.value)}
+                    />
+                  </Box>
+                )}
+                {/* File Required Checkbox */}
+                <HStack>
+                  {updateStatus === "Awaiting User Response" && (
+                    <Checkbox
+                      checked={requireFile}
+                      onChange={(e) => setRequireFile(e.target.checked)}
+                    >
+                      Require file from user
+                    </Checkbox>
+                  )}
+                </HStack>
+              </ModalBody>
+
+              <ModalFooter>
+                <Button variant="ghost" onClick={onUpdateClose}>
+                  Cancel
+                </Button>
+                <Button
+                  colorScheme="green"
+                  ml={3}
+                  onClick={handleUpdateTicket}
+                  isLoading={updating}
+                >
+                  Update
                 </Button>
               </ModalFooter>
             </ModalContent>

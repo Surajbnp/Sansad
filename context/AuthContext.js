@@ -2,24 +2,47 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { Box, Skeleton, useToast } from "@chakra-ui/react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 const AuthContext = createContext();
+
+/* 🌍 Routes that DO NOT require login */
+const PUBLIC_ROUTES = ["/", "/login", "/ticket-status"];
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
   const [loading, setLoading] = useState(true);
+
   const router = useRouter();
+  const pathname = usePathname();
   const toast = useToast();
 
-  console.log("calling authprovider");
+  /* ------------------ HELPERS ------------------ */
+  const isPublicRoute = PUBLIC_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route + "/")
+  );
 
+  const logout = () => {
+    localStorage.removeItem("sansadapptoken");
+    setUser(null);
+    setAccessToken(null);
+  };
+
+  /* ------------------ BOOTSTRAP AUTH ------------------ */
   useEffect(() => {
     const bootstrapAuth = async () => {
       const token = localStorage.getItem("sansadapptoken");
+
+      /* 🌍 Public route → skip auth */
+      if (isPublicRoute) {
+        setLoading(false);
+        return;
+      }
+
+      /* 🔒 Protected route but no token */
       if (!token) {
-        router.push("/login");
+        router.replace("/login");
         setLoading(false);
         return;
       }
@@ -30,7 +53,6 @@ export const AuthProvider = ({ children }) => {
         });
 
         if (res.status === 401) {
-          router.push("/login");
           throw new Error("SESSION_EXPIRED");
         }
 
@@ -49,29 +71,27 @@ export const AuthProvider = ({ children }) => {
           isClosable: true,
         });
 
-        router.push("/login");
+        router.replace("/login");
       } finally {
         setLoading(false);
       }
     };
 
     bootstrapAuth();
-  }, []);
+  }, [pathname]); // 👈 re-run when route changes
 
+  /* ------------------ LOGIN ------------------ */
   const login = (userData, token) => {
     localStorage.setItem("sansadapptoken", token);
     setUser(userData);
+    setAccessToken(token);
   };
 
-  const logout = () => {
-    localStorage.removeItem("sansadapptoken");
-    setUser(null);
-  };
-
+  /* ------------------ LOADING UI ------------------ */
   if (loading) {
     return (
       <Box p={8}>
-        <Skeleton height="70vh" mt={"8vh"} />
+        <Skeleton height="70vh" mt="8vh" />
       </Box>
     );
   }
