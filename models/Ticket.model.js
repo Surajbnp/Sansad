@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { type } from "os";
 
 const ticketSchema = new mongoose.Schema(
   {
@@ -42,7 +43,7 @@ const ticketSchema = new mongoose.Schema(
         "Assigned",
         "In-Progress",
         "Awaiting User Response",
-        "Resolved",
+        "User Respond Received",
         "Closed",
       ],
       default: "Submitted",
@@ -62,6 +63,7 @@ const ticketSchema = new mongoose.Schema(
             "Assigned",
             "In Progress",
             "Awaiting User Response",
+            "User Respond Received",
             "Resolved",
             "Closed",
           ],
@@ -78,6 +80,18 @@ const ticketSchema = new mongoose.Schema(
           },
         },
         remarks: { type: String, trim: true },
+        /*CONDITIONAL METADATA */
+        fileRequired: {
+          type: Boolean,
+          default: false,
+        },
+
+        fileUrl: { type: String, default: null },
+
+        expectedResolvedDate: {
+          type: Date,
+          default: null,
+        },
         date: { type: Date, default: Date.now },
       },
     ],
@@ -114,3 +128,5 @@ const TicketModel =
   mongoose.models.Ticket || mongoose.model("Ticket", ticketSchema);
 
 export default TicketModel;
+
+// adding comments for clarity

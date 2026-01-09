@@ -34,6 +34,7 @@ import styles from "./page.module.css";
 import { useParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import ImagePreviewModal from "@/components/ImagePreviewModal";
+import { set } from "nprogress";
 
 export default function TicketDetailsPage() {
   const [ticket, setTicket] = useState(null);
@@ -47,6 +48,7 @@ export default function TicketDetailsPage() {
   const [requireFile, setRequireFile] = useState(false);
   const [expectedResolvedDate, setExpectedResolvedDate] = useState("");
   const [updating, setUpdating] = useState(false);
+  const [fileUrl, setFileUrl] = useState("");
 
   const {
     isOpen: isAssignOpen,
@@ -65,6 +67,7 @@ export default function TicketDetailsPage() {
   const [loading, setLoading] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const fetchTicket = async () => {
     try {
@@ -95,29 +98,12 @@ export default function TicketDetailsPage() {
       }
     };
 
-    if (id) {
-      fetchTicket();
+    if (id && user?.role !== "User") {
       fetchDepartments();
     }
+
+    fetchTicket();
   }, [id, accessToken]);
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    if (file.size > 500 * 1024) {
-      toast({
-        title: "File too large",
-        description: "File must be under 500 KB",
-        status: "error",
-        duration: 3000,
-      });
-      e.target.value = "";
-      return;
-    }
-
-    setSelectedFile(file);
-  };
 
   const handleAssign = async () => {
     setLoading(true);
@@ -180,6 +166,17 @@ export default function TicketDetailsPage() {
       });
       return;
     }
+    // In Progress → expected resolved date is mandatory
+    if (updateStatus === "In Progress" && !expectedResolvedDate) {
+      toast({
+        title: "Expected resolved date required",
+        description:
+          "Please select expected resolved date for In Progress status",
+        status: "warning",
+        duration: 3000,
+      });
+      return;
+    }
 
     try {
       setUpdating(true);
@@ -187,7 +184,14 @@ export default function TicketDetailsPage() {
       const payload = {
         status: updateStatus,
         remarks: updateRemarks,
-        requireFileFromUser: requireFile,
+
+        // File requirement is OPTIONAL
+        fileRequired:
+          updateStatus === "Awaiting User Response" ? requireFile : false,
+
+        // Expected date ONLY for In Progress
+        expectedResolvedDate:
+          updateStatus === "In Progress" ? expectedResolvedDate : null,
       };
 
       const res = await fetch(`/api/ticket/${id}/update`, {
@@ -201,26 +205,150 @@ export default function TicketDetailsPage() {
 
       const data = await res.json();
 
+      if (!res.ok) {
+        throw new Error(data.message || "Update failed");
+      }
+
       toast({
         title: data.message || "Ticket updated",
         status: "success",
         duration: 3000,
       });
 
+      // reset
       onUpdateClose();
       setUpdateStatus("");
       setUpdateRemarks("");
       setRequireFile(false);
+      setExpectedResolvedDate("");
       fetchTicket();
     } catch (err) {
       toast({
-        title: "Update failed",
+        title: err.message || "Update failed",
         status: "error",
       });
     } finally {
       setUpdating(false);
     }
   };
+
+  const handleUserResponseSubmit = async () => {
+    // Text is mandatory
+    if (!responseText.trim()) {
+      toast({
+        title: "Please enter your response",
+        status: "warning",
+        duration: 3000,
+      });
+      return;
+    }
+
+    // File required ONLY if admin requested it
+    const lastHistory =
+      ticket?.statusHistory?.[ticket.statusHistory.length - 1];
+
+    if (lastHistory?.fileRequired && !fileUrl) {
+      toast({
+        title: "Please upload the required file",
+        status: "warning",
+        duration: 3000,
+      });
+      return;
+    }
+
+    try {
+      setUpdating(true);
+
+      const payload = {
+        remarks: responseText,
+        ...(fileUrl && { fileUrl }),
+      };
+
+      const res = await fetch(`/api/ticket/${id}/respond`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: accessToken,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Submission failed");
+      }
+
+      toast({
+        title: data.message || "Response submitted successfully",
+        status: "success",
+        duration: 3000,
+      });
+
+      // ✅ reset UI
+      setResponseText("");
+      setFileUrl(null);
+      setShowResponseForm(false);
+      fetchTicket();
+    } catch (err) {
+      toast({
+        title: err.message || "Submission failed",
+        status: "error",
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  // Image Upload Handler
+  const handleFileUpload = () => {
+    setUploading(true);
+
+    const widget = window.cloudinary.createUploadWidget(
+      {
+        cloudName: "dxwwnettz",
+        uploadPreset: "sansadpreset",
+        resourceType: "image",
+        multiple: false,
+        clientAllowedFormats: ["jpg", "jpeg", "png"],
+        maxFileSize: 1000000,
+        transformation: [
+          {
+            width: 1280,
+            height: 1280,
+            crop: "limit",
+            quality: "auto:eco",
+            fetch_format: "auto",
+          },
+        ],
+        folder: "tickets",
+        showAdvancedOptions: false,
+        cropping: false,
+        sources: ["local", "camera"],
+      },
+      (error, result) => {
+        setUploading(false);
+
+        if (error) {
+          toast({ title: "छवि अपलोड विफल", status: "error" });
+          return;
+        }
+
+        if (result.event === "success") {
+          const { public_id, format } = result.info;
+          const optimizedUrl = `https://res.cloudinary.com/dxwwnettz/image/upload/w_1280,h_1280,c_limit,q_auto:eco,f_auto/${public_id}.${format}`;
+
+          setFileUrl(optimizedUrl);
+
+          toast({ title: "छवि सफलतापूर्वक अपलोड हुई", status: "success" });
+        }
+      }
+    );
+
+    widget.open();
+  };
+
+  console.log(ticket)
 
   return (
     <Box
@@ -307,9 +435,31 @@ export default function TicketDetailsPage() {
             <HStack spacing={4} mt={4}>
               <Badge colorScheme="blue">{ticket?.assignedDept?.name}</Badge>
             </HStack>
-            <Text fontSize="sm" mt={2} color="gray.500">
-              Created by: {ticket?.user?.name}
-            </Text>
+            <Flex
+              flexDir={{ base: "column", md: "row" }}
+              align={{ base: "start", md: "center" }}
+              justify={"space-between"}
+              lineHeight={1}
+            >
+              <Text fontSize="sm" mt={2} color="gray.900">
+                Created by: {ticket?.user?.name}
+              </Text>
+              <Text fontSize="sm" mt={2} color="gray.900">
+                Expected Resolution Date :{" "}
+                {ticket?.statusHistory[ticket.statusHistory.length - 1]
+                  ?.expectedResolvedDate
+                  ? new Date(
+                      ticket.statusHistory[
+                        ticket.statusHistory.length - 1
+                      ].expectedResolvedDate
+                    ).toLocaleDateString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })
+                  : "N/A"}
+              </Text>
+            </Flex>
 
             {/* Admin Assign Button */}
             {user?.role === "Admin" && ticket?.status === "Submitted" && (
@@ -365,6 +515,14 @@ export default function TicketDetailsPage() {
                     <Text fontSize="sm" color="gray.500">
                       {new Date(item.date).toLocaleString()}
                     </Text>
+                    {item?.fileUrl && (
+                      <Box
+                        my={3}
+                        w={{ base: "100%", md: "200px" }}
+                      >
+                       <Image src={item?.fileUrl} alt={'image'} />
+                      </Box>
+                    )}
                     <HStack mt={1}>
                       <Text fontStyle={"italic"}>By: </Text>
                       <Avatar size="xs" name={item?.updatedBy?.name} />
@@ -380,41 +538,70 @@ export default function TicketDetailsPage() {
             </VStack>
           </Box>
 
-          {ticket.status === "Awaiting User Response" && (
-            <Box mt={6}>
-              {!showResponseForm ? (
-                <Button
-                  colorScheme="blue"
-                  onClick={() => setShowResponseForm(true)}
-                >
-                  Provide Additional Details
-                </Button>
-              ) : (
-                <Box>
-                  <Textarea
-                    placeholder="Enter additional details..."
-                    value={responseText}
-                    onChange={(e) => setResponseText(e.target.value)}
-                  />
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    mt={3}
-                    onChange={handleFileChange}
-                  />
-                  <HStack mt={2}>
-                    <Button colorScheme="green">Submit</Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowResponseForm(false)}
-                    >
-                      Cancel
-                    </Button>
-                  </HStack>
-                </Box>
-              )}
-            </Box>
-          )}
+          {ticket.status === "Awaiting User Response" &&
+            user?.role === "User" && (
+              <Box mt={6}>
+                {!showResponseForm ? (
+                  <Button
+                    colorScheme="blue"
+                    onClick={() => setShowResponseForm(true)}
+                  >
+                    Respond Ticket
+                  </Button>
+                ) : (
+                  <Box>
+                    <Textarea
+                      placeholder="Enter additional details..."
+                      value={responseText}
+                      onChange={(e) => setResponseText(e.target.value)}
+                    />
+                    {ticket?.status === "Awaiting User Response" &&
+                      ticket?.statusHistory[ticket?.statusHistory.length - 1]
+                        ?.fileRequired && (
+                        <HStack mt={2} align="center" gap={4}>
+                          <Button
+                            my={4}
+                            onClick={handleFileUpload}
+                            bg="#fa7602"
+                            color="white"
+                            _hover={{
+                              bg: "white",
+                              color: "#fa7602",
+                              outline: "2px solid #fa7602",
+                            }}
+                            isLoading={uploading}
+                          >
+                            Upload Image
+                          </Button>
+                          {fileUrl && (
+                            <Image
+                              src={fileUrl}
+                              alt="Uploaded"
+                              boxSize="80px"
+                              borderRadius="md"
+                            />
+                          )}
+                        </HStack>
+                      )}
+
+                    <HStack mt={2} gap={4}>
+                      <Button
+                        colorScheme="green"
+                        onClick={handleUserResponseSubmit}
+                      >
+                        {updating ? <Spinner /> : "Submit Response"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowResponseForm(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </HStack>
+                  </Box>
+                )}
+              </Box>
+            )}
 
           {/* Assign Modal */}
           <Modal isOpen={isAssignOpen} onClose={onAssignClose}>
@@ -544,24 +731,3 @@ export default function TicketDetailsPage() {
     </Box>
   );
 }
-
-/*
-
- setTicket((prev) => ({
-        ...prev,
-        status: "User Responded",
-        fileUrl: selectedFile
-          ? URL.createObjectURL(selectedFile)
-          : prev.fileUrl,
-        statusHistory: [
-          ...prev.statusHistory,
-          {
-            status: "User Responded",
-            updatedBy: { name: user?.name || "User" },
-            date: new Date().toISOString(),
-            note: responseText,
-          },
-        ],
-      }));
-
-*/

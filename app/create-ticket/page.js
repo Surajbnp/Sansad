@@ -73,7 +73,7 @@ export default function TicketCreatePage() {
         ...formData,
         user: {
           name: user?.name,
-          userId: user?.userId,
+          userId: user?._id,
         },
       };
 

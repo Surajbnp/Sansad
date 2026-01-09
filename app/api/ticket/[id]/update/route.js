@@ -9,13 +9,44 @@ export async function PATCH(req, { params }) {
 
     const token = req.headers.get("authorization");
     const decodedUser = verifyUser(token);
-    const { id } = await params;
 
-    const { status, remarks, assignedDept } = await req.json();
+    if (!decodedUser?.userId) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
-    if (!id) {
+    // Only Admin / Department can update
+    if (!["Admin", "Department"].includes(decodedUser.role)) {
+      return NextResponse.json(
+        { success: false, message: "Forbidden" },
+        { status: 403 }
+      );
+    }
+
+    const { id } = params;
+    const {
+      status,
+      remarks,
+      fileRequired = false,
+      expectedResolvedDate = null,
+    } = await req.json();
+
+    if (!id || !status) {
       return NextResponse.json(
         { success: false, message: "Ticket ID and status are required" },
+        { status: 400 }
+      );
+    }
+
+    // Business rules
+    if (status === "In Progress" && !expectedResolvedDate) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Expected resolved date is required for In Progress status",
+        },
         { status: 400 }
       );
     }
@@ -23,21 +54,27 @@ export async function PATCH(req, { params }) {
     // Build new status entry
     const newStatusEntry = {
       status,
-      updatedBy: {
-        userId: decodedUser?.userId,
-        name: decodedUser?.name,
-        role: decodedUser?.role,
-      },
       remarks,
+      fileRequired: status === "Awaiting User Response" ? fileRequired : false,
+      expectedResolvedDate:
+        status === "In Progress" ? expectedResolvedDate : null,
+      updatedBy: {
+        userId: decodedUser.userId,
+        name: decodedUser.name,
+        role: decodedUser.role,
+      },
       date: new Date(),
     };
 
-    console.log(newStatusEntry);
     const updatedTicket = await TicketModel.findByIdAndUpdate(
       id,
       {
         $push: { statusHistory: newStatusEntry },
-        $set: { status: status },
+        $set: {
+          status,
+          expectedResolvedDate:
+            status === "In Progress" ? expectedResolvedDate : null,
+        },
       },
       { new: true }
     );
@@ -51,12 +88,11 @@ export async function PATCH(req, { params }) {
 
     return NextResponse.json({
       success: true,
-      message: `Assinged Successfully.`,
-      to: `${assignedDept} Department`,
+      message: "Ticket updated successfully",
       ticket: updatedTicket,
     });
   } catch (error) {
-    console.error("Error updating ticket status:", error);
+    console.error("Error updating ticket:", error);
     return NextResponse.json(
       { success: false, message: "Server error" },
       { status: 500 }
