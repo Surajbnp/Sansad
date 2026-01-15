@@ -59,6 +59,7 @@ export const AuthProvider = ({ children }) => {
         const data = await res.json();
 
         setUser(data.user);
+        console.log("User data loaded:", data.user);
         setAccessToken(token);
       } catch (err) {
         logout();

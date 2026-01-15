@@ -15,7 +15,6 @@ import {
   Alert,
   AlertIcon,
   Divider,
-  Flex,
   Stepper,
   Step,
   StepIndicator,
@@ -25,6 +24,8 @@ import {
   StepTitle,
   StepDescription,
   StepSeparator,
+  SlideFade,
+  Fade,
 } from "@chakra-ui/react";
 import styles from "./page.module.css";
 
@@ -37,9 +38,6 @@ const Page = () => {
   const [ticket, setTicket] = useState(null);
   const [error, setError] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
-
-  const mailHeading = "Ticket Status OTP";
-  const mailSubject = "Your Ticket Status OTP";
 
   /* ================= OTP TIMER ================= */
   useEffect(() => {
@@ -62,12 +60,7 @@ const Page = () => {
       const res = await fetch("/api/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          ticketId,
-          mailHeading,
-          mailSubject,
-        }),
+        body: JSON.stringify({ email, ticketId }),
       });
 
       const data = await res.json();
@@ -99,7 +92,6 @@ const Page = () => {
       if (!res.ok) throw new Error(data.message);
 
       setTicket(data.ticket);
-      setResendTimer(0);
       setStep(3);
     } catch (err) {
       setError(err.message || "Invalid OTP");
@@ -112,19 +104,27 @@ const Page = () => {
   const activeStep = steps.length - 1;
 
   return (
-    <Box className={styles.page} px={{ base: 3, md: 0 }} minH={{base : "60vh", md : "80vh"}}>
+    <Box
+      className={styles.page}
+      minH="80vh"
+      px={{ base: 3, md: 0 }}
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+    >
       <Box
-        maxW="460px"
+        maxW="480px"
         w="100%"
         bg="white"
-        p={{ base: 5, md: 8 }}
+        p={{ base: 5, md: 7 }}
         borderRadius="xl"
         boxShadow={{
           base: "none",
-          md: "rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em",
+          md: "rgba(67, 71, 85, 0.2) 0px 4px 16px",
         }}
+        overflow="hidden"
       >
-        <VStack spacing={5} align="stretch" pb={4}>
+        <VStack spacing={5} align="stretch">
           <Text fontSize="22px" fontWeight="600" textAlign="center">
             Ticket Status
           </Text>
@@ -138,125 +138,144 @@ const Page = () => {
 
           {/* ================= STEP 1 ================= */}
           {step === 1 && (
-            <form onSubmit={sendOtp}>
-              <VStack spacing={4}>
-                <FormControl isRequired>
-                  <FormLabel>Ticket ID</FormLabel>
-                  <Input
-                    value={ticketId}
-                    onChange={(e) => setTicketId(e.target.value)}
-                  />
-                </FormControl>
+            <SlideFade in offsetY="20px">
+              <form onSubmit={sendOtp}>
+                <VStack spacing={4}>
+                  <FormControl isRequired>
+                    <FormLabel>Ticket ID</FormLabel>
+                    <Input
+                      value={ticketId}
+                      onChange={(e) => setTicketId(e.target.value)}
+                    />
+                  </FormControl>
 
-                <FormControl isRequired>
-                  <FormLabel>Email</FormLabel>
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </FormControl>
+                  <FormControl isRequired>
+                    <FormLabel>Email</FormLabel>
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </FormControl>
 
-                <Button
-                  type="submit"
-                  bg="#fa7602"
-                  color="white"
-                  w="100%"
-                  isLoading={loading}
-                >
-                  Get OTP
-                </Button>
-              </VStack>
-            </form>
+                  <Button
+                    type="submit"
+                    bg="#fa7602"
+                    color="white"
+                    w="100%"
+                    isLoading={loading}
+                  >
+                    Get OTP
+                  </Button>
+                </VStack>
+              </form>
+            </SlideFade>
           )}
 
           {/* ================= STEP 2 ================= */}
           {step === 2 && (
-            <form onSubmit={verifyOtp}>
-              <VStack spacing={4}>
-                <Text fontSize="sm" textAlign="center">
-                  OTP sent to <b>{email}</b>
-                </Text>
+            <SlideFade in offsetY="20px">
+              <form onSubmit={verifyOtp}>
+                <VStack spacing={4}>
+                  <Text fontSize="sm" textAlign="center">
+                    OTP sent to <b>{email}</b>
+                  </Text>
 
-                <HStack justify="center">
-                  <PinInput otp onChange={setOtp}>
-                    {[...Array(6)].map((_, i) => (
-                      <PinInputField key={i} />
-                    ))}
-                  </PinInput>
-                </HStack>
+                  <HStack justify="center">
+                    <PinInput otp onChange={setOtp}>
+                      {[...Array(6)].map((_, i) => (
+                        <PinInputField key={i} />
+                      ))}
+                    </PinInput>
+                  </HStack>
 
-                <Button
-                  type="submit"
-                  bg="#fa7602"
-                  color="white"
-                  w="100%"
-                  isLoading={loading}
-                >
-                  Verify & View Status
-                </Button>
+                  <Button
+                    type="submit"
+                    bg="#fa7602"
+                    color="white"
+                    w="100%"
+                    isLoading={loading}
+                  >
+                    Verify & View Status
+                  </Button>
 
-                <Button
-                  variant="link"
-                  colorScheme="orange"
-                  isDisabled={resendTimer > 0}
-                  onClick={sendOtp}
-                >
-                  {resendTimer > 0
-                    ? `Resend OTP in ${resendTimer}s`
-                    : "Resend OTP"}
-                </Button>
-              </VStack>
-            </form>
+                  <Button
+                    variant="link"
+                    colorScheme="orange"
+                    isDisabled={resendTimer > 0}
+                    onClick={sendOtp}
+                  >
+                    {resendTimer > 0
+                      ? `Resend OTP in ${resendTimer}s`
+                      : "Resend OTP"}
+                  </Button>
+                </VStack>
+              </form>
+            </SlideFade>
           )}
 
           {/* ================= STEP 3 ================= */}
           {step === 3 && ticket && (
-            <>
-              <Box>
-                <Text fontSize="sm">Ticket ID: {ticket._id}</Text>
-                <Text fontSize="xs" color="gray.500" textAlign="start">
-                  Last updated: {new Date(ticket.updatedAt).toLocaleString()}
-                </Text>
-              </Box>
+            <Fade in>
+              <VStack spacing={4} align="stretch">
+                <Box>
+                  <Text fontSize="sm" fontWeight="600">
+                    Ticket ID: {ticket._id}
+                  </Text>
+                  <Text fontSize="xs" color="gray.500">
+                    Last updated: {new Date(ticket.updatedAt).toLocaleString()}
+                  </Text>
+                </Box>
 
-              <Divider />
+                <Divider />
 
-              {/* ===== CHAKRA STEPPER ===== */}
-              {steps.length > 0 && (
-                <Stepper
-                  size="md"
-                  index={activeStep}
-                  orientation="vertical"
-                  colorScheme="green"
-                  height={"150px"}
-                >
-                  {steps.map((item, index) => (
-                    <Step key={item._id}>
-                      <StepIndicator>
-                        <StepStatus
-                          complete={<StepIcon />}
-                          incomplete={<StepNumber />}
-                          active={<StepNumber />}
-                        />
-                      </StepIndicator>
+                <SlideFade in offsetY="16px">
+                  <Box bg="gray.50" borderRadius="lg" p={4}>
+                    <Stepper
+                      index={activeStep}
+                      orientation="vertical"
+                      gap={5}
+                      size="sm"
+                      colorScheme="green"
+                    >
+                      {steps.map((item, index) => (
+                        <Step key={item._id}>
+                          <StepIndicator>
+                            <StepStatus
+                              complete={<StepIcon />}
+                              incomplete={<StepNumber />}
+                              active={<StepNumber />}
+                            />
+                          </StepIndicator>
 
-                      <Box flexShrink="0" textAlign="start">
-                        <StepTitle fontSize="xs">{item.status}</StepTitle>
+                          <Box flex="1" minW={0} ml={3}>
+                            <StepTitle
+                              fontSize="sm"
+                              fontWeight={index === activeStep ? "600" : "500"}
+                              noOfLines={2}
+                            >
+                              {item.status}
+                            </StepTitle>
 
-                        {index === activeStep && (
-                          <StepDescription fontSize="xs" color="gray.500">
-                            {item.remarks}
-                          </StepDescription>
-                        )}
-                      </Box>
+                            {item.remarks && (
+                              <StepDescription
+                                fontSize="xs"
+                                color="gray.600"
+                                noOfLines={3}
+                              >
+                                {item.remarks}
+                              </StepDescription>
+                            )}
+                          </Box>
 
-                      <StepSeparator />
-                    </Step>
-                  ))}
-                </Stepper>
-              )}
-            </>
+                          <StepSeparator />
+                        </Step>
+                      ))}
+                    </Stepper>
+                  </Box>
+                </SlideFade>
+              </VStack>
+            </Fade>
           )}
         </VStack>
       </Box>

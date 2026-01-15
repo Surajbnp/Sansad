@@ -1,295 +1,311 @@
 "use client";
-import React from "react";
+
+import React, { useEffect, useState } from "react";
 import {
   Avatar,
   Box,
   Text,
   Button,
-  SimpleGrid,
   Skeleton,
   Flex,
   HStack,
   VStack,
-  Icon,
   Divider,
+  SimpleGrid,
 } from "@chakra-ui/react";
-import { DownloadIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { useAuth } from "@/context/AuthContext";
 import withAuth from "@/utils/withAuth";
 import { useRouter } from "next/navigation";
-import { FiPlusCircle, FiEye, FiCheckCircle, FiFileText } from "react-icons/fi";
 import styles from "./profile.module.css";
 
+/* ---------------- OVERVIEW CARD ---------------- */
+
+const OverviewCard = ({
+  title,
+  value,
+  subText,
+  buttonText = "View",
+  onClick,
+}) => {
+  return (
+    <Box
+      bg="white"
+      boxShadow="rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px"
+      borderRadius="lg"
+      p={5}
+      minH="120px"
+    >
+      <Text fontSize="sm" color="gray.500">
+        {title}
+      </Text>
+
+      <Text fontSize="2xl" fontWeight="bold" mt={1}>
+        {value}
+      </Text>
+
+      <Flex align="center" justify="space-between" mt={2}>
+        {subText && (
+          <Text fontSize="xs" color="gray.500">
+            {subText}
+          </Text>
+        )}
+
+        <Button
+          size="xs"
+          variant="outline"
+          borderColor="#fa6702"
+          color="#fa6702"
+          _hover={{ bg: "#fa6702", color: "white" }}
+          onClick={onClick}
+        >
+          {buttonText}
+        </Button>
+      </Flex>
+    </Box>
+  );
+};
+
+/* ---------------- MAIN PAGE ---------------- */
+
 const Page = () => {
-  const { user, loading, logout } = useAuth();
+  const { user, loading, logout, accessToken } = useAuth();
   const router = useRouter();
 
-  const ticketsCreated = user?.ticketsCreated || 0;
-  const ticketsResolved = user?.ticketsResolved || 0;
+  const [stats, setStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  /* ---------------- FETCH STATS ---------------- */
+  useEffect(() => {
+    if (!accessToken) return;
+
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("/api/user/stats", {
+          headers: { Authorization: accessToken },
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          setStats(data);
+        }
+      } catch (err) {
+        console.error("Stats fetch error:", err);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [accessToken]);
 
   return (
     <Box
       w="100%"
-      color="black"
       pt="90px"
       pb="40px"
       display="flex"
       justifyContent="center"
       px={{ base: 3, md: 6 }}
-      mt={"8vh"}
+      mt="8vh"
     >
-      {loading ? (
+      {loading || statsLoading ? (
         <Box w="100%" maxW="1100px">
           <Skeleton height="420px" borderRadius="md" />
         </Box>
       ) : (
         <Box w="100%" maxW="1100px">
-          {/* TOP HEADER CARD */}
-          <Box rounded="md" py={6} px={{ base: 4, md: 8 }} boxShadow="lg">
-            {/* Top row: title + filters/buttons */}
-            <Flex
-              justify="space-between"
-              align="center"
-              mb={6}
-              gap={4}
-              direction={{ base: "row", md: "row" }}
-              w={"100%"}
-            >
-              <HStack align="center">
-                <Box w="4px" h="28px" bg="#fa7602" rounded="full" mr={2} />
-                <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold">
+          {/* ---------------- PROFILE HEADER ---------------- */}
+          <Box
+            rounded="md"
+            py={6}
+            px={{ base: 4, md: 8 }}
+            boxShadow="rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px"
+          >
+            <Flex justify="space-between" align="center" mb={6}>
+              <HStack>
+                <Box w="4px" h="28px" bg="#fa7602" rounded="full" />
+                <Text fontSize="xl" fontWeight="bold">
                   Profile Details
                 </Text>
               </HStack>
 
-              <HStack spacing={3}>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  borderColor="red.400"
-                  color="red.400"
-                  _hover={{ bg: "#fa7602", color: "white" }}
-                  onClick={() => {
-                    logout();
-                    router.push("/");
-                  }}
-                >
-                  Logout
-                </Button>
-              </HStack>
+              <Button
+                size="sm"
+                variant="outline"
+                borderColor="#fa6702"
+                color="#fa6702"
+                _hover={{ bg: "#fa6702", color: "white" }}
+                onClick={() => {
+                  logout();
+                  router.push("/");
+                }}
+              >
+                Logout
+              </Button>
             </Flex>
 
-            {/* Middle row: avatar + info row */}
             <Flex
               align={{ base: "flex-start", md: "center" }}
               gap={12}
               direction={{ base: "column", md: "row" }}
             >
-              {/* Avatar + name */}
               <HStack spacing={4}>
-                <Avatar
-                  size="xl"
-                  name={user?.name}
-                  src={user?.avatar || undefined}
-                />
+                <Avatar size="xl" name={user?.name} />
                 <Box>
-                  <Text fontSize={{ base: "xl", md: "md" }} fontWeight="bold">
-                    {user?.name || "Unnamed User"}
+                  <Text fontSize="lg" fontWeight="bold">
+                    {user?.name}
                   </Text>
                 </Box>
               </HStack>
 
-              {/* Info columns like reference: Role / Phone / Email */}
-              <Flex
-                flex="1"
-                justify="space-between"
-                gap={6}
-                wrap="wrap"
-                mt={{ base: 4, md: 0 }}
-              >
-                <VStack align="flex-start" spacing={1} minW="150px">
+              <Flex flex="1" gap={6} wrap="wrap">
+                <VStack align="flex-start" spacing={1}>
                   <Text fontSize="xs" color="gray.400">
                     Role
                   </Text>
                   <Text fontSize="sm" fontWeight="semibold">
-                    {user?.role || "User"}
+                    {user?.role}
                   </Text>
                 </VStack>
 
-                <VStack align="flex-start" spacing={1} minW="150px">
+                <VStack align="flex-start" spacing={1}>
                   <Text fontSize="xs" color="gray.400">
-                    Phone Number
+                    Email
                   </Text>
                   <Text fontSize="sm" fontWeight="semibold">
-                    {user?.whatsapp || user?.phone || "Not Provided"}
+                    {user?.email || "Not provided"}
                   </Text>
                 </VStack>
 
-                <VStack align="flex-start" spacing={1} minW="200px">
+                <VStack align="flex-start" spacing={1}>
                   <Text fontSize="xs" color="gray.400">
-                    Email Address
+                    Phone
                   </Text>
                   <Text fontSize="sm" fontWeight="semibold">
-                    {user?.email || "Not Provided"}
-                  </Text>
-                </VStack>
-                <VStack align="flex-start" spacing={1} minW="200px">
-                  <Text fontSize="xs" color="gray.400">
-                    Aadhar
-                  </Text>
-                  <Text fontSize="sm" fontWeight="semibold">
-                    {user?.aadhar || "Not Provided"}
+                    {user?.phone || user?.whatsapp || "Not provided"}
                   </Text>
                 </VStack>
               </Flex>
             </Flex>
           </Box>
 
-          {/* BOTTOM STRIP: OPTIONS – matches horizontal cards in reference */}
-          <Flex mt={6} gap={4} direction={{ base: "column", md: "row" }}>
-            {/* Tickets Created */}
-            <Box
-              flex="1"
-              rounded="md"
-              py={4}
-              px={5}
-              display="flex"
-              alignItems="center"
-              gap={4}
-              boxShadow="md"
-            >
-              <Box
-                w="40px"
-                h="40px"
-                rounded="full"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Icon as={FiFileText} fontSize="20px" />
-              </Box>
-              <Box>
-                <Text fontSize="lg" fontWeight="bold">
-                  {ticketsCreated}
-                </Text>
-                <Text fontSize="xs" color="gray.600">
-                  Tickets Created
-                </Text>
-              </Box>
-            </Box>
+          {/* ---------------- OVERVIEW DASHBOARD ---------------- */}
+          <SimpleGrid mt={6} columns={{ base: 1, sm: 2, md: 4 }} spacing={6}>
+            {/* ADMIN */}
+            {user?.role === "Admin" && (
+              <>
+                <OverviewCard
+                  title="Total Tickets"
+                  value={stats?.totalTickets ?? 0}
+                  subText="All complaints"
+                  onClick={() => router.push("/tickets?state=all")}
+                />
 
-            {/* Tickets Resolved */}
-            <Box
-              flex="1"
-              rounded="md"
-              py={4}
-              px={5}
-              display="flex"
-              alignItems="center"
-              gap={4}
-              boxShadow="md"
-            >
-              <Box
-                w="40px"
-                h="40px"
-                rounded="full"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Icon as={FiCheckCircle} fontSize="20px" />
-              </Box>
-              <Box>
-                <Text fontSize="lg" fontWeight="bold">
-                  {ticketsResolved}
-                </Text>
-                <Text fontSize="xs" color="gray.600">
-                  Tickets Resolved
-                </Text>
-              </Box>
-            </Box>
+                <OverviewCard
+                  title="New Tickets"
+                  value={stats?.stats?.submitted ?? 0}
+                  subText="New tickets"
+                  onClick={() => router.push("/tickets?state=submitted")}
+                />
 
-            {/* View Tickets */}
-            <Box
-              flex="1"
-              rounded="md"
-              py={4}
-              px={5}
-              display="flex"
-              alignItems="center"
-              gap={4}
-              boxShadow="md"
-              color="gray.600"
-              cursor="pointer"
-              _hover={{ bg: "#fa7602", color: "white" }}
-              onClick={() => router.push("/tickets")}
-            >
-              <Box
-                w="40px"
-                h="40px"
-                rounded="full"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Icon as={FiEye} fontSize="20px" />
-              </Box>
-              <Box>
-                <Text fontSize="md" fontWeight="bold">
-                  View Tickets
-                </Text>
-                <Text
-                  fontSize="xs"
-                  _hover={{ color: "white" }}
-                >
-                  See all your tickets
-                </Text>
-              </Box>
-            </Box>
+                <OverviewCard
+                  title="In Progress"
+                  value={stats?.stats?.inProgress ?? 0}
+                  subText="Needs action"
+                  onClick={() => router.push("/tickets?state=inProgress")}
+                />
 
-            {/* Create New Ticket */}
-            <Box
-              flex="1"
-              rounded="md"
-              py={4}
-              px={5}
-              display="flex"
-              alignItems="center"
-              gap={4}
-              boxShadow="md"
-              cursor="pointer"
-              _hover={{ bg: "#fa7602", color: "white" }}
-              onClick={() => router.push("/create-ticket")}
-            >
-              <Box
-                w="40px"
-                h="40px"
-                rounded="full"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                _hover={{ color: "white" }}
-                color="gray.600"
-              >
-                <Icon as={FiPlusCircle} fontSize="20px" />
-              </Box>
-              <Box>
-                <Text fontSize="md" fontWeight="bold">
-                  Create New Ticket
-                </Text>
-                <Text fontSize="xs">Raise an issue</Text>
-              </Box>
-            </Box>
-          </Flex>
-          {/* icons  */}
-          <Box mt={"12vh"}>
-            <Divider maxW={"80%"} m={"auto"} borderColor="gray.300" />
+                <OverviewCard
+                  title="Resolved/Closed"
+                  value={stats?.stats?.completed ?? 0}
+                  subText="Resolved & Closed"
+                  onClick={() => router.push("/tickets?state=completed")}
+                />
+
+                <OverviewCard
+                  title="Departments"
+                  value={stats?.departmentCount ?? 0}
+                  subText="Manage departments"
+                  buttonText="Open"
+                  onClick={() => router.push("/admin/departments")}
+                />
+              </>
+            )}
+
+            {/* DEPARTMENT */}
+            {user?.role === "Department" && (
+              <>
+                <OverviewCard
+                  title="Total Tickets"
+                  value={stats?.totalTickets ?? 0}
+                  onClick={() => router.push("/tickets")}
+                />
+
+                <OverviewCard
+                  title="Assigned"
+                  value={stats?.stats?.assigned ?? 0}
+                  onClick={() => router.push("/tickets?state=assigned")}
+                />
+
+                <OverviewCard
+                  title="In Progress"
+                  value={stats?.stats?.inProgress ?? 0}
+                  onClick={() => router.push("/tickets?state=inProgress")}
+                />
+
+                <OverviewCard
+                  title="Completed"
+                  value={stats?.stats?.completed ?? 0}
+                  onClick={() => router.push("/tickets?state=completed")}
+                />
+              </>
+            )}
+
+            {/* USER */}
+            {user?.role === "User" && (
+              <>
+                <OverviewCard
+                  title="Tickets Created"
+                  value={stats?.totalTickets ?? 0}
+                  subText="Your issues"
+                  onClick={() => router.push("/tickets")}
+                />
+
+                <OverviewCard
+                  title="In Progress"
+                  value={stats?.stats?.inProgress ?? 0}
+                  subText="Awaiting resolution"
+                  onClick={() => router.push("/tickets?state=inProgress")}
+                />
+
+                <OverviewCard
+                  title="Completed"
+                  value={stats?.stats?.completed ?? 0}
+                  subText="Resolved issues"
+                  onClick={() => router.push("/tickets?state=completed")}
+                />
+
+                <OverviewCard
+                  title="Create Ticket"
+                  value="+"
+                  subText="Raise a new issue"
+                  buttonText="Create"
+                  onClick={() => router.push("/create-ticket")}
+                />
+              </>
+            )}
+          </SimpleGrid>
+
+          {/* ---------------- FOOTER ---------------- */}
+          <Box mt="12vh">
+            <Divider maxW="80%" m="auto" borderColor="gray.300" />
             <Box
               w="100%"
               h="30vh"
-              backgroundSize={{ base: "350px", md: "600px", lg: "700px" }}
               className={styles.icons}
-            ></Box>
+              backgroundSize={{ base: "350px", md: "600px" }}
+            />
           </Box>
         </Box>
       )}

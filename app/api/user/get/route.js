@@ -29,7 +29,7 @@ export async function GET(req) {
 
     // 3️⃣ Fetch user from DB (SOURCE OF TRUTH)
     const user = await UserModel.findById(decoded.userId).select(
-      "_id name email role"
+      "_id name email role aadhar whatsapp address voterId"
     );
 
     if (!user) {

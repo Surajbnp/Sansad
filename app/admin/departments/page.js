@@ -239,14 +239,10 @@ const DepartmentsPage = () => {
               key={dep._id}
               p={4}
               borderRadius="md"
-              boxShadow="rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em"
+              boxShadow="rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px"
               bg="white"
             >
-              <Flex
-                justify="space-between"
-                align="start"
-                gap={4}
-              >
+              <Flex justify="space-between" align="start" gap={4}>
                 {/* LEFT INFO */}
                 <Box>
                   <Text
@@ -262,7 +258,7 @@ const DepartmentsPage = () => {
                     Slug: <b>{dep.slug}</b>
                   </Text>
 
-                  <Box mt={2}  w={'100%'}>
+                  <Box mt={2} w={"100%"}>
                     <Flex align={"center"} gap={2}>
                       <Text
                         fontWeight={600}
