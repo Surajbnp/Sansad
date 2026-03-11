@@ -154,9 +154,9 @@ export default function Home() {
           p={6}
           mt="-350px"
         >
-          <Image src="/SSK-Satna_Point1.webp" alt="icon1" w="120px" />
-          <Image src="/SSK-Satna_Point2.webp" alt="icon2" w="120px" />
-          <Image src="/SSK-Satna_Point3.webp" alt="icon3" w="120px" />
+          <Image src="/SSK-Satna_Point1.webp" alt="icon1" w="170px" />
+          <Image src="/SSK-Satna_Point2.webp" alt="icon2" w="170px" />
+          <Image src="/SSK-Satna_Point3.webp" alt="icon3" w="170px" />
         </Flex>
 
       </Box>
