@@ -364,7 +364,8 @@ export default function Login() {
 
        
 
-          <Text mt={{ base: 4, md: 6 }} fontSize={{ base: "22px", md: "40px" }} fontWeight={600}>
+          <Text mt={{ base: 4, md: 6 }} fontSize={{ base: "22px", md: "40px" }} fontWeight={600} textAlign="center" 
+  w="100%">
           हेल्पलाइन: +91 123456789
         </Text>
       </Box>
