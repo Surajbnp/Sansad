@@ -140,7 +140,7 @@ export default function Home() {
         {/* DESKTOP ICONS */}
         <Box
           display={{ base: "none", md: "block" }}
-          h={{ md: "300px", lg: "350px" }}
+          h={{ md: "300px", lg: "300px" }}
           className={styles.icons}
           my="50px"
         />
