@@ -35,7 +35,7 @@ export default function About() {
           fontSize={{ base: "26px", md: "42px" }}
           letterSpacing="2px"
         >
-          ABOUT
+          Blog
         </Text>
 
       </Box>

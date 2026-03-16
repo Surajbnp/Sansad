@@ -26,6 +26,7 @@ export default function About() {
           top="50%"
           transform="translateY(-50%)"
           w={{ base: "60px", md: "120px" }}
+
         />
 
         {/* TITLE */}
@@ -35,7 +36,7 @@ export default function About() {
           fontSize={{ base: "26px", md: "42px" }}
           letterSpacing="2px"
         >
-          ABOUT
+         Success Stories
         </Text>
 
       </Box>
