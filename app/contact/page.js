@@ -17,16 +17,6 @@ export default function About() {
         justifyContent="center"
       >
 
-        {/* LOGO */}
-        <Image
-          src="/SSASatna_White_Logo.png"
-          alt="logo"
-          position="absolute"
-          left={{ base: "20px", md: "60px" }}
-          top="50%"
-          transform="translateY(-50%)"
-          w={{ base: "60px", md: "120px" }}
-        />
 
         {/* TITLE */}
         <Text

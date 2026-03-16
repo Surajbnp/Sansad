@@ -104,6 +104,7 @@ export async function POST(req) {
       department: name,
     });
 
+    // adding number here!
     /* ------------------ CREATE DEPARTMENT ------------------ */
     const slug = await generateSlug(name);
 

@@ -134,20 +134,16 @@ export default function Page() {
       ) : (
         <Box maxW="800px" mx="auto" px={4} pb="80px" py={8}>
           {/* HEADER */}
-          <Flex
-            justify="space-between"
-            align="center"
-            mb={4}
-          >
+          <Flex justify="space-between" align="center" mb={4}>
             <Text fontSize="2xl" fontWeight={600}>
               {user?.role === "Admin"
                 ? "Tickets"
                 : user?.role === "Department"
-                ? "Department Tickets"
-                : "Your Tickets"}
+                  ? "Department Tickets"
+                  : "Your Tickets"}
             </Text>
 
-            <VStack align={'end'} spacing={4}>
+            <VStack align={"end"} spacing={4}>
               {/* CREATE → ONLY USER */}
               {user?.role === "User" && (
                 <Button
@@ -159,7 +155,7 @@ export default function Page() {
                 </Button>
               )}
 
-              {/* FILTER → ADMIN + DEPARTMENT + USER */}
+              {/* FILTER → ADMIN + DEPARTMENT + USER + Mobile */}
               <Select
                 w="200px"
                 value={state}
@@ -205,3 +201,6 @@ export default function Page() {
     </Box>
   );
 }
+
+// adding the otp along with the email verification feature
+// mobile adding with rest api both

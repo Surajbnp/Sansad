@@ -14,15 +14,17 @@ import {
   Spinner,
   Link,
   Image,
-  HStack
+  HStack,
+  VStack
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import { FiEye, FiEyeOff , FiPhone} from "react-icons/fi";
+import { MdEmail, MdLock, MdPhone } from "react-icons/md";
 import styles from "./login.module.css";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import NextLink from "next/link";
-import { Flex } from '@chakra-ui/react';
+import { Flex } from "@chakra-ui/react";
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -123,270 +125,278 @@ export default function Login() {
   };
 
   return (
-    <Box className={styles.page}>
+    <Box minH="100vh"  display="flex" flexDirection="column">
+      {/* HERO BANNER */}
       <Box
-        className={styles.hero}
+        bg="#fa7602"
         w="100%"
-        minH={{ base: "auto", md: "90vh" }}
+        minH={{ base: "130px", md: "200px" }}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
         position="relative"
-      >
-
-        {/* LOGO LEFT SIDE */}
-        <Image
-          src="/SSASatna_White_Logo.png"
-          alt="logo"
-          position="absolute"
-          top={{ base: "15px", md: "100px" }}
-          left={{ base: "20px", md: "100px" }}
-          w={{ base: "70px", md: "200px" }}
-        />
-
-      </Box>
-
-
-      {/* ICONS SECTION */}
-      <Box w="100%" className={styles.iconsWrapper}>
-
-        {/* DESKTOP ICONS */}
-        <Box
-          display={{ base: "none", md: "block" }}
-          h={{ md: "300px", lg: "300px" }}
-          className={styles.icons}
-          my="50px"
-        />
-
-        {/* MOBILE ICONS */}
-        <Flex
-          display={{ base: "flex", md: "none" }}
-          direction="column"
-          align="center"
-          gap={6}
-          p={6}
-          mt="-350px"
-        >
-          <Image src="/SSK-Satna_Point1.webp" alt="icon1" w="170px" />
-          <Image src="/SSK-Satna_Point2.webp" alt="icon2" w="170px" />
-          <Image src="/SSK-Satna_Point3.webp" alt="icon3" w="170px" />
-        </Flex>
-
-      </Box>
-
-    <HStack
-        justify="center"
-        spacing={4}
-        maxW="80%"
-        m="auto"
-        my={2}
-        flexWrap="wrap"
         overflow="hidden"
-        h="12px"
       >
-        {[...Array(24)].map((_, i) => (
-          <Box
-            key={i}
-            w="2px"
-            h="2px"
-            bg="black"
-            borderRadius="full"
-            flexShrink={0}
-          />
-        ))}
-      </HStack>
+        {/* Decorative circles */}
+        <Box
+          position="absolute"
+          top="-40px"
+          right="-40px"
+          w="180px"
+          h="180px"
+          borderRadius="full"
+          bg="rgba(255,255,255,0.08)"
+        />
+        <Box
+          position="absolute"
+          bottom="-60px"
+          left="10%"
+          w="220px"
+          h="220px"
+          borderRadius="full"
+          bg="rgba(255,255,255,0.05)"
+        />
+        <Box
+          position="absolute"
+          top="20px"
+          left="-30px"
+          w="100px"
+          h="100px"
+          borderRadius="full"
+          bg="rgba(255,255,255,0.06)"
+        />
 
-      <Box
-        p={{ base: "30px", md: "50px" }}
-        borderRadius="lg"
-        maxW="600px"
-        w="100%"
-      >
-
-
-        <Grid gap={4}>
-          <FormControl isInvalid={!!errors.email}>
-            <Text mb={2}
-              fontWeight="bold"
-              color="gray.700"
-              fontSize="md">Mobile No./Email ID/Username</Text>
-            <Input
-              name="email"
-              type="email"
-              placeholder="Mobile No./Email ID/Username"
-              value={formData.email}
-              onChange={handleChange}
-              fontWeight="semibold"
-              h="50px"
-              borderRadius="md"
-              borderColor="gray.400"
-              bg="gray.50"
-              color="black"
-              focusBorderColor="#fa7602"
-              _placeholder={{ color: "gray.300", fontWeight: "normal" }}
-              _hover={{ borderColor: "gray.500" }}
-            />
-          </FormControl>
-
-          <FormControl isInvalid={!!errors.password}>
-            <Text mb={2} fontWeight="bold" color="gray.700" fontSize="md">
-              Password
-            </Text>
-            <InputGroup>
-              <Input
-                name="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                fontWeight="semibold"
-                h="50px"
-                borderRadius="md"
-                borderColor="gray.400"
-                bg="gray.50"
-                color="black"
-                focusBorderColor="#fa7602"
-                _placeholder={{ color: "gray.300", fontWeight: "normal" }}
-                _hover={{ borderColor: "gray.500" }}
-              />
-              <InputRightElement
-                onClick={() => setShowPassword(!showPassword)}
-                cursor="pointer"
-                color="gray.500"
-              >
-                {showPassword ? <FiEyeOff /> : <FiEye />}
-              </InputRightElement>
-            </InputGroup>
-          </FormControl>
-
-          <Button
-            onClick={handleSubmit}
-
-            bg="#fa7602"
+        <VStack spacing={1} zIndex={1}>
+          <Text
             color="white"
-            _hover={{
-              bg: "#e66a00",
-              transform: "scale(1.02)",
-            }}
-            _active={{
-              bg: "#d46200",
-            }}
-
-            h="60px"
-            w="140px"
-            fontSize="28px"
             fontWeight="800"
-            borderRadius="10px"
-            boxShadow="md"
-
-            justifySelf="center"
-            mt={4}
+            fontSize={{ base: "28px", md: "38px" }}
+            letterSpacing="3px"
+            textTransform="uppercase"
           >
-            {isLoading ? <Spinner size="md" color="white" /> : "लॉगिन"}
-          </Button>
-        </Grid>
-        {/* <Text mt={8} textAlign={"center"} fontSize="md" color="gray.600">
-          <Link
-            as={NextLink}
-            href="/forgot-password"
-            color="blue"
-            fontWeight="sm"
-            _hover={{ textDecoration: "underline" }}
-          >
-            Forget password?
-          </Link>
-        </Text>
-        <Text mt={8} textAlign={"center"} fontSize="md" color="gray.600">
-          Not a user?{" "}
-          <Link
-            as={NextLink}
-            href="/signup"
-            color="orange.400"
-            fontWeight="medium"
-            _hover={{ textDecoration: "underline", color: "orange.500" }}
-          >
-            Signup
-          </Link>
-        </Text> */}
-
-<Flex 
-  direction={{ base: "column", md: "row" }} // Mobile par niche-uupar, desktop par ek line mein
-  justify="center" 
-  align="center" 
-  gap={{ base: 1, md: 2 }} // Mobile par gap thoda kam
-  fontSize={{ base: "md", md: "lg" }} // Mobile par font thoda chota
-  color="gray.600" 
-  mt={8}
->
-  <Link
-    as={NextLink}
-    href="/forgot-password"
-    _hover={{ textDecoration: "underline" }}
-    textAlign="center"
-  >
-    Forgot Password ?
-  </Link>
-  
-  {/* Mobile par separator hide kar denge */}
-  <Text color="gray.600" display={{ base: "none", md: "block" }}>|</Text>
-  
-  <Box textAlign="center">
-    <Link
-      as={NextLink}
-      href="/signup"
-      color="#fa7602"
-      fontWeight="bold"
-      _hover={{ textDecoration: "underline" }}
-    >
-      Click Here
-    </Link>
-    <Text as="span" ml={1}>to sign up</Text>
-  </Box>
-</Flex>
- <HStack
-          justify="center"
-          spacing={4}
-          maxW="80%"
-          m="auto"
-          mt={8}
-          flexWrap="wrap"
-          overflow="hidden"
-          h="12px"
-        >
-          {[...Array(40)].map((_, i) => (
-            <Box
-              key={i}
-              w="2px"
-              h="2px"
-              bg="black"
-              borderRadius="full"
-              flexShrink={0}
-            />
-          ))}
-        </HStack>
-
-       
-
-          <Text mt={{ base: 4, md: 6 }} fontSize={{ base: "22px", md: "40px" }} fontWeight={600} textAlign="center" 
-  w="100%">
-          हेल्पलाइन: +91 123456789
-        </Text>
+            Login
+          </Text>
+         
+        </VStack>
       </Box>
-    </Box >
+
+      {/* Zigzag / wave divider */}
+      <Box w="100%" lineHeight={0} bg="#fa7602">
+        <svg
+          viewBox="0 0 1200 30"
+          xmlns="http://www.w3.org/2000/svg"
+          preserveAspectRatio="none"
+          style={{ display: "block", width: "100%", height: "30px" }}
+        >
+          <path
+            d="M0,0 L0,15 Q150,30 300,15 Q450,0 600,15 Q750,30 900,15 Q1050,0 1200,15 L1200,0 Z"
+            fill="#fa7602"
+          />
+          <path
+            d="M0,15 Q150,30 300,15 Q450,0 600,15 Q750,30 900,15 Q1050,0 1200,15 L1200,30 L0,30 Z"
+            fill="#f5f5f0"
+          />
+        </svg>
+      </Box>
+
+      {/* FORM CARD */}
+      <Flex
+        flex={1}
+        align="center"
+        justify="center"
+        px={4}
+        py={{ base: 6, md: 10 }}
+      >
+        <Box
+          borderRadius="2xl"
+          p={{ base: "28px", md: "48px" }}
+          w="100%"
+          maxW="480px"
+          border="1px solid rgba(0,0,0,0.06)"
+        >
+          {/* Form heading */}
+          <Text
+            fontSize={{ base: "20px", md: "24px" }}
+            fontWeight="700"
+            color="gray.800"
+            mb={1}
+          >
+            Sign in to your account
+          </Text>
+          <Text fontSize="sm" color="gray.500" mb={8}>
+            Enter your credentials below to continue
+          </Text>
+
+          <VStack spacing={5}>
+            {/* Email / Username field */}
+            <FormControl isInvalid={!!errors.email}>
+              <Text mb={1.5} fontWeight="600" color="gray.700" fontSize="sm">
+                Mobile No. / Email ID / Username
+              </Text>
+              <InputGroup>
+                <Input
+                  name="email"
+                  type="text"
+                  placeholder="Enter your email or username"
+                  value={formData.email}
+                  onChange={handleChange}
+                  h="50px"
+                  borderRadius="lg"
+                  borderColor="gray.200"
+                  bg="gray.50"
+                  color="gray.800"
+                  fontSize="sm"
+                  focusBorderColor="#fa7602"
+                  _placeholder={{ color: "gray.400" }}
+                  _hover={{ borderColor: "gray.300" }}
+                  pl={10}
+                />
+                <Box
+                  position="absolute"
+                  left={3}
+                  top="50%"
+                  transform="translateY(-50%)"
+                  color="gray.400"
+                  zIndex={1}
+                  pointerEvents="none"
+                >
+                  <MdEmail size={18} />
+                </Box>
+              </InputGroup>
+              {errors.email && (
+                <FormErrorMessage fontSize="xs">
+                  {errors.email}
+                </FormErrorMessage>
+              )}
+            </FormControl>
+
+            {/* Password field */}
+            <FormControl isInvalid={!!errors.password}>
+              <Text mb={1.5} fontWeight="600" color="gray.700" fontSize="sm">
+                Password
+              </Text>
+              <InputGroup>
+                <Box
+                  position="absolute"
+                  left={3}
+                  top="50%"
+                  transform="translateY(-50%)"
+                  color="gray.400"
+                  zIndex={1}
+                  pointerEvents="none"
+                >
+                  <MdLock size={18} />
+                </Box>
+                <Input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  h="50px"
+                  borderRadius="lg"
+                  borderColor="gray.200"
+                  bg="gray.50"
+                  color="gray.800"
+                  fontSize="sm"
+                  focusBorderColor="#fa7602"
+                  _placeholder={{ color: "gray.400" }}
+                  _hover={{ borderColor: "gray.300" }}
+                  pl={10}
+                />
+                <InputRightElement
+                  h="50px"
+                  onClick={() => setShowPassword(!showPassword)}
+                  cursor="pointer"
+                  color="gray.400"
+                  _hover={{ color: "#fa7602" }}
+                >
+                  {showPassword ? <FiEyeOff size={17} /> : <FiEye size={17} />}
+                </InputRightElement>
+              </InputGroup>
+              {errors.password && (
+                <FormErrorMessage fontSize="xs">
+                  {errors.password}
+                </FormErrorMessage>
+              )}
+            </FormControl>
+
+            {/* Forgot password */}
+            <Flex w="100%" justify="flex-end" mt={-2}>
+              <Link
+                as={NextLink}
+                href="/forgot-password"
+                fontSize="sm"
+                color="#fa7602"
+                fontWeight="500"
+                _hover={{ textDecoration: "underline" }}
+              >
+                Forgot Password?
+              </Link>
+            </Flex>
+
+            {/* Submit button */}
+            <Button
+              onClick={handleSubmit}
+              bg="#fa7602"
+              color="white"
+              w="100%"
+              h="52px"
+              fontSize="16px"
+              fontWeight="700"
+              borderRadius="lg"
+              boxShadow="0 4px 16px rgba(250,118,2,0.35)"
+              _hover={{
+                bg: "#e56a00",
+                transform: "translateY(-1px)",
+                boxShadow: "0 6px 20px rgba(250,118,2,0.4)",
+              }}
+              _active={{ bg: "#d46200", transform: "translateY(0)" }}
+              transition="all 0.2s"
+              mt={1}
+            >
+              {isLoading ? <Spinner size="sm" color="white" /> : "लॉगिन करें"}
+            </Button>
+          </VStack>
+
+          {/* Divider + Signup */}
+          <HStack my={6} spacing={3}>
+            <Divider borderColor="gray.200" />
+            <Text
+              fontSize="xs"
+              color="gray.400"
+              whiteSpace="nowrap"
+              flexShrink={0}
+            >
+              नया खाता बनाएं
+            </Text>
+            <Divider borderColor="gray.200" />
+          </HStack>
+
+          <Flex
+            justify="center"
+            align="center"
+            gap={1}
+            fontSize="sm"
+            color="gray.600"
+          >
+            <Text>पहली बार आए हैं?</Text>
+            <Link
+              as={NextLink}
+              href="/signup"
+              color="#fa7602"
+              fontWeight="700"
+              _hover={{ textDecoration: "underline" }}
+              ml={1}
+            >
+              Sign Up करें →
+            </Link>
+          </Flex>
+        </Box>
+      </Flex>
+
+      {/* HELPLINE FOOTER STRIP */}
+     
+    </Box>
   );
 }
-
-
-// forget password route is missing
-// sending reset link functionality is missing
-// sending email functionality is missing
-// sending token generation is missing
-// reset password route is missing
-// reset password functionality is missing
-// token verification is missing
-// password update functionality is missing
-// success and error handling for all above functionalities is missing
-// UI for all above functionalities is missing
-// validation for all above functionalities is missing
-// loading states for all above functionalities is missing
-// integration with backend for all above functionalities is missing
-// security measures for all above functionalities is missing
-// accessibility considerations for all above functionalities is missing
-// responsiveness for all above functionalities is missing

@@ -27,7 +27,7 @@ export async function GET(req) {
       );
     }
 
-    // 3️⃣ Fetch user from DB (SOURCE OF TRUTH)
+    // 3️⃣ Fetch user from DB (SOURCE OF TRUTH) OTP with moible
     const user = await UserModel.findById(decoded.userId).select(
       "_id name email role aadhar whatsapp address voterId"
     );

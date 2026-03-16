@@ -1,43 +1,62 @@
 "use client";
 
-import { Box, Text, Image, Flex } from "@chakra-ui/react";
+import { Box, Text, Image, Flex , VStack} from "@chakra-ui/react";
 
 export default function About() {
   return (
     <Box>
-
       {/* HERO SECTION */}
       <Box
         bg="#fa7602"
         w="100%"
-        minH={{ base: "140px", md: "250px" }}
-        position="relative"
+        minH={{ base: "130px", md: "300px" }}
         display="flex"
         alignItems="center"
         justifyContent="center"
+        position="relative"
+        overflow="hidden"
       >
-
-        {/* LOGO */}
-        <Image
-          src="/SSASatna_White_Logo.png"
-          alt="logo"
+        {/* Decorative circles */}
+        <Box
           position="absolute"
-          left={{ base: "20px", md: "60px" }}
-          top="50%"
-          transform="translateY(-50%)"
-          w={{ base: "60px", md: "120px" }}
+          top="-40px"
+          right="-40px"
+          w="180px"
+          h="180px"
+          borderRadius="full"
+          bg="rgba(255,255,255,0.08)"
+        />
+        <Box
+          position="absolute"
+          bottom="-60px"
+          left="10%"
+          w="220px"
+          h="220px"
+          borderRadius="full"
+          bg="rgba(255,255,255,0.05)"
+        />
+        <Box
+          position="absolute"
+          top="20px"
+          left="-30px"
+          w="100px"
+          h="100px"
+          borderRadius="full"
+          bg="rgba(255,255,255,0.06)"
         />
 
-        {/* TITLE */}
-        <Text
-          color="white"
-          fontWeight="bold"
-          fontSize={{ base: "26px", md: "42px" }}
-          letterSpacing="2px"
-        >
-          ABOUT
-        </Text>
-
+        <VStack spacing={1} zIndex={1}>
+          <Text
+            color="white"
+            fontWeight="800"
+            fontSize={{ base: "28px", md: "38px" }}
+            letterSpacing="3px"
+            textTransform="uppercase"
+          >
+            About Us
+          </Text>
+        
+        </VStack>
       </Box>
 
       {/* CONTENT SECTION */}
@@ -51,18 +70,17 @@ export default function About() {
         py={{ base: 10, md: 16 }}
         gap={6}
       >
-
         <Text fontSize={{ base: "15px", md: "18px" }} lineHeight="1.8">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-          ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
           aliquip ex ea commodo consequat.
         </Text>
 
         <Text fontSize={{ base: "15px", md: "18px" }} lineHeight="1.8">
           Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
-          non proident, sunt in culpa qui officia deserunt mollit anim id est
+          dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+          proident, sunt in culpa qui officia deserunt mollit anim id est
           laborum.
         </Text>
 
@@ -71,9 +89,7 @@ export default function About() {
           asperiores, molestiae tempora pariatur eaque perspiciatis laboriosam
           unde dolore aliquam possimus.
         </Text>
-
       </Flex>
-
     </Box>
   );
 }
