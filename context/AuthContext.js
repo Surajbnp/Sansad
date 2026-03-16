@@ -41,8 +41,13 @@ export const AuthProvider = ({ children }) => {
       }
 
       /* 🔒 Protected route but no token */
+      // if (!token) {
+      //   router.replace("/login");
+      //   setLoading(false);
+      //   return;
+      // }
+
       if (!token) {
-        router.replace("/login");
         setLoading(false);
         return;
       }

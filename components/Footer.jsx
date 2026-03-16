@@ -127,7 +127,7 @@ import {
 
 export default function Footer() {
   return (
-    <Box bg="white" color="black" py={{ base: 5, md: 10 }} px={4}>
+    <Box bg="white" color="black" py={{ base: 5, md: 10 }}>
       <Container maxW="7xl">
         <VStack spacing={{ base: 4, md: 6 }} align="center">
 

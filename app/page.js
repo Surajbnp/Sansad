@@ -140,7 +140,7 @@ export default function Home() {
         {/* DESKTOP ICONS */}
         <Box
           display={{ base: "none", md: "block" }}
-          h={{ md: "300px", lg: "350px" }}
+          h={{ md: "300px", lg: "300px" }}
           className={styles.icons}
           my="50px"
         />
@@ -155,8 +155,8 @@ export default function Home() {
           mt="-350px"
         >
           <Image src="/SSK-Satna_Point1.webp" alt="icon1" w="170px" />
-          <Image src="/SSK-Satna_Point2.webp" alt="icon2" w="170px" />
-          <Image src="/SSK-Satna_Point3.webp" alt="icon3" w="170px" />
+          <Image src="/SSK-Satna_Point2.webp" alt="icon2" w="180px" />
+          <Image src="/SSK-Satna_Point3.webp" alt="icon3" w="180px" />
         </Flex>
 
       </Box>

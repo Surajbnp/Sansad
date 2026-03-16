@@ -483,7 +483,7 @@ export default function Navbar() {
             _hover={{ bg: "#fa7602", color: "white" }}
           />
 
-          <HStack as={"nav"} spacing={{ md: 10, lg: 32 }} display={{ base: "none", md: "flex" }}>
+          <HStack as={"nav"} spacing={{ md: 2, lg: 20 }} display={{ base: "none", md: "flex" }} >
             {Links.map((link, index) => (
               <NavLink href={link.href} key={index}>
                 {link.name}

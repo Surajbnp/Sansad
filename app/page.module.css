@@ -45,6 +45,16 @@
   background-position: center;
 }
 
+/* TABLET HERO*/
+@media (min-width: 769px) and (max-width: 1024px) {
+  .hero {
+    background-image: url("/SatnaSSK_Homeslide_Desktop.webp"); 
+    background-size: cover;
+    background-position: center top; 
+    height: 500px;
+  }
+}
+
 /* MOBILE HERO */
 
 @media (max-width: 768px) {

@@ -13,20 +13,34 @@
 
 .hero {
   width: 100%;
-  background-image: url("https://res.cloudinary.com/dddnxiqpq/image/upload/v1753632505/hero_assn8d.png");
+  background-image: url("/SatnaSSK_Homeslide_Desktop.webp");
   min-height: 90vh;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
-  margin-top: 8vh;
+  margin-top: -12vh;
 }
+
+@media (max-width: 768px) {
+  .hero {
+    background-image: url("/SatnaSSK_Homeslide_Mobile.webp");
+    background-size: contain;
+    background-position: top center;
+    aspect-ratio: 9 / 16;
+  }
+}
+
 
 .icons {
   background-image: url("https://res.cloudinary.com/dddnxiqpq/image/upload/v1753632500/icons_gotiyz.png");
   background-repeat: no-repeat;
   background-position: center;
+   background-size: contain;
 }
 
+.iconsWrapper {
+  width: 100%;
+}
 .form {
   max-width: 600px;
   margin: auto;
