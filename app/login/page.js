@@ -13,6 +13,8 @@ import {
   useToast,
   Spinner,
   Link,
+  Image,
+  HStack
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
@@ -20,6 +22,7 @@ import styles from "./login.module.css";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import NextLink from "next/link";
+import { Flex } from '@chakra-ui/react';
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -121,48 +124,111 @@ export default function Login() {
 
   return (
     <Box className={styles.page}>
-      {/* <Box
+      <Box
         className={styles.hero}
-        mt={{ base: "4vh", md: 0 }}
-        minH={{ base: "28vh", md: "90vh" }}
-      ></Box>
-      <Divider maxW={"80%"} m={"auto"} borderColor="gray.300" /> */}
+        w="100%"
+        minH={{ base: "auto", md: "90vh" }}
+        position="relative"
+      >
+
+        {/* LOGO LEFT SIDE */}
+        <Image
+          src="/SSASatna_White_Logo.png"
+          alt="logo"
+          position="absolute"
+          top={{ base: "15px", md: "100px" }}
+          left={{ base: "20px", md: "100px" }}
+          w={{ base: "70px", md: "200px" }}
+        />
+
+      </Box>
+
+
+      {/* ICONS SECTION */}
+      <Box w="100%" className={styles.iconsWrapper}>
+
+        {/* DESKTOP ICONS */}
+        <Box
+          display={{ base: "none", md: "block" }}
+          h={{ md: "300px", lg: "350px" }}
+          className={styles.icons}
+          my="50px"
+        />
+
+        {/* MOBILE ICONS */}
+        <Flex
+          display={{ base: "flex", md: "none" }}
+          direction="column"
+          align="center"
+          gap={6}
+          p={6}
+          mt="-350px"
+        >
+          <Image src="/SSK-Satna_Point1.webp" alt="icon1" w="170px" />
+          <Image src="/SSK-Satna_Point2.webp" alt="icon2" w="170px" />
+          <Image src="/SSK-Satna_Point3.webp" alt="icon3" w="170px" />
+        </Flex>
+
+      </Box>
+
+    <HStack
+        justify="center"
+        spacing={4}
+        maxW="80%"
+        m="auto"
+        my={2}
+        flexWrap="wrap"
+        overflow="hidden"
+        h="12px"
+      >
+        {[...Array(24)].map((_, i) => (
+          <Box
+            key={i}
+            w="2px"
+            h="2px"
+            bg="black"
+            borderRadius="full"
+            flexShrink={0}
+          />
+        ))}
+      </HStack>
 
       <Box
         p={{ base: "30px", md: "50px" }}
         borderRadius="lg"
         maxW="600px"
-        w="90%"
+        w="100%"
       >
-        <Text
-          textAlign="center"
-          color="black"
-          fontSize="2xl"
-          fontWeight="bold"
-          mb={8}
-        >
-          लॉग इन फॉर्म (Login Form)
-        </Text>
+
 
         <Grid gap={4}>
           <FormControl isInvalid={!!errors.email}>
-            <Text mb={1}>Email ID</Text>
+            <Text mb={2}
+              fontWeight="bold"
+              color="gray.700"
+              fontSize="md">Mobile No./Email ID/Username</Text>
             <Input
               name="email"
               type="email"
-              placeholder="Email ID"
+              placeholder="Mobile No./Email ID/Username"
               value={formData.email}
               onChange={handleChange}
-              borderColor="gray.300"
+              fontWeight="semibold"
+              h="50px"
+              borderRadius="md"
+              borderColor="gray.400"
               bg="gray.50"
               color="black"
               focusBorderColor="#fa7602"
-              _placeholder={{ color: "gray.400" }}
+              _placeholder={{ color: "gray.300", fontWeight: "normal" }}
+              _hover={{ borderColor: "gray.500" }}
             />
           </FormControl>
 
           <FormControl isInvalid={!!errors.password}>
-            <Text mb={1}>Password</Text>
+            <Text mb={2} fontWeight="bold" color="gray.700" fontSize="md">
+              Password
+            </Text>
             <InputGroup>
               <Input
                 name="password"
@@ -170,11 +236,15 @@ export default function Login() {
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
-                borderColor="gray.300"
+                fontWeight="semibold"
+                h="50px"
+                borderRadius="md"
+                borderColor="gray.400"
                 bg="gray.50"
                 color="black"
                 focusBorderColor="#fa7602"
-                _placeholder={{ color: "gray.400" }}
+                _placeholder={{ color: "gray.300", fontWeight: "normal" }}
+                _hover={{ borderColor: "gray.500" }}
               />
               <InputRightElement
                 onClick={() => setShowPassword(!showPassword)}
@@ -188,22 +258,31 @@ export default function Login() {
 
           <Button
             onClick={handleSubmit}
-            _hover={{
-              bg: "white",
-              color: "#fa7602",
-              outline: "2px solid #fa7602",
-            }}
+
             bg="#fa7602"
             color="white"
-            fontWeight="bold"
-            px={8}
-            py={6}
-            fontSize="lg"
+            _hover={{
+              bg: "#e66a00",
+              transform: "scale(1.02)",
+            }}
+            _active={{
+              bg: "#d46200",
+            }}
+
+            h="60px"
+            w="140px"
+            fontSize="28px"
+            fontWeight="800"
+            borderRadius="10px"
+            boxShadow="md"
+
+            justifySelf="center"
+            mt={4}
           >
-            {isLoading ? <Spinner size="md" color="white" /> : "लॉग इन करें"}
+            {isLoading ? <Spinner size="md" color="white" /> : "लॉगिन"}
           </Button>
         </Grid>
-        <Text mt={8} textAlign={"center"} fontSize="md" color="gray.600">
+        {/* <Text mt={8} textAlign={"center"} fontSize="md" color="gray.600">
           <Link
             as={NextLink}
             href="/forgot-password"
@@ -225,9 +304,71 @@ export default function Login() {
           >
             Signup
           </Link>
+        </Text> */}
+
+<Flex 
+  direction={{ base: "column", md: "row" }} // Mobile par niche-uupar, desktop par ek line mein
+  justify="center" 
+  align="center" 
+  gap={{ base: 1, md: 2 }} // Mobile par gap thoda kam
+  fontSize={{ base: "md", md: "lg" }} // Mobile par font thoda chota
+  color="gray.600" 
+  mt={8}
+>
+  <Link
+    as={NextLink}
+    href="/forgot-password"
+    _hover={{ textDecoration: "underline" }}
+    textAlign="center"
+  >
+    Forgot Password
+  </Link>
+  
+  {/* Mobile par separator hide kar denge */}
+  <Text color="gray.600" display={{ base: "none", md: "block" }}>|</Text>
+  
+  <Box textAlign="center">
+    <Link
+      as={NextLink}
+      href="/signup"
+      color="#fa7602"
+      fontWeight="bold"
+      _hover={{ textDecoration: "underline" }}
+    >
+      Click Here
+    </Link>
+    <Text as="span" ml={1}>to sign up</Text>
+  </Box>
+</Flex>
+ <HStack
+          justify="center"
+          spacing={4}
+          maxW="80%"
+          m="auto"
+          mt={8}
+          flexWrap="wrap"
+          overflow="hidden"
+          h="12px"
+        >
+          {[...Array(40)].map((_, i) => (
+            <Box
+              key={i}
+              w="2px"
+              h="2px"
+              bg="black"
+              borderRadius="full"
+              flexShrink={0}
+            />
+          ))}
+        </HStack>
+
+       
+
+          <Text mt={{ base: 4, md: 6 }} fontSize={{ base: "22px", md: "40px" }} fontWeight={600}>
+          हेल्पलाइन: +91 123456789
         </Text>
       </Box>
-    </Box>
+    </Box >
   );
 }
 
