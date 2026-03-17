@@ -62,7 +62,9 @@
     background-image: url("/SatnaSSK_Homeslide_Mobile.webp");
     background-size: contain;
     background-position: top center;
-    aspect-ratio: 9 / 16;
+    aspect-ratio: auto;
+    width: 100vw;
+    height: 56.25vw;
   }
 }
 
