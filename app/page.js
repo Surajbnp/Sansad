@@ -112,46 +112,36 @@ import styles from "./page.module.css";
 export default function Home() {
   return (
     <Box className={styles.page} minH={{ base: "fit-content", md: "100vh" }}>
-      {/* HERO SECTION */}
-      <Box
-        className={styles.hero}
-        w="100%"
-        minH={{ base: "auto", md: "90vh" }}
-        position="relative"
-      >
-        {/* LOGO LEFT SIDE */}
-        {/* <Image
-          src="/SSASatna_White_Logo.png"
-          alt="logo"
-          position="absolute"
-          top={{ base: "15px", md: "100px" }}
-          left={{ base: "20px", md: "100px" }}
-          w={{ base: "70px", md: "200px" }}
-        /> */}
+      <Box className={styles.heroWrapper} w="100%">
+        <Image
+          src="/SatnaSSK_Homeslide_Mobile.webp"
+          display={{ base: "block", md: "none" }} // मोबाइल पर दिखेगा
+          w="100%"
+          alt="Hero Mobile"
+        />
+        <Box
+          className={styles.hero}
+          display={{ base: "none", md: "block" }} // डेस्कटॉप पर पुराना बैकग्राउंड वाला बॉक्स
+          w="100%"
+          minH="90vh"
+          position="relative"
+        />
       </Box>
 
       {/* ICONS SECTION */}
-      <Box w="100%" className={styles.iconsWrapper}>
-        {/* DESKTOP ICONS */}
-        <Box
-          display={{ base: "none", md: "block" }}
-          h={{ md: "300px", lg: "300px" }}
-          className={styles.icons}
-          my="50px"
-        />
-
-        {/* MOBILE ICONS */}
+      <Box w="100%" className={styles.iconsWrapper} >
         <Flex
-          display={{ base: "flex", md: "none" }}
-          direction="column"
+          direction={{ base: "column", md: "row" }}
           align="center"
-          gap={6}
+          justify="center"
+          gap={{ base: 6, md: 10 }}
           p={6}
-          mt="-350px"
+          my={{ base: "50px", md: "50px" }}
+
         >
-          <Image src="/SSK-Satna_Point1.webp" alt="icon1" w="170px" />
-          <Image src="/SSK-Satna_Point2.webp" alt="icon2" w="180px" />
-          <Image src="/SSK-Satna_Point3.webp" alt="icon3" w="180px" />
+          <Image src="/SSK-Satna_Point1.webp" alt="icon1" w={{ base: "170px", md: "200px" }} />
+          <Image src="/SSK-Satna_Point2.webp" alt="icon2" w={{ base: "170px", md: "200px" }} />
+          <Image src="/SSK-Satna_Point3.webp" alt="icon3" w={{ base: "170px", md: "200px" }} />
         </Flex>
       </Box>
 
