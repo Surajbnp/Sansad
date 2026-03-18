@@ -4,7 +4,6 @@ import { Box, ChakraProvider, extendTheme } from "@chakra-ui/react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/context/AuthContext";
-import NProgressLoader from "@/components/NProgressLoader";
 
 const config = {
   initialColorMode: "light",
@@ -73,7 +72,6 @@ export default function Providers({ children }) {
         <Box>
           <Navbar />
         </Box>
-        <NProgressLoader />
         {children}
         <Footer />
       </AuthProvider>

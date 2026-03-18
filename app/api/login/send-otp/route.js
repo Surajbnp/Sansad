@@ -19,6 +19,7 @@ export async function POST(request) {
       );
     }
 
+    console.log("Received phone for OTP:", phone);
     /* ── 2. check user exists in DB ── */
     await database();
     const user = await UserModel.findOne({ phone });
