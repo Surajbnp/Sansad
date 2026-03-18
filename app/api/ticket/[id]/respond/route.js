@@ -1,107 +1,101 @@
+// app/api/ticket/[id]/respond/route.js
+
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 import database from "@/lib/database";
 import TicketModel from "@/models/Ticket.model";
-import verifyUser from "../../../authMiddleware";
+import UserModel from "@/models/User.model";
 
 export async function PATCH(req, { params }) {
   try {
-    await database();
+    /* ── 1. auth ── */
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    if (!token)
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
-    /* ------------------ AUTH ------------------ */
-    const token = req.headers.get("authorization");
-    const decodedUser = verifyUser(token);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (!decodedUser?.userId) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+    if (decoded.role !== "User")
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
 
-    // Only normal users can respond
-    if (decodedUser.role !== "User") {
-      return NextResponse.json(
-        { success: false, message: "Forbidden" },
-        { status: 403 }
-      );
-    }
-
-    const { id } = params;
+    /* ── 2. inputs ── */
+    const { id } = await params;
     const { remarks, fileUrl } = await req.json();
 
-    if (!id || !remarks?.trim()) {
+    if (!id || !remarks?.trim())
       return NextResponse.json(
         { success: false, message: "Response text is required" },
-        { status: 400 }
+        { status: 400 },
       );
-    }
 
-    /* ------------------ FETCH TICKET ------------------ */
+    /* ── 3. fetch + validate ── */
+    await database();
+
     const ticket = await TicketModel.findById(id);
-
-    if (!ticket) {
+    if (!ticket)
       return NextResponse.json(
         { success: false, message: "Ticket not found" },
-        { status: 404 }
+        { status: 404 },
       );
-    }
 
-    /* ------------------ STATE VALIDATION ------------------ */
-    if (ticket.status !== "Awaiting User Response") {
+    if (ticket.status !== "Awaiting User Response")
       return NextResponse.json(
-        {
-          success: false,
-          message: "Ticket is not awaiting user response",
-        },
-        { status: 403 }
+        { success: false, message: "Ticket is not awaiting user response" },
+        { status: 403 },
       );
-    }
 
     const lastHistory = ticket.statusHistory[ticket.statusHistory.length - 1];
-
-    // File enforcement only if required
-    if (lastHistory?.fileRequired && !fileUrl) {
+    if (lastHistory?.fileRequired && !fileUrl)
       return NextResponse.json(
-        {
-          success: false,
-          message: "File upload is required for this ticket",
-        },
-        { status: 400 }
+        { success: false, message: "File upload is required for this ticket" },
+        { status: 400 },
       );
-    }
 
-    /* ------------------ BUILD HISTORY ENTRY ------------------ */
+    /* ── 4. push response ── */
+    const currentUser = await UserModel.findById(decoded.id).select("name");
+
     const responseEntry = {
       status: "User Respond Received",
       remarks,
-      updatedBy: {
-        userId: decodedUser.userId,
-        name: decodedUser.name,
-        role: "User",
-      },
-      fileUrl: fileUrl,
+      fileUrl: fileUrl || null,
       fileRequired: false,
+      updatedBy: { userId: decoded.id, name: currentUser?.name, role: "User" },
       date: new Date(),
     };
 
-    ticket.statusHistory.push(responseEntry);
-    ticket.status = "User Respond Received";
-
-    await ticket.save();
-
-    return NextResponse.json(
+    const updatedTicket = await TicketModel.findByIdAndUpdate(
+      id,
       {
-        success: true,
-        message: "Response submitted successfully",
-        ticket,
+        $push: { statusHistory: responseEntry },
+        $set: { status: "User Respond Received" },
       },
-      { status: 200 }
+      { new: true },
     );
-  } catch (error) {
-    console.error("User respond route error:", error);
+
+    if (!updatedTicket)
+      return NextResponse.json(
+        { success: false, message: "Ticket not found" },
+        { status: 404 },
+      );
+
+    return NextResponse.json({
+      success: true,
+      message: "Response submitted successfully",
+      ticket: updatedTicket,
+    });
+  } catch (err) {
+    if (err.name === "TokenExpiredError")
+      return NextResponse.json(
+        { message: "Session expired, please login again" },
+        { status: 401 },
+      );
+
+    console.error("Respond route error:", err);
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import styles from "./page.module.css";
 import {
@@ -20,88 +21,203 @@ import {
   FormLabel,
   FormErrorMessage,
   useDisclosure,
-  Spinner,
   HStack,
   PinInput,
   PinInputField,
   ModalCloseButton,
   InputGroup,
-  InputRightElement,
-  IconButton,
-  Badge,
+  InputLeftAddon,
 } from "@chakra-ui/react";
-import { AddIcon, ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import { AddIcon } from "@chakra-ui/icons";
+import { MdPerson, MdPhone } from "react-icons/md";
 import { useAuth } from "@/context/AuthContext";
 
 const OTP_TIME = 60;
 
+/* ── dept card ── */
+const DeptCard = ({ dep, index }) => (
+  <Box
+    bg="white"
+    borderRadius="16px"
+    border="1px solid"
+    borderColor="gray.100"
+    boxShadow="0 2px 8px rgba(0,0,0,0.05)"
+    p={5}
+    position="relative"
+    overflow="hidden"
+    transition="all 0.2s"
+    style={{ animationDelay: `${index * 50}ms` }}
+    _hover={{
+      boxShadow: "0 6px 24px rgba(250,118,2,0.1)",
+      borderColor: "#fa7602",
+    }}
+  >
+    <Box position="absolute" top={0} left={0} w="100%" h="3px" bg="#fa7602" />
+    <Flex justify="space-between" align="flex-start" gap={4} wrap="wrap">
+      <Box flex={1}>
+        <HStack mb={2} spacing={3} flexWrap="wrap">
+          <Text
+            fontSize="lg"
+            fontWeight="800"
+            color="gray.800"
+            textTransform="capitalize"
+          >
+            {dep.name}
+          </Text>
+          <Box
+            px={2}
+            py="1px"
+            borderRadius="full"
+            bg="gray.100"
+            fontSize="10px"
+            fontWeight="700"
+            color="gray.500"
+            letterSpacing="0.06em"
+          >
+            {dep.slug}
+          </Box>
+        </HStack>
+
+        <VStack align="flex-start" spacing={1}>
+          <HStack spacing={2}>
+            <MdPerson size={14} color="#fa7602" />
+            <Text fontSize="sm" fontWeight="600" color="gray.700">
+              {dep.assignedUser?.name || "Not assigned"}
+            </Text>
+            {dep?.designation && (
+              <Box
+                px={2}
+                py="1px"
+                borderRadius="full"
+                fontSize="10px"
+                fontWeight="700"
+                bg="#fff3e0"
+                color="#e65100"
+              >
+                {dep.designation}
+              </Box>
+            )}
+          </HStack>
+
+          {dep?.phone && (
+            <HStack spacing={2}>
+              <MdPhone size={14} color="#9ca3af" />
+              <Text fontSize="sm" color="gray.500">
+                +91 {dep.phone}
+              </Text>
+            </HStack>
+          )}
+
+          {dep.assignedUser?.phone && (
+            <HStack spacing={2}>
+              <MdPhone size={14} color="#fa7602" />
+              <Text fontSize="sm" color="gray.500">
+                Staff: +91 {dep.assignedUser.phone}
+              </Text>
+            </HStack>
+          )}
+        </VStack>
+
+        <HStack mt={3} spacing={3}>
+          <Text fontSize="10px" color="gray.400">
+            Created by {dep.createdBy?.name}
+          </Text>
+          <Text fontSize="10px" color="gray.300">
+            •
+          </Text>
+          <Text fontSize="10px" color="gray.400">
+            {new Date(dep.createdAt).toLocaleDateString("en-IN", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}
+          </Text>
+        </HStack>
+      </Box>
+
+      <Button
+        size="sm"
+        variant="outline"
+        borderColor="#fa7602"
+        color="#fa7602"
+        borderRadius="full"
+        px={4}
+        fontWeight="700"
+        fontSize="12px"
+        _hover={{ bg: "#fa7602", color: "white" }}
+        transition="all 0.2s"
+      >
+        Reassign
+      </Button>
+    </Flex>
+  </Box>
+);
+
+/* ── form field helper ── */
+const Field = ({ label, required, error, children }) => (
+  <FormControl isInvalid={!!error} mb={4}>
+    <FormLabel fontSize="sm" fontWeight="600" color="gray.600" mb={1}>
+      {label}
+      {required && (
+        <Text as="span" color="red.400">
+          {" "}
+          *
+        </Text>
+      )}
+    </FormLabel>
+    {children}
+    <FormErrorMessage fontSize="xs">{error}</FormErrorMessage>
+  </FormControl>
+);
+
+/* ─────────────────────────────────────────
+   MAIN PAGE
+───────────────────────────────────────── */
 const DepartmentsPage = () => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  console.log(departments, "dep");
-
-  // form fields
+  // form fields — no email/password anymore
   const [newDepName, setNewDepName] = useState("");
   const [assignedName, setAssignedName] = useState("");
-  const [assignedEmail, setAssignedEmail] = useState("");
-  const [assignedPassword, setAssignedPassword] = useState("");
+  const [assignedPhone, setAssignedPhone] = useState("");
   const [assignedContact, setAssignedContact] = useState("");
   const [assignedDesignation, setAssignedDesignation] = useState("");
 
-  // ui states
-  const [showPassword, setShowPassword] = useState(false);
-  const [progressText, setProgressText] = useState("");
-
-  // validation
   const [errors, setErrors] = useState({});
-
-  // otp flow
   const [otp, setOtp] = useState("");
   const [otpStep, setOtpStep] = useState(1); // 1=form, 2=otp
   const [submitting, setSubmitting] = useState(false);
+  const [progressText, setProgressText] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
 
   const toast = useToast();
-  const { accessToken } = useAuth();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  /* ================= TIMER ================= */
+  /* resend countdown */
   useEffect(() => {
     if (resendTimer === 0) return;
-    const t = setInterval(() => {
-      setResendTimer((s) => s - 1);
-    }, 1000);
+    const t = setInterval(() => setResendTimer((s) => s - 1), 1000);
     return () => clearInterval(t);
   }, [resendTimer]);
 
-  /* ================= VALIDATION ================= */
+  /* validation */
   const validateForm = () => {
     const e = {};
     if (!newDepName.trim()) e.newDepName = "Department name is required";
     if (!assignedName.trim()) e.assignedName = "Staff name is required";
     if (!assignedDesignation.trim())
       e.assignedDesignation = "Designation is required";
-
-    if (!assignedContact.trim()) e.assignedContact = "Contact is required";
-
-    if (
-      !assignedEmail.trim() ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(assignedEmail)
-    )
-      e.assignedEmail = "Valid email required";
-    if (!assignedPassword || assignedPassword.length < 6)
-      e.assignedPassword = "Min 6 characters required";
+    if (!assignedPhone.trim() || !/^\d{10}$/.test(assignedPhone))
+      e.assignedPhone = "Valid 10-digit phone number required";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  /* ================= FETCH ================= */
+  /* fetch departments */
   const fetchDepartments = async () => {
     try {
-      const res = await fetch("/api/departments/get", {
-        headers: { authorization: accessToken },
-      });
+      const res = await fetch("/api/departments/get");
       const data = await res.json();
       if (data.success) setDepartments(data.departments);
     } finally {
@@ -113,28 +229,42 @@ const DepartmentsPage = () => {
     fetchDepartments();
   }, []);
 
-  /* ================= SEND OTP ================= */
+  /* ── STEP 1: send OTP to staff phone ── */
   const sendOtp = async () => {
     if (!validateForm()) return;
-
+    setSubmitting(true);
     try {
-      setSubmitting(true);
       const res = await fetch("/api/departments/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: assignedEmail,
-          mailHeading: "Department Account Verification",
-          mailSubject: "Verify Department Email",
-        }),
+        body: JSON.stringify({ phone: assignedPhone }),
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-
       setOtpStep(2);
       setResendTimer(OTP_TIME);
-      toast({ title: "OTP sent successfully", status: "success" });
+      toast({ title: `OTP sent to +91 ${assignedPhone}`, status: "success" });
+    } catch (err) {
+      toast({ title: err.message || "OTP भेजने में असफल", status: "error" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  /* resend OTP */
+  const resendOtp = async () => {
+    setOtp("");
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: assignedPhone }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      setResendTimer(OTP_TIME);
+      toast({ title: "OTP पुनः भेजा गया", status: "info" });
     } catch (err) {
       toast({ title: err.message, status: "error" });
     } finally {
@@ -142,342 +272,340 @@ const DepartmentsPage = () => {
     }
   };
 
-  /* ================= VERIFY OTP + AUTO CREATE ================= */
-  const verifyOtp = async () => {
+  /* ── STEP 2: verify OTP + create dept in one call ── */
+  const verifyOtpAndCreate = async () => {
     if (otp.length !== 6) {
-      toast({ title: "Enter valid OTP", status: "warning" });
+      toast({ title: "कृपया 6 अंकों का OTP दर्ज करें", status: "warning" });
       return;
     }
-
-    try {
-      setSubmitting(true);
-      setProgressText("Verifying OTP...");
-
-      const res = await fetch("/api/departments/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: assignedEmail, otp }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-
-      setResendTimer(0);
-      setProgressText("Creating department...");
-
-      await handleCreate();
-    } catch (err) {
-      toast({ title: err.message, status: "error" });
-      setProgressText("");
-    }
-  };
-
-  /* ================= CREATE ================= */
-  const handleCreate = async () => {
+    setSubmitting(true);
+    setProgressText("Creating department...");
     try {
       const res = await fetch("/api/departments/create", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: accessToken,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: newDepName,
           assignedName,
-          assignedEmail,
-          assignedPassword,
-          assignedContact,
+          assignedPhone,
+          assignedContact: assignedContact || assignedPhone,
           assignedDesignation,
+          otp,
         }),
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      toast({ title: "Department created", status: "success" });
-      onClose();
+      toast({ title: "Department created!", status: "success" });
+      handleClose();
       fetchDepartments();
-
-      // reset
-      setOtpStep(1);
-      setOtp("");
-      setResendTimer(0);
-      setProgressText("");
     } catch (err) {
+      setOtp(""); // clear wrong OTP
       toast({ title: err.message, status: "error" });
     } finally {
       setSubmitting(false);
+      setProgressText("");
     }
   };
 
-  /* ================= BACK ================= */
+  /* reset + close */
+  const handleClose = () => {
+    onClose();
+    setOtpStep(1);
+    setOtp("");
+    setResendTimer(0);
+    setProgressText("");
+    setNewDepName("");
+    setAssignedName("");
+    setAssignedPhone("");
+    setAssignedContact("");
+    setAssignedDesignation("");
+    setErrors({});
+  };
+
   const goBack = () => {
     setOtpStep(1);
     setOtp("");
     setResendTimer(0);
   };
 
-  console.log(departments);
-
   return (
-    <Box className={styles.container} px={4} py={8}>
-      <Flex justify="space-between" mb={6}>
-        <Text fontSize="2xl" fontWeight="bold">
-          Departments
-        </Text>
-        <Button leftIcon={<AddIcon />} onClick={onOpen}>
-          Create
-        </Button>
-      </Flex>
+    <Box minH="100vh" bg="#fafafa" pt="90px" pb="60px" px={{ base: 4, md: 8 }}>
+      <Box maxW="860px" mx="auto">
+        {/* ── header ── */}
+        <Flex justify="space-between" align="center" mb={6}>
+          <Box>
+            <Text fontSize="2xl" fontWeight="800" color="gray.800">
+              Departments
+            </Text>
+            <Text fontSize="sm" color="gray.400" mt="1px">
+              {departments.length} department
+              {departments.length !== 1 ? "s" : ""} registered
+            </Text>
+          </Box>
+          <Button
+            leftIcon={<AddIcon />}
+            bg="#fa7602"
+            color="white"
+            borderRadius="full"
+            fontWeight="700"
+            px={5}
+            _hover={{ bg: "#e06800" }}
+            onClick={onOpen}
+          >
+            Create
+          </Button>
+        </Flex>
 
-      {loading ? (
-        <Skeleton height="60px" />
-      ) : (
-        <VStack spacing={4} align="stretch">
-          {departments.map((dep) => (
-            <Box
-              key={dep._id}
-              p={4}
-              borderRadius="md"
-              boxShadow="rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px"
-              bg="white"
+        {/* ── list ── */}
+        {loading ? (
+          <VStack spacing={3}>
+            {[...Array(3)].map((_, i) => (
+              <Skeleton key={i} height="130px" borderRadius="16px" w="100%" />
+            ))}
+          </VStack>
+        ) : departments.length === 0 ? (
+          <Flex
+            h="50vh"
+            align="center"
+            justify="center"
+            flexDir="column"
+            gap={3}
+          >
+            <Box fontSize="48px">🏢</Box>
+            <Text color="gray.400" fontSize="lg" fontWeight="600">
+              No departments yet
+            </Text>
+            <Button
+              bg="#fa7602"
+              color="white"
+              borderRadius="full"
+              onClick={onOpen}
+              _hover={{ bg: "#e06800" }}
             >
-              <Flex justify="space-between" align="start" gap={4}>
-                {/* LEFT INFO */}
-                <Box>
-                  <Text
-                    fontSize="lg"
-                    fontWeight="600"
-                    textTransform="capitalize"
-                    w={"100%"}
-                  >
-                    {dep.name}
-                  </Text>
+              Create First Department
+            </Button>
+          </Flex>
+        ) : (
+          <VStack spacing={3} align="stretch">
+            {departments.map((dep, i) => (
+              <DeptCard key={dep._id} dep={dep} index={i} />
+            ))}
+          </VStack>
+        )}
+      </Box>
 
-                  <Text fontSize="sm" color="gray.500">
-                    Slug: <b>{dep.slug}</b>
-                  </Text>
-
-                  <Box mt={2} w={"100%"}>
-                    <Flex align={"center"} gap={2}>
-                      <Text
-                        fontWeight={600}
-                        fontSize="sm"
-                        textTransform={"capitalize"}
-                      >
-                        <b>Assigned Staff:</b>{" "}
-                        {dep.assignedUser?.name || "Not assigned"}
-                      </Text>
-                      <Badge colorScheme="green">{dep?.designation}</Badge>
-                    </Flex>
-
-                    <Text fontSize="sm" color="gray.600">
-                      {`Email : ${dep.assignedUser?.email}`}
-                    </Text>
-                    <Text fontSize="sm" color="gray.600">
-                      {`Contact : ${dep?.phone}`}
-                    </Text>
-                  </Box>
-
-                  <Box mt={2}>
-                    <Text fontSize="xs" color="gray.500">
-                      Created by: {dep.createdBy?.name}
-                    </Text>
-                    <Text fontSize="xs" color="gray.400">
-                      {new Date(dep.createdAt).toLocaleString()}
-                    </Text>
-                  </Box>
-                </Box>
-
-                {/* RIGHT ACTIONS */}
-                <Flex direction="column" gap={2}>
-                  {/* FUTURE: reassign staff */}
-                  <Button size="sm" variant="outline" colorScheme="orange">
-                    Reassign
-                  </Button>
-                </Flex>
-              </Flex>
-            </Box>
-          ))}
-        </VStack>
-      )}
-
-      {/* ================= MODAL ================= */}
+      {/* ── MODAL ── */}
       <Modal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleClose}
         isCentered
         closeOnOverlayClick={false}
+        size="md"
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Create Department</ModalHeader>
+        <ModalOverlay backdropFilter="blur(4px)" />
+        <ModalContent borderRadius="16px" overflow="hidden">
+          <Box h="3px" bg="#fa7602" />
+          <ModalHeader fontWeight="800" fontSize="lg">
+            {otpStep === 1 ? "Create Department" : "Verify Staff Phone"}
+          </ModalHeader>
           <ModalCloseButton />
 
           <ModalBody>
+            {/* ── STEP 1: form ── */}
             {otpStep === 1 && (
               <>
-                <FormControl isInvalid={errors.newDepName} mb={3}>
-                  <FormLabel>
-                    Department Name{" "}
-                    <Text as="span" color="red">
-                      *
-                    </Text>
-                  </FormLabel>
+                <Field
+                  label="Department Name"
+                  required
+                  error={errors.newDepName}
+                >
                   <Input
                     value={newDepName}
                     onChange={(e) => setNewDepName(e.target.value)}
+                    borderRadius="10px"
+                    focusBorderColor="#fa7602"
+                    placeholder="e.g. Electric"
                   />
-                  <FormErrorMessage>{errors.newDepName}</FormErrorMessage>
-                </FormControl>
+                </Field>
 
-                <FormControl isInvalid={errors.assignedDesignation} mb={3}>
-                  <FormLabel>
-                    Designation{" "}
-                    <Text as="span" color="red">
-                      *
-                    </Text>
-                  </FormLabel>
+                <Field
+                  label="Designation"
+                  required
+                  error={errors.assignedDesignation}
+                >
                   <Input
                     value={assignedDesignation}
                     onChange={(e) =>
                       setAssignedDesignation(e.target.value.replace(/\s/g, ""))
                     }
-                    placeholder="No spaces allowed"
+                    borderRadius="10px"
+                    focusBorderColor="#fa7602"
+                    placeholder="No spaces (e.g. SectionOfficer)"
                   />
-                  <FormErrorMessage>
-                    {errors.assignedDesignation}
-                  </FormErrorMessage>
-                </FormControl>
+                </Field>
 
-                <FormControl isInvalid={errors.assignedName} mb={3}>
-                  <FormLabel>
-                    Staff Name{" "}
-                    <Text as="span" color="red">
-                      *
-                    </Text>
-                  </FormLabel>
+                <Field label="Staff Name" required error={errors.assignedName}>
                   <Input
                     value={assignedName}
                     onChange={(e) => setAssignedName(e.target.value)}
+                    borderRadius="10px"
+                    focusBorderColor="#fa7602"
                   />
-                  <FormErrorMessage>{errors.assignedName}</FormErrorMessage>
-                </FormControl>
+                </Field>
 
-                <FormControl isInvalid={errors.assignedEmail} mb={3}>
-                  <FormLabel>
-                    Staff Email{" "}
-                    <Text as="span" color="red">
-                      *
-                    </Text>
-                  </FormLabel>
-                  <Input
-                    type="email"
-                    value={assignedEmail}
-                    onChange={(e) => setAssignedEmail(e.target.value)}
-                  />
-                  <FormErrorMessage>{errors.assignedEmail}</FormErrorMessage>
-                </FormControl>
-
-                <FormControl isInvalid={errors.assignedPassword} mb={3}>
-                  <FormLabel>
-                    Password{" "}
-                    <Text as="span" color="red">
-                      *
-                    </Text>
-                  </FormLabel>
-
+                <Field
+                  label="Staff Mobile Number"
+                  required
+                  error={errors.assignedPhone}
+                >
                   <InputGroup>
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      value={assignedPassword}
-                      onChange={(e) => setAssignedPassword(e.target.value)}
+                    <InputLeftAddon
+                      children="+91"
+                      bg="gray.100"
+                      borderRadius="10px 0 0 10px"
                     />
-                    <InputRightElement>
-                      <IconButton
-                        size="sm"
-                        variant="ghost"
-                        icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                        onClick={() => setShowPassword(!showPassword)}
-                        aria-label="Toggle password"
-                      />
-                    </InputRightElement>
+                    <Input
+                      type="tel"
+                      maxLength={10}
+                      placeholder="10 अंकों का नंबर"
+                      value={assignedPhone}
+                      onChange={(e) => {
+                        setAssignedPhone(e.target.value.replace(/\D/g, ""));
+                        setErrors((er) => ({ ...er, assignedPhone: false }));
+                      }}
+                      borderRadius="0 10px 10px 0"
+                      focusBorderColor="#fa7602"
+                    />
                   </InputGroup>
+                </Field>
 
-                  <FormErrorMessage>{errors.assignedPassword}</FormErrorMessage>
-                </FormControl>
-
-                <FormControl isInvalid={errors.assignedContact} mb={3}>
-                  <FormLabel>
-                    Contact Number{" "}
-                    <Text as="span" color="red">
-                      *
-                    </Text>
-                  </FormLabel>
-                  <Input
-                    type="tel"
-                    value={assignedContact}
-                    onChange={(e) => setAssignedContact(e.target.value)}
-                    placeholder="e.g. 9876543210"
-                  />
-                  <FormErrorMessage>{errors.assignedContact}</FormErrorMessage>
-                </FormControl>
+                {/* optional contact — if different from staff phone */}
+                <Field
+                  label="Department Contact (optional)"
+                  error={errors.assignedContact}
+                >
+                  <InputGroup>
+                    <InputLeftAddon
+                      children="+91"
+                      bg="gray.100"
+                      borderRadius="10px 0 0 10px"
+                    />
+                    <Input
+                      type="tel"
+                      maxLength={10}
+                      placeholder="Leave blank to use staff number"
+                      value={assignedContact}
+                      onChange={(e) =>
+                        setAssignedContact(e.target.value.replace(/\D/g, ""))
+                      }
+                      borderRadius="0 10px 10px 0"
+                      focusBorderColor="#fa7602"
+                    />
+                  </InputGroup>
+                </Field>
               </>
             )}
 
+            {/* ── STEP 2: OTP ── */}
             {otpStep === 2 && (
-              <>
-                <Text mb={3} textAlign="center">
-                  Enter OTP sent to <b>{assignedEmail}</b>
+              <VStack spacing={5}>
+                <Box
+                  bg="orange.50"
+                  border="1px solid"
+                  borderColor="orange.200"
+                  borderRadius="xl"
+                  px={5}
+                  py={3}
+                  textAlign="center"
+                  w="100%"
+                >
+                  <Text fontSize="sm" color="gray.600">
+                    OTP sent to{" "}
+                    <Text as="span" fontWeight="700" color="gray.800">
+                      +91 {assignedPhone}
+                    </Text>
+                  </Text>
+                  <Text fontSize="xs" color="gray.400" mt={1}>
+                    Staff member must share the OTP with you
+                  </Text>
+                </Box>
+
+                <Text fontSize="sm" color="gray.500">
+                  6 अंकों का OTP दर्ज करें
                 </Text>
 
-                <HStack justify="center" mb={4}>
-                  <PinInput otp onChange={setOtp}>
+                <HStack justify="center">
+                  <PinInput otp value={otp} onChange={setOtp}>
                     {[...Array(6)].map((_, i) => (
-                      <PinInputField key={i} />
+                      <PinInputField
+                        key={i}
+                        fontSize="xl"
+                        fontWeight="bold"
+                        borderColor="gray.300"
+                        _focus={{
+                          borderColor: "#fa7602",
+                          boxShadow: "0 0 0 1px #fa7602",
+                        }}
+                      />
                     ))}
                   </PinInput>
                 </HStack>
 
-                <Flex justify="space-between">
-                  <Button variant="ghost" onClick={goBack}>
-                    Back
+                <Flex justify="space-between" w="100%">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    borderRadius="full"
+                    onClick={goBack}
+                  >
+                    ← Back
                   </Button>
                   <Button
                     variant="link"
-                    colorScheme="purple"
-                    isDisabled={resendTimer > 0}
-                    onClick={sendOtp}
+                    fontSize="sm"
+                    color={resendTimer > 0 ? "gray.400" : "orange.500"}
+                    isDisabled={resendTimer > 0 || submitting}
+                    onClick={resendOtp}
                   >
                     {resendTimer > 0
-                      ? `Resend OTP in ${resendTimer}s`
-                      : "Resend OTP"}
+                      ? `Resend in ${resendTimer}s`
+                      : "OTP पुनः भेजें"}
                   </Button>
                 </Flex>
-              </>
+              </VStack>
             )}
           </ModalBody>
 
-          <ModalFooter>
+          <ModalFooter pt={0} pb={5}>
             {otpStep === 1 && (
               <Button
                 w="100%"
-                colorScheme="purple"
-                onClick={sendOtp}
+                bg="#fa7602"
+                color="white"
+                borderRadius="full"
+                fontWeight="700"
                 isLoading={submitting}
+                loadingText="Sending OTP..."
+                _hover={{ bg: "#e06800" }}
+                onClick={sendOtp}
               >
-                Verify Email & Proceed
+                Send OTP to Staff →
               </Button>
             )}
-
             {otpStep === 2 && (
               <Button
                 w="100%"
-                colorScheme="purple"
-                onClick={verifyOtp}
+                bg="#fa7602"
+                color="white"
+                borderRadius="full"
+                fontWeight="700"
                 isLoading={submitting}
+                loadingText={progressText || "Creating..."}
+                _hover={{ bg: "#e06800" }}
+                onClick={verifyOtpAndCreate}
               >
-                {progressText || "Verify OTP"}
+                Verify & Create Department ✓
               </Button>
             )}
           </ModalFooter>

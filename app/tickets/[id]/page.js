@@ -14,8 +14,8 @@ import {
   Image,
   Input,
   useToast,
-  SkeletonCircle,
   SkeletonText,
+  SkeletonCircle,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -34,13 +34,56 @@ import styles from "./page.module.css";
 import { useParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import ImagePreviewModal from "@/components/ImagePreviewModal";
-import { set } from "nprogress";
+
+/* ── status colour map ── */
+const STATUS_CONFIG = {
+  Submitted: { color: "#2563eb", bg: "#eff6ff" },
+  Assigned: { color: "#7c3aed", bg: "#f5f3ff" },
+  "In Progress": { color: "#d97706", bg: "#fffbeb" },
+  "Awaiting User Response": { color: "#ea580c", bg: "#fff7ed" },
+  "User Respond Received": { color: "#0891b2", bg: "#ecfeff" },
+  Resolved: { color: "#16a34a", bg: "#f0fdf4" },
+  Closed: { color: "#6b7280", bg: "#f9fafb" },
+};
+const getS = (s) => STATUS_CONFIG[s] || { color: "#6b7280", bg: "#f9fafb" };
+
+const fmtDate = (d) =>
+  new Date(d).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+const fmtDateTime = (d) =>
+  new Date(d).toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+/* ── info chip ── */
+const Chip = ({ label, value }) => (
+  <Box bg="gray.50" borderRadius="10px" px={3} py={2}>
+    <Text
+      fontSize="9px"
+      color="gray.400"
+      fontWeight="700"
+      letterSpacing="0.1em"
+      textTransform="uppercase"
+    >
+      {label}
+    </Text>
+    <Text fontSize="sm" fontWeight="600" color="gray.700">
+      {value || "—"}
+    </Text>
+  </Box>
+);
 
 export default function TicketDetailsPage() {
   const [ticket, setTicket] = useState(null);
   const [showResponseForm, setShowResponseForm] = useState(false);
   const [responseText, setResponseText] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null);
   const [departments, setDepartments] = useState([]);
   const [selectedDept, setSelectedDept] = useState("");
   const [updateStatus, setUpdateStatus] = useState("");
@@ -49,6 +92,10 @@ export default function TicketDetailsPage() {
   const [expectedResolvedDate, setExpectedResolvedDate] = useState("");
   const [updating, setUpdating] = useState(false);
   const [fileUrl, setFileUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const {
     isOpen: isAssignOpen,
@@ -63,21 +110,12 @@ export default function TicketDetailsPage() {
 
   const toast = useToast();
   const { id } = useParams();
-  const { accessToken, user } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState(null);
-  const [uploading, setUploading] = useState(false);
+  const { user } = useAuth(); // ← removed accessToken
 
+  /* ── fetch ticket — cookie automatic ── */
   const fetchTicket = async () => {
     try {
-      const res = await fetch(`/api/ticket/${id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: accessToken,
-        },
-      });
+      const res = await fetch(`/api/ticket/${id}`);
       const data = await res.json();
       setTicket(data.ticket);
     } catch (err) {
@@ -88,9 +126,7 @@ export default function TicketDetailsPage() {
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const res = await fetch(`/api/departments/get`, {
-          headers: { authorization: accessToken },
-        });
+        const res = await fetch(`/api/departments/get`);
         const data = await res.json();
         setDepartments(data.departments || []);
       } catch (err) {
@@ -98,124 +134,85 @@ export default function TicketDetailsPage() {
       }
     };
 
-    if (id && user?.role !== "User") {
-      fetchDepartments();
-    }
+    if (id && user?.role !== "User") fetchDepartments();
+    if (id) fetchTicket();
+  }, [id, user]);
 
-    fetchTicket();
-  }, [id, accessToken]);
-
+  /* ── assign ── */
   const handleAssign = async () => {
-    setLoading(true);
-    if (selectedDept === "") {
+    if (!selectedDept) {
       toast({
         title: "Please select a department",
         status: "warning",
         duration: 3000,
-        isClosable: true,
       });
-      setLoading(false);
       return;
     }
-
+    setLoading(true);
     try {
-      const payload = {
-        status: "Assigned",
-        remarks: `Assigned to ${selectedDept} department`,
-        ...(selectedFile && { fileUrl: selectedFile }),
-        assignedDept: selectedDept,
-      };
-
       const res = await fetch(`/api/ticket/${id}/assign`, {
         method: "PATCH",
-        headers: {
-          authorization: accessToken,
-        },
-        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "Assigned",
+          remarks: `Assigned to ${selectedDept} department`,
+          assignedDept: selectedDept,
+        }),
       });
-
       const data = await res.json();
-      console.log("Ticket updated:", data);
       toast({
-        title: data.message || "Assigned Success!",
-        description: data?.to,
+        title: data.message || "Assigned!",
         status: "success",
         duration: 3000,
-        isClosable: true,
       });
-
-      // reset UI
-      setShowResponseForm(false);
-      setResponseText("");
-      setSelectedFile(null);
-      setLoading(false);
       onAssignClose();
       fetchTicket();
-    } catch (error) {
+    } catch (err) {
+      toast({ title: "Assignment failed", status: "error" });
+    } finally {
       setLoading(false);
-      console.error("Error updating ticket:", error);
     }
   };
 
+  /* ── update status ── */
   const handleUpdateTicket = async () => {
     if (!updateStatus) {
       toast({
-        title: "Please select status",
+        title: "Please select a status",
         status: "warning",
         duration: 3000,
       });
       return;
     }
-    // In Progress → expected resolved date is mandatory
     if (updateStatus === "In Progress" && !expectedResolvedDate) {
       toast({
         title: "Expected resolved date required",
-        description:
-          "Please select expected resolved date for In Progress status",
         status: "warning",
         duration: 3000,
       });
       return;
     }
-
+    setUpdating(true);
     try {
-      setUpdating(true);
-
-      const payload = {
-        status: updateStatus,
-        remarks: updateRemarks,
-
-        // File requirement is OPTIONAL
-        fileRequired:
-          updateStatus === "Awaiting User Response" ? requireFile : false,
-
-        // Expected date ONLY for In Progress
-        expectedResolvedDate:
-          updateStatus === "In Progress" ? expectedResolvedDate : null,
-      };
-
       const res = await fetch(`/api/ticket/${id}/update`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: accessToken,
-        },
-        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: updateStatus,
+          remarks: updateRemarks,
+          fileRequired:
+            updateStatus === "Awaiting User Response" ? requireFile : false,
+          expectedResolvedDate:
+            updateStatus === "In Progress" ? expectedResolvedDate : null,
+        }),
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Update failed");
-      }
-
+      if (!res.ok) throw new Error(data.message || "Update failed");
       toast({
         title: data.message || "Ticket updated",
         status: "success",
         duration: 3000,
       });
-
-      // reset
       onUpdateClose();
       setUpdateStatus("");
       setUpdateRemarks("");
@@ -223,17 +220,14 @@ export default function TicketDetailsPage() {
       setExpectedResolvedDate("");
       fetchTicket();
     } catch (err) {
-      toast({
-        title: err.message || "Update failed",
-        status: "error",
-      });
+      toast({ title: err.message || "Update failed", status: "error" });
     } finally {
       setUpdating(false);
     }
   };
 
+  /* ── user respond ── */
   const handleUserResponseSubmit = async () => {
-    // Text is mandatory
     if (!responseText.trim()) {
       toast({
         title: "Please enter your response",
@@ -242,11 +236,8 @@ export default function TicketDetailsPage() {
       });
       return;
     }
-
-    // File required ONLY if admin requested it
     const lastHistory =
       ticket?.statusHistory?.[ticket.statusHistory.length - 1];
-
     if (lastHistory?.fileRequired && !fileUrl) {
       toast({
         title: "Please upload the required file",
@@ -255,55 +246,37 @@ export default function TicketDetailsPage() {
       });
       return;
     }
-
+    setUpdating(true);
     try {
-      setUpdating(true);
-
-      const payload = {
-        remarks: responseText,
-        ...(fileUrl && { fileUrl }),
-      };
-
       const res = await fetch(`/api/ticket/${id}/respond`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: accessToken,
-        },
-        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          remarks: responseText,
+          ...(fileUrl && { fileUrl }),
+        }),
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Submission failed");
-      }
-
+      if (!res.ok) throw new Error(data.message || "Submission failed");
       toast({
-        title: data.message || "Response submitted successfully",
+        title: "Response submitted!",
         status: "success",
         duration: 3000,
       });
-
-      // ✅ reset UI
       setResponseText("");
       setFileUrl(null);
       setShowResponseForm(false);
       fetchTicket();
     } catch (err) {
-      toast({
-        title: err.message || "Submission failed",
-        status: "error",
-      });
+      toast({ title: err.message || "Submission failed", status: "error" });
     } finally {
       setUpdating(false);
     }
   };
 
-  // Image Upload Handler
+  /* ── cloudinary upload ── */
   const handleFileUpload = () => {
     setUploading(true);
-
     const widget = window.cloudinary.createUploadWidget(
       {
         cloudName: "dxwwnettz",
@@ -312,422 +285,596 @@ export default function TicketDetailsPage() {
         multiple: false,
         clientAllowedFormats: ["jpg", "jpeg", "png"],
         maxFileSize: 1000000,
-        transformation: [
-          {
-            width: 1280,
-            height: 1280,
-            crop: "limit",
-            quality: "auto:eco",
-            fetch_format: "auto",
-          },
-        ],
         folder: "tickets",
-        showAdvancedOptions: false,
-        cropping: false,
         sources: ["local", "camera"],
       },
       (error, result) => {
         setUploading(false);
-
         if (error) {
-          toast({ title: "छवि अपलोड विफल", status: "error" });
+          toast({ title: "Upload failed", status: "error" });
           return;
         }
-
         if (result.event === "success") {
           const { public_id, format } = result.info;
-          const optimizedUrl = `https://res.cloudinary.com/dxwwnettz/image/upload/w_1280,h_1280,c_limit,q_auto:eco,f_auto/${public_id}.${format}`;
-
-          setFileUrl(optimizedUrl);
-
-          toast({ title: "छवि सफलतापूर्वक अपलोड हुई", status: "success" });
+          setFileUrl(
+            `https://res.cloudinary.com/dxwwnettz/image/upload/w_1280,h_1280,c_limit,q_auto:eco,f_auto/${public_id}.${format}`,
+          );
+          toast({ title: "Image uploaded!", status: "success" });
         }
-      }
+      },
     );
-
     widget.open();
   };
 
-  console.log(ticket)
+  const s = getS(ticket?.status);
+  const lastHistory =
+    ticket?.statusHistory?.[ticket?.statusHistory?.length - 1];
 
   return (
-    <Box
-      className={styles.container}
-      pb={"80px"}
-      maxW="800px"
-      minH={"70vh"}
-      mx="auto"
-      px={4}
-      py={8}
-      mb={16}
-    >
-      {!ticket ? (
-        <Box m={" auto"} maxW={"800px"} minH={"70vh"}>
-          <SkeletonCircle size="10" />
-          <SkeletonText mt="4" noOfLines={10} spacing="4" />
-        </Box>
-      ) : (
-        <>
-          <Box
-            mb={6}
-            p={4}
-            boxShadow={
-              " rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px"
-            }
-            borderRadius="md"
-          >
-            <Flex
-              flexDir={{ base: "column-reverse", md: "row" }}
-              align={{ base: "start", md: "center" }}
-              justify={{ base: "start", md: "space-between" }}
-            >
-              <Text fontSize="sm" mt={2} color="gray.500">
-                #Id: {ticket._id}
-              </Text>
-              <Flex gap={4}>
-                <Badge
-                  fontStyle={"italic"}
-                  colorScheme={
-                    ticket.status === "Resolved" ? "green" : "orange"
-                  }
-                >
-                  {ticket.status}
-                </Badge>
-                {ticket?.assignedDept !== null && (
-                  <Badge fontStyle={"italic"} colorScheme={"purple"}>
-                    {ticket?.assignedDept}
-                  </Badge>
-                )}
-              </Flex>
-            </Flex>
-
-            <Text fontSize="2xl" textTransform={"capitalize"} fontWeight="bold">
-              {ticket.title}
-            </Text>
-            <Text color="gray.600" mt={2}>
-              {ticket.description}
-            </Text>
-            {ticket.fileUrl && (
-              <Box mt={4}>
-                <Text fontSize="sm" fontWeight="medium" mb={1}>
-                  Attached File:
-                </Text>
-                <Image
-                  src={ticket.fileUrl}
-                  alt="Ticket Attachment"
-                  maxH="200px"
-                  borderRadius="md"
-                  onClick={() => {
-                    setPreviewImage(ticket.fileUrl);
-                    setPreviewOpen(true);
-                  }}
-                  cursor={"pointer"}
-                />
-
-                {/* Image Preview Modal */}
-                <ImagePreviewModal
-                  isOpen={previewOpen}
-                  onClose={() => setPreviewOpen(false)}
-                  imageUrl={previewImage}
-                />
-              </Box>
-            )}
-            <HStack spacing={4} mt={4}>
-              <Badge colorScheme="blue">{ticket?.assignedDept?.name}</Badge>
-            </HStack>
-            <Flex
-              flexDir={{ base: "column", md: "row" }}
-              align={{ base: "start", md: "center" }}
-              justify={"space-between"}
-              lineHeight={1}
-            >
-              <Text fontSize="sm" mt={2} color="gray.900">
-                Created by: {ticket?.user?.name}
-              </Text>
-              <Text fontSize="sm" mt={2} color="gray.900">
-                Expected Resolution Date :{" "}
-                {ticket?.statusHistory[ticket.statusHistory.length - 1]
-                  ?.expectedResolvedDate
-                  ? new Date(
-                      ticket.statusHistory[
-                        ticket.statusHistory.length - 1
-                      ].expectedResolvedDate
-                    ).toLocaleDateString("en-IN", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })
-                  : "N/A"}
-              </Text>
-            </Flex>
-
-            {/* Admin Assign Button */}
-            {user?.role === "Admin" && ticket?.status === "Submitted" && (
-              <Button mr={4} mt={4} colorScheme="purple" onClick={onAssignOpen}>
-                Assign
-              </Button>
-            )}
-            {(user?.role === "Admin" || user?.role === "Department") && (
-              <Button mt={4} colorScheme="green" onClick={onUpdateOpen}>
-                Update
-              </Button>
-            )}
+    <Box minH="100vh" bg="#fafafa" pt="90px" pb="80px" px={{ base: 4, md: 8 }}>
+      <Box maxW="800px" mx="auto">
+        {!ticket ? (
+          <Box bg="white" borderRadius="16px" p={6}>
+            <SkeletonCircle size="10" mb={4} />
+            <SkeletonText noOfLines={8} spacing="4" />
           </Box>
+        ) : (
+          <>
+            {/* ── TICKET HEADER CARD ── */}
+            <Box
+              bg="white"
+              borderRadius="16px"
+              border="1px solid"
+              borderColor="gray.100"
+              boxShadow="0 2px 16px rgba(0,0,0,0.06)"
+              overflow="hidden"
+              mb={5}
+            >
+              {/* coloured top bar matching status */}
+              <Box h="4px" bg={s.color} />
 
-          {/* Timeline */}
-          <Box>
-            <Text fontSize="xl" fontWeight="bold" mb={4}>
-              Status Timeline
-            </Text>
-            <VStack align="start" spacing={6} position="relative" ml={4}>
-              <Box
-                position="absolute"
-                left="-8px"
-                top="0"
-                bottom="0"
-                w="2px"
-                borderLeft={"4px dotted"}
-                borderColor={"gray.600"}
-              />
-
-              {ticket?.statusHistory?.map((item, index) => (
-                <Flex key={index} align="flex-start" position="relative">
-                  <Box position="absolute" left="-16px" mt={1} bg={"white"}>
-                    <Icon
-                      as={
-                        index === ticket.statusHistory.length - 1
-                          ? TimeIcon
-                          : CheckCircleIcon
-                      }
-                      color={
-                        index === ticket.statusHistory.length - 1
-                          ? "orange.400"
-                          : "green.500"
-                      }
-                      boxSize={5}
-                    />
-                  </Box>
-
-                  <Box pl={8}>
-                    {item.remarks && (
-                      <Text fontWeight="bold">{item.remarks}</Text>
-                    )}
-                    <Text fontSize="sm" color="gray.500">
-                      {new Date(item.date).toLocaleString()}
-                    </Text>
-                    {item?.fileUrl && (
+              <Box p={{ base: 5, md: 7 }}>
+                {/* id + badges */}
+                <Flex
+                  justify="space-between"
+                  align="center"
+                  wrap="wrap"
+                  gap={3}
+                  mb={4}
+                >
+                  <Text
+                    fontSize="11px"
+                    color="gray.400"
+                    fontWeight="600"
+                    letterSpacing="0.08em"
+                    bg="gray.50"
+                    px={2}
+                    py="3px"
+                    borderRadius="6px"
+                  >
+                    #{ticket._id?.slice(-10).toUpperCase()}
+                  </Text>
+                  <HStack spacing={2} flexWrap="wrap">
+                    <Box
+                      px={3}
+                      py="3px"
+                      borderRadius="full"
+                      fontSize="11px"
+                      fontWeight="700"
+                      bg={s.bg}
+                      color={s.color}
+                      letterSpacing="0.04em"
+                    >
+                      {ticket.status}
+                    </Box>
+                    {ticket.assignedDept && (
                       <Box
-                        my={3}
-                        w={{ base: "100%", md: "200px" }}
+                        px={3}
+                        py="3px"
+                        borderRadius="full"
+                        fontSize="11px"
+                        fontWeight="600"
+                        bg="#f5f3ff"
+                        color="#7c3aed"
                       >
-                       <Image src={item?.fileUrl} alt={'image'} />
+                        {ticket.assignedDept}
                       </Box>
                     )}
-                    <HStack mt={1}>
-                      <Text fontStyle={"italic"}>By: </Text>
-                      <Avatar size="xs" name={item?.updatedBy?.name} />
-                      <Text fontStyle={"italic"} fontSize="sm">{`${
-                        item?.updatedBy?.userId === user?.userId
-                          ? "You"
-                          : item?.updatedBy?.name
-                      } (${item?.updatedBy?.role})`}</Text>
-                    </HStack>
-                  </Box>
+                  </HStack>
                 </Flex>
-              ))}
-            </VStack>
-          </Box>
 
-          {ticket.status === "Awaiting User Response" &&
-            user?.role === "User" && (
-              <Box mt={6}>
-                {!showResponseForm ? (
-                  <Button
-                    colorScheme="blue"
-                    onClick={() => setShowResponseForm(true)}
-                  >
-                    Respond Ticket
-                  </Button>
-                ) : (
-                  <Box>
-                    <Textarea
-                      placeholder="Enter additional details..."
-                      value={responseText}
-                      onChange={(e) => setResponseText(e.target.value)}
+                {/* title + description */}
+                <Text
+                  fontSize={{ base: "xl", md: "2xl" }}
+                  fontWeight="800"
+                  color="gray.800"
+                  textTransform="capitalize"
+                  mb={2}
+                >
+                  {ticket.title}
+                </Text>
+                <Text color="gray.500" fontSize="sm" lineHeight="1.7">
+                  {ticket.description}
+                </Text>
+
+                {/* attached image */}
+                {ticket.fileUrl && (
+                  <Box mt={4}>
+                    <Text
+                      fontSize="xs"
+                      fontWeight="700"
+                      color="gray.400"
+                      letterSpacing="0.08em"
+                      textTransform="uppercase"
+                      mb={2}
+                    >
+                      Attached File
+                    </Text>
+                    <Image
+                      src={ticket.fileUrl}
+                      alt="Attachment"
+                      maxH="200px"
+                      borderRadius="10px"
+                      cursor="pointer"
+                      onClick={() => {
+                        setPreviewImage(ticket.fileUrl);
+                        setPreviewOpen(true);
+                      }}
+                      _hover={{ opacity: 0.9 }}
+                      transition="opacity 0.2s"
                     />
-                    {ticket?.status === "Awaiting User Response" &&
-                      ticket?.statusHistory[ticket?.statusHistory.length - 1]
-                        ?.fileRequired && (
-                        <HStack mt={2} align="center" gap={4}>
+                    <ImagePreviewModal
+                      isOpen={previewOpen}
+                      onClose={() => setPreviewOpen(false)}
+                      imageUrl={previewImage}
+                    />
+                  </Box>
+                )}
+
+                {/* meta chips */}
+                <Flex mt={5} gap={3} wrap="wrap">
+                  <Chip label="Created by" value={ticket?.user?.name} />
+                  <Chip label="Created on" value={fmtDate(ticket?.createdAt)} />
+                  <Chip
+                    label="Expected by"
+                    value={
+                      lastHistory?.expectedResolvedDate
+                        ? fmtDate(lastHistory.expectedResolvedDate)
+                        : "N/A"
+                    }
+                  />
+                  {ticket.assignedDept && (
+                    <Chip label="Department" value={ticket.assignedDept} />
+                  )}
+                </Flex>
+
+                {/* action buttons */}
+                <HStack mt={5} spacing={3} flexWrap="wrap">
+                  {user?.role === "Admin" && ticket?.status === "Submitted" && (
+                    <Button
+                      bg="#7c3aed"
+                      color="white"
+                      borderRadius="full"
+                      size="sm"
+                      px={5}
+                      fontWeight="700"
+                      _hover={{ bg: "#6d28d9" }}
+                      onClick={onAssignOpen}
+                    >
+                      Assign Department
+                    </Button>
+                  )}
+                  {(user?.role === "Admin" || user?.role === "Department") && (
+                    <Button
+                      bg="#16a34a"
+                      color="white"
+                      borderRadius="full"
+                      size="sm"
+                      px={5}
+                      fontWeight="700"
+                      _hover={{ bg: "#15803d" }}
+                      onClick={onUpdateOpen}
+                    >
+                      Update Status
+                    </Button>
+                  )}
+                </HStack>
+              </Box>
+            </Box>
+
+            {/* ── TIMELINE ── */}
+            <Box
+              bg="white"
+              borderRadius="16px"
+              border="1px solid"
+              borderColor="gray.100"
+              boxShadow="0 2px 16px rgba(0,0,0,0.06)"
+              p={{ base: 5, md: 7 }}
+              mb={5}
+            >
+              <HStack mb={5} spacing={3}>
+                <Box w="4px" h="22px" bg="#fa7602" borderRadius="full" />
+                <Text fontSize="md" fontWeight="700" color="gray.700">
+                  Status Timeline
+                </Text>
+              </HStack>
+
+              <VStack align="start" spacing={0} position="relative" pl={6}>
+                {/* vertical line */}
+                <Box
+                  position="absolute"
+                  left="8px"
+                  top="10px"
+                  bottom="10px"
+                  w="2px"
+                  bg="gray.100"
+                  borderRadius="full"
+                />
+
+                {ticket?.statusHistory?.map((item, index) => {
+                  const isLast = index === ticket.statusHistory.length - 1;
+                  const hs = getS(item.status);
+                  return (
+                    <Flex
+                      key={index}
+                      align="flex-start"
+                      position="relative"
+                      pb={6}
+                      w="100%"
+                    >
+                      {/* dot */}
+                      <Box
+                        position="absolute"
+                        left="-22px"
+                        top="2px"
+                        w="18px"
+                        h="18px"
+                        borderRadius="full"
+                        bg={isLast ? "#fa7602" : "white"}
+                        border="2px solid"
+                        borderColor={isLast ? "#fa7602" : "gray.200"}
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        zIndex={1}
+                      >
+                        {!isLast && (
+                          <Box
+                            w="6px"
+                            h="6px"
+                            borderRadius="full"
+                            bg="gray.300"
+                          />
+                        )}
+                      </Box>
+
+                      <Box w="100%" pl={4}>
+                        {/* status pill */}
+                        {item.status && (
+                          <Box
+                            display="inline-block"
+                            px={2}
+                            py="1px"
+                            borderRadius="full"
+                            fontSize="10px"
+                            fontWeight="700"
+                            bg={hs.bg}
+                            color={hs.color}
+                            mb={1}
+                          >
+                            {item.status}
+                          </Box>
+                        )}
+
+                        {item.remarks && (
+                          <Text fontWeight="600" color="gray.800" fontSize="sm">
+                            {item.remarks}
+                          </Text>
+                        )}
+
+                        <Text fontSize="11px" color="gray.400" mt="2px">
+                          {fmtDateTime(item.date)}
+                        </Text>
+
+                        {item?.fileUrl && (
+                          <Image
+                            src={item.fileUrl}
+                            alt="attachment"
+                            maxH="120px"
+                            borderRadius="8px"
+                            mt={2}
+                            cursor="pointer"
+                            onClick={() => {
+                              setPreviewImage(item.fileUrl);
+                              setPreviewOpen(true);
+                            }}
+                          />
+                        )}
+
+                        <HStack mt={2} spacing={1}>
+                          <Avatar size="2xs" name={item?.updatedBy?.name} />
+                          <Text
+                            fontSize="11px"
+                            color="gray.500"
+                            fontStyle="italic"
+                          >
+                            {item?.updatedBy?.userId === user?._id
+                              ? "You"
+                              : item?.updatedBy?.name}
+                            {` (${item?.updatedBy?.role})`}
+                          </Text>
+                        </HStack>
+                      </Box>
+                    </Flex>
+                  );
+                })}
+              </VStack>
+            </Box>
+
+            {/* ── USER RESPOND ── */}
+            {ticket.status === "Awaiting User Response" &&
+              user?.role === "User" && (
+                <Box
+                  bg="white"
+                  borderRadius="16px"
+                  border="1px solid"
+                  borderColor="orange.200"
+                  boxShadow="0 2px 16px rgba(250,118,2,0.08)"
+                  p={{ base: 5, md: 7 }}
+                >
+                  <HStack mb={4} spacing={3}>
+                    <Box w="4px" h="22px" bg="#fa7602" borderRadius="full" />
+                    <Text fontSize="md" fontWeight="700" color="gray.700">
+                      Your Response Needed
+                    </Text>
+                  </HStack>
+
+                  {!showResponseForm ? (
+                    <Button
+                      bg="#fa7602"
+                      color="white"
+                      borderRadius="full"
+                      fontWeight="700"
+                      _hover={{ bg: "#e06800" }}
+                      onClick={() => setShowResponseForm(true)}
+                    >
+                      Respond to Ticket
+                    </Button>
+                  ) : (
+                    <VStack spacing={4} align="stretch">
+                      <Textarea
+                        placeholder="Enter your response..."
+                        value={responseText}
+                        onChange={(e) => setResponseText(e.target.value)}
+                        borderRadius="10px"
+                        borderColor="gray.200"
+                        focusBorderColor="#fa7602"
+                        minH="120px"
+                        fontSize="sm"
+                      />
+
+                      {lastHistory?.fileRequired && (
+                        <HStack>
                           <Button
-                            my={4}
                             onClick={handleFileUpload}
                             bg="#fa7602"
                             color="white"
-                            _hover={{
-                              bg: "white",
-                              color: "#fa7602",
-                              outline: "2px solid #fa7602",
-                            }}
+                            borderRadius="full"
+                            size="sm"
                             isLoading={uploading}
+                            _hover={{ bg: "#e06800" }}
                           >
-                            Upload Image
+                            Upload File
                           </Button>
                           {fileUrl && (
                             <Image
                               src={fileUrl}
                               alt="Uploaded"
-                              boxSize="80px"
-                              borderRadius="md"
+                              boxSize="60px"
+                              borderRadius="8px"
                             />
                           )}
                         </HStack>
                       )}
 
-                    <HStack mt={2} gap={4}>
-                      <Button
-                        colorScheme="green"
-                        onClick={handleUserResponseSubmit}
-                      >
-                        {updating ? <Spinner /> : "Submit Response"}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setShowResponseForm(false)}
-                      >
-                        Cancel
-                      </Button>
-                    </HStack>
-                  </Box>
-                )}
-              </Box>
-            )}
+                      <HStack spacing={3}>
+                        <Button
+                          bg="#16a34a"
+                          color="white"
+                          borderRadius="full"
+                          fontWeight="700"
+                          isLoading={updating}
+                          loadingText="Submitting..."
+                          _hover={{ bg: "#15803d" }}
+                          onClick={handleUserResponseSubmit}
+                        >
+                          Submit Response
+                        </Button>
+                        <Button
+                          variant="outline"
+                          borderRadius="full"
+                          borderColor="gray.200"
+                          color="gray.500"
+                          onClick={() => setShowResponseForm(false)}
+                        >
+                          Cancel
+                        </Button>
+                      </HStack>
+                    </VStack>
+                  )}
+                </Box>
+              )}
 
-          {/* Assign Modal */}
-          <Modal isOpen={isAssignOpen} onClose={onAssignClose}>
-            <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>Assign Ticket</ModalHeader>
-              <ModalCloseButton />
-              <ModalBody>
-                <Box>
-                  <Text mb={1} color="gray.600">
-                    Select Department
+            {/* ── ASSIGN MODAL ── */}
+            <Modal isOpen={isAssignOpen} onClose={onAssignClose} isCentered>
+              <ModalOverlay backdropFilter="blur(4px)" />
+              <ModalContent borderRadius="16px" overflow="hidden">
+                <Box h="3px" bg="#7c3aed" />
+                <ModalHeader fontWeight="800" fontSize="lg">
+                  Assign Department
+                </ModalHeader>
+                <ModalCloseButton />
+                <ModalBody pb={2}>
+                  <Text mb={2} fontSize="sm" color="gray.500">
+                    Select the department to handle this ticket
                   </Text>
                   <Select
                     placeholder="Select Department"
                     value={selectedDept}
                     onChange={(e) => setSelectedDept(e.target.value)}
+                    borderRadius="10px"
+                    focusBorderColor="#7c3aed"
                   >
                     {departments.map((dept) => (
-                      <option
-                        style={{ textDecoration: "capitalize" }}
-                        key={dept._id}
-                        value={dept.name}
-                      >
+                      <option key={dept._id} value={dept.name}>
                         {dept.name}
                       </option>
                     ))}
                   </Select>
-                </Box>
-              </ModalBody>
-              <ModalFooter>
-                <Button variant="ghost" onClick={onAssignClose}>
-                  Cancel
-                </Button>
-                <Button colorScheme="purple" ml={3} onClick={handleAssign}>
-                  {loading ? <Spinner /> : "Assign"}
-                </Button>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
-
-          {/* ================= UPDATE MODAL ================= */}
-          <Modal
-            isOpen={isUpdateOpen}
-            onClose={onUpdateClose}
-            isCentered
-            closeOnOverlayClick={false}
-          >
-            <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>Update Ticket</ModalHeader>
-              <ModalCloseButton />
-
-              <ModalBody>
-                {/* Status */}
-                <Box mb={4}>
-                  <Text mb={1} color="gray.600">
-                    Update Status
-                  </Text>
-                  <Select
-                    placeholder="Select status"
-                    value={updateStatus}
-                    onChange={(e) => setUpdateStatus(e.target.value)}
+                </ModalBody>
+                <ModalFooter gap={2}>
+                  <Button
+                    variant="ghost"
+                    onClick={onAssignClose}
+                    borderRadius="full"
                   >
-                    <option value="In Progress">In Progress</option>
-                    <option value="Awaiting User Response">
-                      Awaiting User Response
-                    </option>
-                    <option value="Resolved">Resolved</option>
-                    <option value="Closed">Closed</option>
-                  </Select>
-                </Box>
-                {/* Remarks */}
-                <Box mb={4}>
-                  <Text mb={1} color="gray.600">
-                    Remarks
-                  </Text>
-                  <Textarea
-                    placeholder="Add remarks"
-                    value={updateRemarks}
-                    onChange={(e) => setUpdateRemarks(e.target.value)}
-                  />
-                </Box>
-                {/* Expected Resolved Date */}
-                {updateStatus === "In Progress" && (
-                  <Box mb={4}>
-                    <Text mb={1} color="gray.600">
-                      Expected Resolved Date
-                    </Text>
-                    <Input
-                      type="date"
-                      value={expectedResolvedDate}
-                      min={new Date().toISOString().split("T")[0]} // ⛔ past dates
-                      onChange={(e) => setExpectedResolvedDate(e.target.value)}
-                    />
-                  </Box>
-                )}
-                {/* File Required Checkbox */}
-                <HStack>
-                  {updateStatus === "Awaiting User Response" && (
-                    <Checkbox
-                      checked={requireFile}
-                      onChange={(e) => setRequireFile(e.target.checked)}
-                    >
-                      Require file from user
-                    </Checkbox>
-                  )}
-                </HStack>
-              </ModalBody>
+                    Cancel
+                  </Button>
+                  <Button
+                    bg="#7c3aed"
+                    color="white"
+                    borderRadius="full"
+                    fontWeight="700"
+                    isLoading={loading}
+                    onClick={handleAssign}
+                    _hover={{ bg: "#6d28d9" }}
+                  >
+                    Assign
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
 
-              <ModalFooter>
-                <Button variant="ghost" onClick={onUpdateClose}>
-                  Cancel
-                </Button>
-                <Button
-                  colorScheme="green"
-                  ml={3}
-                  onClick={handleUpdateTicket}
-                  isLoading={updating}
-                >
-                  Update
-                </Button>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
-        </>
-      )}
+            {/* ── UPDATE MODAL ── */}
+            <Modal
+              isOpen={isUpdateOpen}
+              onClose={onUpdateClose}
+              isCentered
+              closeOnOverlayClick={false}
+            >
+              <ModalOverlay backdropFilter="blur(4px)" />
+              <ModalContent borderRadius="16px" overflow="hidden">
+                <Box h="3px" bg="#16a34a" />
+                <ModalHeader fontWeight="800" fontSize="lg">
+                  Update Ticket Status
+                </ModalHeader>
+                <ModalCloseButton />
+                <ModalBody>
+                  <VStack spacing={4} align="stretch">
+                    <Box>
+                      <Text
+                        mb={1}
+                        fontSize="sm"
+                        fontWeight="600"
+                        color="gray.600"
+                      >
+                        Status
+                      </Text>
+                      <Select
+                        placeholder="Select status"
+                        value={updateStatus}
+                        onChange={(e) => setUpdateStatus(e.target.value)}
+                        borderRadius="10px"
+                        focusBorderColor="#16a34a"
+                      >
+                        <option value="In Progress">In Progress</option>
+                        <option value="Awaiting User Response">
+                          Awaiting User Response
+                        </option>
+                        <option value="Resolved">Resolved</option>
+                        <option value="Closed">Closed</option>
+                      </Select>
+                    </Box>
+
+                    <Box>
+                      <Text
+                        mb={1}
+                        fontSize="sm"
+                        fontWeight="600"
+                        color="gray.600"
+                      >
+                        Remarks
+                      </Text>
+                      <Textarea
+                        placeholder="Add remarks..."
+                        value={updateRemarks}
+                        onChange={(e) => setUpdateRemarks(e.target.value)}
+                        borderRadius="10px"
+                        focusBorderColor="#16a34a"
+                        fontSize="sm"
+                      />
+                    </Box>
+
+                    {updateStatus === "In Progress" && (
+                      <Box>
+                        <Text
+                          mb={1}
+                          fontSize="sm"
+                          fontWeight="600"
+                          color="gray.600"
+                        >
+                          Expected Resolution Date
+                        </Text>
+                        <Input
+                          type="date"
+                          value={expectedResolvedDate}
+                          min={new Date().toISOString().split("T")[0]}
+                          onChange={(e) =>
+                            setExpectedResolvedDate(e.target.value)
+                          }
+                          borderRadius="10px"
+                          focusBorderColor="#16a34a"
+                        />
+                      </Box>
+                    )}
+
+                    {updateStatus === "Awaiting User Response" && (
+                      <Checkbox
+                        isChecked={requireFile}
+                        onChange={(e) => setRequireFile(e.target.checked)}
+                        colorScheme="orange"
+                        fontSize="sm"
+                      >
+                        Require file upload from user
+                      </Checkbox>
+                    )}
+                  </VStack>
+                </ModalBody>
+                <ModalFooter gap={2}>
+                  <Button
+                    variant="ghost"
+                    onClick={onUpdateClose}
+                    borderRadius="full"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    bg="#16a34a"
+                    color="white"
+                    borderRadius="full"
+                    fontWeight="700"
+                    isLoading={updating}
+                    onClick={handleUpdateTicket}
+                    _hover={{ bg: "#15803d" }}
+                  >
+                    Update
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
+          </>
+        )}
+      </Box>
     </Box>
   );
 }

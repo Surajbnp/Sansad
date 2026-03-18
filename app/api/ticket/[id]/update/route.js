@@ -1,31 +1,26 @@
+// app/api/ticket/[id]/update/route.js
+
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 import database from "@/lib/database";
 import TicketModel from "@/models/Ticket.model";
-import verifyUser from "../../../authMiddleware";
 
 export async function PATCH(req, { params }) {
   try {
-    await database();
+    /* ── 1. auth ── */
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    if (!token)
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
-    const token = req.headers.get("authorization");
-    const decodedUser = verifyUser(token);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (!decodedUser?.userId) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+    if (!["Admin", "Department"].includes(decoded.role))
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
 
-    // Only Admin / Department can update
-    if (!["Admin", "Department"].includes(decodedUser.role)) {
-      return NextResponse.json(
-        { success: false, message: "Forbidden" },
-        { status: 403 }
-      );
-    }
-
-    const { id } = params;
+    /* ── 2. inputs ── */
+    const { id } = await params;
     const {
       status,
       remarks,
@@ -33,36 +28,31 @@ export async function PATCH(req, { params }) {
       expectedResolvedDate = null,
     } = await req.json();
 
-    if (!id || !status) {
+    if (!id || !status)
       return NextResponse.json(
         { success: false, message: "Ticket ID and status are required" },
-        { status: 400 }
+        { status: 400 },
       );
-    }
 
-    // Business rules
-    if (status === "In Progress" && !expectedResolvedDate) {
+    if (status === "In Progress" && !expectedResolvedDate)
       return NextResponse.json(
         {
           success: false,
           message: "Expected resolved date is required for In Progress status",
         },
-        { status: 400 }
+        { status: 400 },
       );
-    }
 
-    // Build new status entry
+    /* ── 3. update ── */
+    await database();
+
     const newStatusEntry = {
       status,
       remarks,
       fileRequired: status === "Awaiting User Response" ? fileRequired : false,
       expectedResolvedDate:
         status === "In Progress" ? expectedResolvedDate : null,
-      updatedBy: {
-        userId: decodedUser.userId,
-        name: decodedUser.name,
-        role: decodedUser.role,
-      },
+      updatedBy: { userId: decoded.id, name: decoded.name, role: decoded.role },
       date: new Date(),
     };
 
@@ -76,26 +66,31 @@ export async function PATCH(req, { params }) {
             status === "In Progress" ? expectedResolvedDate : null,
         },
       },
-      { new: true }
+      { new: true },
     );
 
-    if (!updatedTicket) {
+    if (!updatedTicket)
       return NextResponse.json(
         { success: false, message: "Ticket not found" },
-        { status: 404 }
+        { status: 404 },
       );
-    }
 
     return NextResponse.json({
       success: true,
       message: "Ticket updated successfully",
       ticket: updatedTicket,
     });
-  } catch (error) {
-    console.error("Error updating ticket:", error);
+  } catch (err) {
+    if (err.name === "TokenExpiredError")
+      return NextResponse.json(
+        { message: "Session expired, please login again" },
+        { status: 401 },
+      );
+
+    console.error("Error updating ticket:", err);
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

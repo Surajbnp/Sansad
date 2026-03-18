@@ -1,47 +1,46 @@
+// app/api/departments/get/route.js
+
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
+import database from "@/lib/database";
 import DepartmentModel from "@/models/Department.model";
 import UserModel from "@/models/User.model";
-import database from "@/lib/database";
-import verifyUser from "../../authMiddleware";
 
-export async function GET(req) {
+export async function GET() {
   try {
+    /* ── 1. auth ── */
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    if (!token)
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
     await database();
 
-    const token = req.headers.get("authorization");
-    const decoded = verifyUser(token);
-
-    if (!decoded?.userId) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const admin = await UserModel.findById(decoded.userId);
-
-    if (!admin || admin.role !== "Admin") {
+    // Admin only
+    if (decoded.role !== "Admin")
       return NextResponse.json(
         { success: false, message: "Forbidden: Admins only" },
-        { status: 403 }
+        { status: 403 },
       );
-    }
 
-    // ✅ Fetch departments with assigned user info
+    /* ── 2. fetch ── */
     const departments = await DepartmentModel.find()
-      .populate("assignedUser", "name email role department")
+      .populate("assignedUser", "name phone role department")
       .sort({ createdAt: -1 })
       .lean();
 
-    return NextResponse.json({
-      success: true,
-      departments,
-    });
-  } catch (error) {
-    console.error("Error fetching departments:", error);
+    return NextResponse.json({ success: true, departments });
+  } catch (err) {
+    if (err.name === "TokenExpiredError")
+      return NextResponse.json({ message: "Session expired" }, { status: 401 });
+
+    console.error("Error fetching departments:", err);
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

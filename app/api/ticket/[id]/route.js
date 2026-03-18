@@ -1,49 +1,60 @@
+// app/api/ticket/[id]/route.js
+
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 import database from "@/lib/database";
 import TicketModel from "@/models/Ticket.model";
-import verifyUser from "../../authMiddleware";
 
 export async function GET(req, { params }) {
   try {
-    await database();
+    /* ── 1. auth ── */
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    if (!token)
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
-    const token = req.headers.get("authorization");
-    const isVerified = verifyUser(token);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    /* ── 2. validate id ── */
     const { id } = await params;
-
-    if (!id) {
+    console.log("decoded:", JSON.stringify(decoded));
+    console.log("ticket id from params:", id);
+    if (!id)
       return NextResponse.json(
         { success: false, message: "Ticket ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
-    }
 
-    let ticket;
+    /* ── 3. fetch ── */
+    await database();
 
-    if (isVerified?.role === "Admin" || isVerified?.role === "Department") {
-      ticket = await TicketModel.findOne({
-        _id: id,
-      });
-    } else {
-      ticket = await TicketModel.findOne({
-        _id: id,
-        "user.userId": isVerified?.userId,
-      });
-    }
+    // Admin + Department → any ticket
+    // User → only their own tickets
+    const query =
+      decoded.role === "Admin" || decoded.role === "Department"
+        ? { _id: id }
+        : { _id: id, "user.userId": decoded.id };
 
-    if (!ticket) {
+    const ticket = await TicketModel.findOne(query);
+
+    if (!ticket)
       return NextResponse.json(
         { success: false, message: "Ticket not found" },
-        { status: 404 }
+        { status: 404 },
       );
-    }
 
     return NextResponse.json({ success: true, ticket });
   } catch (err) {
+    if (err.name === "TokenExpiredError")
+      return NextResponse.json(
+        { message: "Session expired, please login again" },
+        { status: 401 },
+      );
+
     return NextResponse.json(
       { success: false, message: err.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

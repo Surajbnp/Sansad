@@ -1,65 +1,83 @@
+// app/api/ticket/[id]/assign/route.js
+
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 import database from "@/lib/database";
 import TicketModel from "@/models/Ticket.model";
-import verifyUser from "../../../authMiddleware";
 
 export async function PATCH(req, { params }) {
   try {
-    await database();
+    /* ── 1. auth ── */
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    if (!token)
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
-    const token = req.headers.get("authorization");
-    const decodedUser = verifyUser(token);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decoded.role !== "Admin")
+      return NextResponse.json(
+        { message: "Forbidden — Admin only" },
+        { status: 403 },
+      );
+
+    /* ── 2. inputs ── */
     const { id } = await params;
-
     const { status, remarks, assignedDept } = await req.json();
 
-    if (!id) {
+    if (!id || !assignedDept)
       return NextResponse.json(
-        { success: false, message: "Ticket ID and status are required" },
-        { status: 400 }
+        { success: false, message: "Ticket ID and department are required" },
+        { status: 400 },
       );
-    }
 
-    // Build new status entry
-    const newStatusEntry = {
-      status,
-      updatedBy: {
-        userId: decodedUser?.userId,
-        name: decodedUser?.name,
-        role: decodedUser?.role,
-      },
-      remarks,
-      date: new Date(),
-    };
+    /* ── 3. update ── */
+    await database();
 
-    console.log(newStatusEntry);
     const updatedTicket = await TicketModel.findByIdAndUpdate(
       id,
       {
-        $push: { statusHistory: newStatusEntry },
-        $set: { status: status, assignedDept: assignedDept },
+        $push: {
+          statusHistory: {
+            status: status || "Assigned",
+            remarks,
+            updatedBy: {
+              userId: decoded.id,
+              name: decoded.name,
+              role: decoded.role,
+            },
+            date: new Date(),
+          },
+        },
+        $set: { status: status || "Assigned", assignedDept },
       },
-      { new: true }
+      { new: true },
     );
 
-    if (!updatedTicket) {
+    if (!updatedTicket)
       return NextResponse.json(
         { success: false, message: "Ticket not found" },
-        { status: 404 }
+        { status: 404 },
       );
-    }
 
     return NextResponse.json({
       success: true,
-      message: `Assinged Successfully.`,
+      message: "Assigned Successfully.",
       to: `To ${assignedDept} Department`,
       ticket: updatedTicket,
     });
-  } catch (error) {
-    console.error("Error updating ticket status:", error);
+  } catch (err) {
+    if (err.name === "TokenExpiredError")
+      return NextResponse.json(
+        { message: "Session expired, please login again" },
+        { status: 401 },
+      );
+
+    console.error("Assign route error:", err);
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

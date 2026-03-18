@@ -1,100 +1,58 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { Box, Skeleton, useToast } from "@chakra-ui/react";
-import { useRouter, usePathname } from "next/navigation";
+import { Box, Skeleton } from "@chakra-ui/react";
+import { usePathname } from "next/navigation";
 
 const AuthContext = createContext();
 
-/* 🌍 Routes that DO NOT require login */
-const PUBLIC_ROUTES = ["/", "/login", "/ticket-status"];
+const PUBLIC_ROUTES = ["/", "/signup", "/login", "/ticket-status"];
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [accessToken, setAccessToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const router = useRouter();
   const pathname = usePathname();
-  const toast = useToast();
 
-  /* ------------------ HELPERS ------------------ */
   const isPublicRoute = PUBLIC_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(route + "/")
+    (route) => pathname === route || pathname.startsWith(route + "/"),
   );
 
-  const logout = () => {
-    localStorage.removeItem("sansadapptoken");
+  /* ------------------ LOGOUT ------------------ */
+  const logout = async () => {
+    await fetch("/api/user/logout", { method: "POST" });
     setUser(null);
-    setAccessToken(null);
   };
 
   /* ------------------ BOOTSTRAP AUTH ------------------ */
   useEffect(() => {
     const bootstrapAuth = async () => {
-      const token = localStorage.getItem("sansadapptoken");
-
-      /* 🌍 Public route → skip auth */
-      if (isPublicRoute) {
-        setLoading(false);
-        return;
-      }
-
-      /* 🔒 Protected route but no token */
-      // if (!token) {
-      //   router.replace("/login");
-      //   setLoading(false);
-      //   return;
-      // }
-
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
+      setLoading(true);
       try {
-        const res = await fetch("/api/user/get", {
-          headers: { authorization: token },
-        });
-
-        if (res.status === 401) {
-          throw new Error("SESSION_EXPIRED");
-        }
-
+        // always call — if cookie exists backend returns user, if not returns 401
+        const res = await fetch("/api/user/get");
         const data = await res.json();
-
-        setUser(data.user);
-        console.log("User data loaded:", data.user);
-        setAccessToken(token);
-      } catch (err) {
-        logout();
-
-        toast({
-          title: "Session expired",
-          description: "Please login again",
-          status: "warning",
-          duration: 3000,
-          isClosable: true,
-        });
-
-        router.replace("/login");
+        setUser(res.ok ? data.user : null);
+      } catch {
+        setUser(null);
       } finally {
         setLoading(false);
       }
     };
 
     bootstrapAuth();
-  }, [pathname]); // 👈 re-run when route changes
+  }, [pathname]);
 
   /* ------------------ LOGIN ------------------ */
-  const login = (userData, token) => {
-    localStorage.setItem("sansadapptoken", token);
-    setUser(userData);
-    setAccessToken(token);
+  const login = async () => {
+    const res = await fetch("/api/user/get");
+    const data = await res.json();
+    setUser(res.ok ? data.user : null);
   };
 
   /* ------------------ LOADING UI ------------------ */
-  if (loading) {
+  // only block render on protected routes — public pages load instantly
+  if (loading && !isPublicRoute) {
     return (
       <Box p={8}>
         <Skeleton height="70vh" mt="8vh" />
@@ -103,7 +61,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

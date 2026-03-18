@@ -4,7 +4,7 @@ function verifyUser(token) {
   try {
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "sansadappsecret"
+      process.env.JWT_SECRET || "sansadappsecret",
     );
     return decoded;
   } catch (err) {

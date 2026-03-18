@@ -1,9 +1,11 @@
+// app/api/tickets/route.js
+
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 import database from "@/lib/database";
 import TicketModel from "@/models/Ticket.model";
-import { NextResponse } from "next/server";
-import verifyUser from "../../authMiddleware";
 
-/* ================= BUSINESS STATE → DB STATUS MAP ================= */
 const STATE_STATUS_MAP = {
   submitted: ["Submitted"],
   assigned: ["Assigned"],
@@ -17,59 +19,54 @@ const STATE_STATUS_MAP = {
 
 export async function GET(req) {
   try {
+    /* ── 1. auth ── */
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    if (!token)
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    /* ── 2. connect DB ── */
     await database();
 
-    /* ================= AUTH ================= */
-    const token = req.headers.get("authorization");
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: "Authorization token missing" },
-        { status: 401 }
-      );
-    }
-
-    const decoded = verifyUser(token);
-
-    /* ================= QUERY PARAM ================= */
-    const { searchParams } = new URL(req.url);
-    const state = searchParams.get("state"); // submitted | assigned | inprogress | completed | all
-
-    /* ================= BASE QUERY (ROLE FIRST) ================= */
+    /* ── 3. role-based base query ── */
     const query = {};
 
     if (decoded.role === "User") {
-      query["user.userId"] = decoded.userId;
+      query["user.userId"] = decoded.id;
     }
 
     if (decoded.role === "Department") {
       if (!decoded.department) {
         return NextResponse.json(
           { success: false, message: "Department not assigned" },
-          { status: 403 }
+          { status: 403 },
         );
       }
       query.assignedDept = decoded.department;
     }
 
-    // Admin → no role restriction
+    // Admin → no restriction, sees all tickets
 
-    /* ================= BUSINESS STATE FILTER ================= */
+    /* ── 4. state filter ── */
+    const { searchParams } = new URL(req.url);
+    const state = searchParams.get("state");
+
     if (state && state.toLowerCase() !== "all") {
-      const normalizedState = state.toLowerCase();
-      const statuses = STATE_STATUS_MAP[normalizedState];
+      const statuses = STATE_STATUS_MAP[state.toLowerCase()];
 
       if (!statuses) {
         return NextResponse.json(
           { success: false, message: "Invalid state filter" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       query.status = { $in: statuses };
     }
-    // else → no status filter applied (ALL tickets for role)
 
-    /* ================= FETCH ================= */
+    /* ── 5. fetch ── */
     const tickets = await TicketModel.find(query)
       .sort({ createdAt: -1 })
       .lean();
@@ -80,11 +77,18 @@ export async function GET(req) {
       state: state || "all",
       tickets,
     });
-  } catch (error) {
-    console.error("Error fetching tickets:", error);
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return NextResponse.json(
+        { message: "Session expired, please login again" },
+        { status: 401 },
+      );
+    }
+
+    console.error("Error fetching tickets:", err);
     return NextResponse.json(
       { success: false, message: "Failed to fetch tickets" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

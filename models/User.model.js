@@ -2,17 +2,11 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    email: {
-      type: String,
+    phone: {
+      type: Number,
       required: true,
       unique: true,
-      lowercase: true,
       trim: true,
-    },
-
-    password: {
-      type: String,
-      required: true,
     },
 
     name: {
@@ -74,7 +68,7 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const UserModel = mongoose.models.User || mongoose.model("User", userSchema);

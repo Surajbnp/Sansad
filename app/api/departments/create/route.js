@@ -1,11 +1,13 @@
+// app/api/departments/create/route.js
+
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 import database from "@/lib/database";
 import DepartmentModel from "@/models/Department.model";
 import UserModel from "@/models/User.model";
-import verifyUser from "../../authMiddleware";
 
-/* ------------------ slug generator ------------------ */
+/* ── slug generator ── */
 const generateSlug = async (name) => {
   let baseSlug = name
     .toLowerCase()
@@ -16,116 +18,126 @@ const generateSlug = async (name) => {
 
   let slug = baseSlug;
   let counter = 1;
-
   while (await DepartmentModel.findOne({ slug })) {
     slug = `${baseSlug}-${counter++}`;
   }
-
   return slug;
 };
 
 export async function POST(req) {
   try {
+    /* ── 1. auth ── */
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    if (!token)
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
     await database();
 
-    /* ------------------ AUTH ------------------ */
-    const token = req.headers.get("authorization");
-    const decoded = verifyUser(token);
-
-    if (!decoded?.userId) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const admin = await UserModel.findById(decoded.userId);
-
-    if (!admin || admin.role !== "Admin") {
+    const admin = await UserModel.findById(decoded.id);
+    if (!admin || admin.role !== "Admin")
       return NextResponse.json(
         { success: false, message: "Only admin can create departments" },
-        { status: 403 }
+        { status: 403 },
       );
-    }
 
-    /* ------------------ BODY ------------------ */
-    const body = await req.json();
-    console.log(body);
+    /* ── 2. body ── */
     const {
       name,
       assignedName,
-      assignedEmail,
-      assignedPassword,
+      assignedPhone,
       assignedContact,
       assignedDesignation,
-    } = body;
+      otp,
+    } = await req.json();
 
     if (
       !name ||
       !assignedName ||
-      !assignedEmail ||
-      !assignedPassword ||
+      !assignedPhone ||
       !assignedDesignation ||
-      !assignedContact
-    ) {
+      !otp
+    )
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
+      );
+
+    if (!/^\d{10}$/.test(assignedPhone))
+      return NextResponse.json(
+        { success: false, message: "Invalid phone number" },
+        { status: 400 },
+      );
+
+    /* ── 3. verify OTP before doing anything ── */
+    const verifyUrl = `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/VERIFY3/${assignedPhone}/${otp}`;
+    const verifyRes = await fetch(verifyUrl);
+    const verifyData = await verifyRes.json();
+
+    if (verifyData.Status !== "Success") {
+      const messageMap = {
+        "OTP Expired": "OTP की समय सीमा समाप्त हो गई, पुनः भेजें",
+        "OTP MisMatch": "गलत OTP दर्ज किया गया, पुनः प्रयास करें",
+      };
+      const reason =
+        messageMap[verifyData.Details] ||
+        verifyData.Details ||
+        "OTP verification failed";
+      return NextResponse.json(
+        { success: false, message: reason },
+        { status: 400 },
       );
     }
 
-    /* ------------------ CHECK DEPT ------------------ */
+    /* ── 3. check duplicates ── */
     const existingDept = await DepartmentModel.findOne({ name });
-    if (existingDept) {
+    if (existingDept)
       return NextResponse.json(
         { success: false, message: "Department already exists" },
-        { status: 409 }
+        { status: 409 },
       );
-    }
 
-    /* ------------------ CHECK USER ------------------ */
-    const existingUser = await UserModel.findOne({ email: assignedEmail });
-    if (existingUser) {
+    const existingUser = await UserModel.findOne({ phone: assignedPhone });
+    if (existingUser)
       return NextResponse.json(
-        { success: false, message: "Department user already exists" },
-        { status: 409 }
+        {
+          success: false,
+          message: "A user with this phone number already exists",
+        },
+        { status: 409 },
       );
-    }
 
-    /* ------------------ CREATE USER ------------------ */
-    const hashedPassword = await bcrypt.hash(assignedPassword, 10);
-
+    /* ── 4. create dept user ── */
     const deptUser = await UserModel.create({
       name: assignedName,
-      email: assignedEmail,
-      password: hashedPassword,
-      whatsapp: assignedContact || null,
+      phone: assignedPhone,
       role: "Department",
       department: name,
     });
 
-    // adding number here!
-    /* ------------------ CREATE DEPARTMENT ------------------ */
+    /* ── 5. create department ── */
     const slug = await generateSlug(name);
 
     const department = await DepartmentModel.create({
       name,
       slug,
       designation: assignedDesignation,
-      phone: assignedContact,
-      createdBy: {
-        userId: admin._id,
-        name: admin.name,
-      },
+      phone: assignedContact || assignedPhone,
+      createdBy: { userId: admin._id, name: admin.name },
       assignedUser: deptUser._id,
     });
 
     return NextResponse.json({ success: true, department }, { status: 201 });
-  } catch (error) {
-    console.error("Error creating department:", error);
+  } catch (err) {
+    if (err.name === "TokenExpiredError")
+      return NextResponse.json({ message: "Session expired" }, { status: 401 });
+
+    console.error("Error creating department:", err);
     return NextResponse.json(
       { success: false, message: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

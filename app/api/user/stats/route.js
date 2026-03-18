@@ -1,59 +1,56 @@
+// app/api/stats/route.js
+
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 import database from "@/lib/database";
 import TicketModel from "@/models/Ticket.model";
 import DepartmentModel from "@/models/Department.model";
-import { NextResponse } from "next/server";
-import verifyUser from "../../authMiddleware";
 
-export async function GET(req) {
+export async function GET() {
   try {
-    await database();
+    /* ── 1. read & verify token from cookie ── */
+    const token = cookies().get("token")?.value;
 
-    const token = req.headers.get("authorization");
     if (!token) {
       return NextResponse.json(
         { success: false, message: "Authorization token missing" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
-    const decoded = verifyUser(token);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    /* ── 2. connect DB ── */
+    await database();
 
     let matchQuery = {};
 
-    /* ================= ROLE BASE ================= */
+    /* ── 3. role-based filter ── */
     if (decoded.role === "User") {
-      matchQuery = { "user.userId": decoded.userId };
+      matchQuery = { "user.userId": decoded.id };
     }
 
     if (decoded.role === "Department") {
       if (!decoded.department) {
         return NextResponse.json(
           { success: false, message: "Department not assigned" },
-          { status: 403 }
+          { status: 403 },
         );
       }
       matchQuery = { assignedDept: decoded.department };
     }
 
-    /* ================= AGGREGATE RAW STATUS ================= */
+    // Admin → matchQuery stays {} → matches all tickets
+
+    /* ── 4. aggregate raw status counts ── */
     const rawStats = await TicketModel.aggregate([
       { $match: matchQuery },
-      {
-        $group: {
-          _id: "$status",
-          count: { $sum: 1 },
-        },
-      },
+      { $group: { _id: "$status", count: { $sum: 1 } } },
     ]);
 
-    /* ================= MAP TO BUSINESS STATES ================= */
-    const summary = {
-      submitted: 0,
-      assigned: 0,
-      inProgress: 0,
-      completed: 0,
-    };
-
+    /* ── 5. map to business states ── */
+    const summary = { submitted: 0, assigned: 0, inProgress: 0, completed: 0 };
     let totalTickets = 0;
 
     rawStats.forEach(({ _id: status, count }) => {
@@ -63,32 +60,28 @@ export async function GET(req) {
         case "Submitted":
           summary.submitted += count;
           break;
-
         case "Assigned":
           summary.assigned += count;
           break;
-
         case "In Progress":
         case "Awaiting User Response":
         case "User Respond Received":
           summary.inProgress += count;
           break;
-
         case "Resolved":
         case "Closed":
           summary.completed += count;
           break;
-
         default:
           break;
       }
     });
 
-    /* ================= ADMIN EXTRA ================= */
-    let departmentCount;
-    if (decoded.role === "Admin") {
-      departmentCount = await DepartmentModel.countDocuments();
-    }
+    /* ── 6. admin extra ── */
+    const departmentCount =
+      decoded.role === "Admin"
+        ? await DepartmentModel.countDocuments()
+        : undefined;
 
     return NextResponse.json({
       success: true,
@@ -97,11 +90,18 @@ export async function GET(req) {
       stats: summary,
       departmentCount,
     });
-  } catch (error) {
-    console.error("Stats error:", error);
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return NextResponse.json(
+        { success: false, message: "Session expired, please login again" },
+        { status: 401 },
+      );
+    }
+
+    console.error("Stats error:", err);
     return NextResponse.json(
       { success: false, message: "Failed to fetch stats" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

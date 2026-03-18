@@ -3,130 +3,142 @@
 import {
   Box,
   Button,
-  Divider,
-  Grid,
   Input,
   Text,
   FormControl,
-  InputGroup,
-  InputRightElement,
+  FormErrorMessage,
   useToast,
-  Spinner,
   Link,
-  Image,
   HStack,
-  VStack
+  VStack,
+  InputGroup,
+  InputLeftAddon,
+  PinInput,
+  PinInputField,
+  Flex,
+  Divider,
 } from "@chakra-ui/react";
-import { useState } from "react";
-import { FiEye, FiEyeOff , FiPhone} from "react-icons/fi";
-import { MdEmail, MdLock, MdPhone } from "react-icons/md";
+import { useState, useEffect } from "react";
+import { MdPhone } from "react-icons/md";
 import styles from "./login.module.css";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import NextLink from "next/link";
-import { Flex } from "@chakra-ui/react";
 
 export default function Login() {
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [errors, setErrors] = useState({});
-  const [showPassword, setShowPassword] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [resendTimer, setResendTimer] = useState(0);
+  const [isSending, setIsSending] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+
   const toast = useToast();
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
+  /* ── resend countdown ── */
+  useEffect(() => {
+    if (resendTimer === 0) return;
+    const t = setInterval(() => setResendTimer((n) => n - 1), 1000);
+    return () => clearInterval(t);
+  }, [resendTimer]);
 
-  const validate = () => {
-    const newErrors = {};
-    const { email, password } = formData;
-
-    if (!email.trim()) {
-      newErrors.email = "कृपया ईमेल दर्ज करें";
-    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
-      newErrors.email = "मान्य ईमेल पता दर्ज करें";
+  /* ── STEP 1: send OTP ── */
+  const sendOtp = async () => {
+    if (!/^\d{10}$/.test(phone)) {
+      setPhoneError("कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें");
+      return;
     }
+    setPhoneError("");
+    setIsSending(true);
+    try {
+      const res = await fetch("/api/login/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
 
-    if (!password.trim()) {
-      newErrors.password = "कृपया पासवर्ड दर्ज करें";
-    }
-
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) {
-      const firstKey = Object.keys(newErrors)[0];
+      setOtpSent(true);
+      setResendTimer(60);
+      toast({ title: "OTP भेजा गया", status: "success", duration: 3000 });
+    } catch (err) {
       toast({
-        title: newErrors[firstKey],
+        title: err.message || "OTP भेजने में असफल",
         status: "error",
         duration: 3000,
-        isClosable: true,
       });
+    } finally {
+      setIsSending(false);
     }
-
-    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async () => {
-    if (!validate()) return;
-
+  /* ── resend OTP ── */
+  const resendOtp = async () => {
+    setOtp("");
+    setIsSending(true);
     try {
-      setIsLoading(true);
-      const response = await fetch("/api/login", {
+      const res = await fetch("/api/login/send-otp", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setIsLoading(false);
-        toast({
-          title: data.message || "Login failed.",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-        return;
-      }
-
-      // If login is successful
-      setIsLoading(false);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      setResendTimer(60);
+      toast({ title: "OTP पुनः भेजा गया", status: "info", duration: 3000 });
+    } catch (err) {
       toast({
-        title: data.message || "Login successful.",
-        status: "success",
+        title: err.message || "OTP पुनः भेजने में असफल",
+        status: "error",
         duration: 3000,
-        isClosable: true,
       });
+    } finally {
+      setIsSending(false);
+    }
+  };
 
-      // Store token if needed
-      localStorage.setItem("sansadapptoken", data.token);
-      login(data.user, data.token);
+  /* ── STEP 2: verify OTP + login ── */
+  const verifyOtp = async () => {
+    if (otp.length !== 6) {
+      toast({
+        title: "कृपया 6 अंकों का OTP दर्ज करें",
+        status: "error",
+        duration: 3000,
+      });
+      return;
+    }
+    setIsVerifying(true);
+    try {
+      const res = await fetch("/api/login/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, otp }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      await login(); // fetch user into context — cookie already set by backend
+      toast({ title: "लॉगिन सफल!", status: "success", duration: 3000 });
       router.push("/profile");
     } catch (err) {
-      setIsLoading(false);
-      console.error("Login error:", err);
+      setOtp("");
       toast({
-        title: "Server error. Please try again later.",
+        title: err.message || "OTP सत्यापन विफल",
         status: "error",
         duration: 3000,
-        isClosable: true,
       });
+    } finally {
+      setIsVerifying(false);
     }
   };
 
   return (
-    <Box minH="100vh"  display="flex" flexDirection="column">
-      {/* HERO BANNER */}
+    <Box minH="100vh" display="flex" flexDirection="column">
+      {/* ── HERO BANNER ── */}
       <Box
         bg="#fa7602"
         w="100%"
@@ -137,7 +149,6 @@ export default function Login() {
         position="relative"
         overflow="hidden"
       >
-        {/* Decorative circles */}
         <Box
           position="absolute"
           top="-40px"
@@ -165,22 +176,19 @@ export default function Login() {
           borderRadius="full"
           bg="rgba(255,255,255,0.06)"
         />
-
-        <VStack spacing={1} zIndex={1}>
-          <Text
-            color="white"
-            fontWeight="800"
-            fontSize={{ base: "28px", md: "38px" }}
-            letterSpacing="3px"
-            textTransform="uppercase"
-          >
-            Login
-          </Text>
-         
-        </VStack>
+        <Text
+          color="white"
+          fontWeight="800"
+          fontSize={{ base: "28px", md: "38px" }}
+          letterSpacing="3px"
+          textTransform="uppercase"
+          zIndex={1}
+        >
+          Login
+        </Text>
       </Box>
 
-      {/* Zigzag / wave divider */}
+      {/* ── WAVE DIVIDER ── */}
       <Box w="100%" lineHeight={0} bg="#fa7602">
         <svg
           viewBox="0 0 1200 30"
@@ -199,167 +207,194 @@ export default function Login() {
         </svg>
       </Box>
 
-      {/* FORM CARD */}
+      {/* ── FORM CARD ── */}
       <Flex
         flex={1}
         align="center"
         justify="center"
         px={4}
         py={{ base: 6, md: 10 }}
+        bg="#f5f5f0"
       >
         <Box
+          bg="white"
           borderRadius="2xl"
           p={{ base: "28px", md: "48px" }}
           w="100%"
           maxW="480px"
           border="1px solid rgba(0,0,0,0.06)"
+          boxShadow="0 4px 24px rgba(0,0,0,0.07)"
         >
-          {/* Form heading */}
           <Text
             fontSize={{ base: "20px", md: "24px" }}
             fontWeight="700"
             color="gray.800"
             mb={1}
           >
-            Sign in to your account
+            अपने अकाउंट में लॉगिन करें
           </Text>
           <Text fontSize="sm" color="gray.500" mb={8}>
-            Enter your credentials below to continue
+            अपना मोबाइल नंबर दर्ज करें, OTP से सत्यापित करें
           </Text>
 
-          <VStack spacing={5}>
-            {/* Email / Username field */}
-            <FormControl isInvalid={!!errors.email}>
+          <VStack spacing={5} align="stretch">
+            {/* ── PHONE INPUT ── */}
+            <FormControl isInvalid={!!phoneError}>
               <Text mb={1.5} fontWeight="600" color="gray.700" fontSize="sm">
-                Mobile No. / Email ID / Username
+                मोबाइल नंबर
               </Text>
               <InputGroup>
-                <Input
-                  name="email"
-                  type="text"
-                  placeholder="Enter your email or username"
-                  value={formData.email}
-                  onChange={handleChange}
+                <InputLeftAddon
+                  children="+91"
+                  bg="gray.100"
+                  border="1px solid"
+                  borderColor="gray.200"
                   h="50px"
-                  borderRadius="lg"
+                  borderRadius="lg 0 0 lg"
+                  fontSize="sm"
+                  color="gray.600"
+                />
+                <Input
+                  type="tel"
+                  maxLength={10}
+                  placeholder="10 अंकों का नंबर"
+                  value={phone}
+                  onChange={(e) => {
+                    setPhone(e.target.value.replace(/\D/g, ""));
+                    setPhoneError("");
+                  }}
+                  isDisabled={otpSent}
+                  h="50px"
+                  borderRadius="0 lg lg 0"
                   borderColor="gray.200"
                   bg="gray.50"
-                  color="gray.800"
                   fontSize="sm"
                   focusBorderColor="#fa7602"
                   _placeholder={{ color: "gray.400" }}
-                  _hover={{ borderColor: "gray.300" }}
-                  pl={10}
+                  _disabled={{ opacity: 0.7, cursor: "not-allowed" }}
                 />
-                <Box
-                  position="absolute"
-                  left={3}
-                  top="50%"
-                  transform="translateY(-50%)"
-                  color="gray.400"
-                  zIndex={1}
-                  pointerEvents="none"
-                >
-                  <MdEmail size={18} />
-                </Box>
               </InputGroup>
-              {errors.email && (
-                <FormErrorMessage fontSize="xs">
-                  {errors.email}
-                </FormErrorMessage>
-              )}
+              <FormErrorMessage fontSize="xs">{phoneError}</FormErrorMessage>
             </FormControl>
 
-            {/* Password field */}
-            <FormControl isInvalid={!!errors.password}>
-              <Text mb={1.5} fontWeight="600" color="gray.700" fontSize="sm">
-                Password
-              </Text>
-              <InputGroup>
-                <Box
-                  position="absolute"
-                  left={3}
-                  top="50%"
-                  transform="translateY(-50%)"
-                  color="gray.400"
-                  zIndex={1}
-                  pointerEvents="none"
-                >
-                  <MdLock size={18} />
-                </Box>
-                <Input
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  h="50px"
-                  borderRadius="lg"
-                  borderColor="gray.200"
-                  bg="gray.50"
-                  color="gray.800"
-                  fontSize="sm"
-                  focusBorderColor="#fa7602"
-                  _placeholder={{ color: "gray.400" }}
-                  _hover={{ borderColor: "gray.300" }}
-                  pl={10}
-                />
-                <InputRightElement
-                  h="50px"
-                  onClick={() => setShowPassword(!showPassword)}
-                  cursor="pointer"
-                  color="gray.400"
-                  _hover={{ color: "#fa7602" }}
-                >
-                  {showPassword ? <FiEyeOff size={17} /> : <FiEye size={17} />}
-                </InputRightElement>
-              </InputGroup>
-              {errors.password && (
-                <FormErrorMessage fontSize="xs">
-                  {errors.password}
-                </FormErrorMessage>
-              )}
-            </FormControl>
-
-            {/* Forgot password */}
-            <Flex w="100%" justify="flex-end" mt={-2}>
-              <Link
-                as={NextLink}
-                href="/forgot-password"
-                fontSize="sm"
-                color="#fa7602"
-                fontWeight="500"
-                _hover={{ textDecoration: "underline" }}
+            {/* ── SEND OTP BUTTON (before OTP sent) ── */}
+            {!otpSent && (
+              <Button
+                onClick={sendOtp}
+                bg="#fa7602"
+                color="white"
+                w="100%"
+                h="52px"
+                fontSize="16px"
+                fontWeight="700"
+                borderRadius="lg"
+                boxShadow="0 4px 16px rgba(250,118,2,0.35)"
+                isLoading={isSending}
+                loadingText="भेज रहे हैं..."
+                _hover={{ bg: "#e56a00", transform: "translateY(-1px)" }}
+                _active={{ bg: "#d46200", transform: "translateY(0)" }}
+                transition="all 0.2s"
               >
-                Forgot Password?
-              </Link>
-            </Flex>
+                OTP भेजें →
+              </Button>
+            )}
 
-            {/* Submit button */}
-            <Button
-              onClick={handleSubmit}
-              bg="#fa7602"
-              color="white"
-              w="100%"
-              h="52px"
-              fontSize="16px"
-              fontWeight="700"
-              borderRadius="lg"
-              boxShadow="0 4px 16px rgba(250,118,2,0.35)"
-              _hover={{
-                bg: "#e56a00",
-                transform: "translateY(-1px)",
-                boxShadow: "0 6px 20px rgba(250,118,2,0.4)",
-              }}
-              _active={{ bg: "#d46200", transform: "translateY(0)" }}
-              transition="all 0.2s"
-              mt={1}
-            >
-              {isLoading ? <Spinner size="sm" color="white" /> : "लॉगिन करें"}
-            </Button>
+            {/* ── OTP INPUT (after OTP sent) ── */}
+            {otpSent && (
+              <>
+                {/* info box */}
+                <Box
+                  bg="orange.50"
+                  border="1px solid"
+                  borderColor="orange.200"
+                  borderRadius="xl"
+                  px={4}
+                  py={3}
+                  textAlign="center"
+                >
+                  <Text fontSize="sm" color="gray.600">
+                    OTP भेजा गया है{" "}
+                    <Text as="span" fontWeight="700" color="gray.800">
+                      +91 {phone}
+                    </Text>{" "}
+                    पर
+                  </Text>
+                </Box>
+
+                <Text fontSize="sm" color="gray.500" textAlign="center">
+                  6 अंकों का OTP दर्ज करें
+                </Text>
+
+                {/* pin input */}
+                <HStack justify="center">
+                  <PinInput otp size="lg" value={otp} onChange={setOtp}>
+                    {[...Array(6)].map((_, i) => (
+                      <PinInputField
+                        key={i}
+                        fontSize="xl"
+                        fontWeight="bold"
+                        borderColor="gray.300"
+                        _focus={{
+                          borderColor: "#fa7602",
+                          boxShadow: "0 0 0 1px #fa7602",
+                        }}
+                      />
+                    ))}
+                  </PinInput>
+                </HStack>
+
+                {/* verify button */}
+                <Button
+                  onClick={verifyOtp}
+                  bg="#fa7602"
+                  color="white"
+                  w="100%"
+                  h="52px"
+                  fontSize="16px"
+                  fontWeight="700"
+                  borderRadius="lg"
+                  boxShadow="0 4px 16px rgba(250,118,2,0.35)"
+                  isLoading={isVerifying}
+                  loadingText="सत्यापित कर रहे हैं..."
+                  _hover={{ bg: "#e56a00", transform: "translateY(-1px)" }}
+                  _active={{ bg: "#d46200" }}
+                  transition="all 0.2s"
+                >
+                  OTP सत्यापित करें ✓
+                </Button>
+
+                {/* resend + change number */}
+                <Flex justify="space-between" align="center">
+                  <Button
+                    variant="link"
+                    fontSize="sm"
+                    color={resendTimer > 0 ? "gray.400" : "orange.500"}
+                    isDisabled={resendTimer > 0 || isSending}
+                    onClick={resendOtp}
+                  >
+                    {resendTimer > 0
+                      ? `OTP पुनः भेजें (${resendTimer}s)`
+                      : "OTP पुनः भेजें"}
+                  </Button>
+
+                  <Button
+                    variant="link"
+                    fontSize="sm"
+                    color="gray.400"
+                    onClick={() => {
+                      setOtpSent(false);
+                      setOtp("");
+                      setResendTimer(0);
+                    }}
+                  >
+                    नंबर बदलें
+                  </Button>
+                </Flex>
+              </>
+            )}
           </VStack>
 
-          {/* Divider + Signup */}
+          {/* ── SIGNUP LINK ── */}
           <HStack my={6} spacing={3}>
             <Divider borderColor="gray.200" />
             <Text
@@ -394,9 +429,6 @@ export default function Login() {
           </Flex>
         </Box>
       </Flex>
-
-      {/* HELPLINE FOOTER STRIP */}
-     
     </Box>
   );
 }
