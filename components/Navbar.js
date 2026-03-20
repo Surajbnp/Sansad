@@ -45,7 +45,7 @@ import { GrUserWorker } from "react-icons/gr";
 const Links = [
   { name: "Home", href: "/", icon: MdHome },
   { name: "About", href: "/about", icon: MdInfo },
-  { name: "Schemes", href: "/schemes", icon: MdInfo },
+  { name: "Govt Schemes", href: "/govt-schemes", icon: MdInfo },
   { name: "Success Stories", href: "/success-stories", icon: MdAutoGraph },
   { name: "Blog & News", href: "/blog", icon: MdBook },
   { name: "Contact", href: "/contact", icon: MdContactPhone },
