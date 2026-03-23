@@ -267,7 +267,7 @@ export default function Home() {
           fontSize={{ base: "22px", md: "40px" }}
           fontWeight={600}
         >
-          हेल्पलाइन: +91 123456789
+          हेल्पलाइन: +91 9425172508
         </Text>
       </Box>
     </Box>
