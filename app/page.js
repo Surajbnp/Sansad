@@ -115,13 +115,13 @@ export default function Home() {
       <Box className={styles.heroWrapper} w="100%">
         <Image
           src="/SatnaSSK_Homeslide_Mobile.webp"
-          display={{ base: "block", md: "none" }} // मोबाइल पर दिखेगा
+          display={{ base: "block", md: "none" }} 
           w="100%"
           alt="Hero Mobile"
         />
         <Box
           className={styles.hero}
-          display={{ base: "none", md: "block" }} // डेस्कटॉप पर पुराना बैकग्राउंड वाला बॉक्स
+          display={{ base: "none", md: "block" }} 
           w="100%"
           minH="90vh"
           position="relative"
