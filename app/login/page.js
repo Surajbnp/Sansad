@@ -24,6 +24,7 @@ import styles from "./login.module.css";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import NextLink from "next/link";
+import { useTitle } from "@/hooks/useTitle";
 
 export default function Login() {
   const [phone, setPhone] = useState("");
@@ -37,6 +38,7 @@ export default function Login() {
   const toast = useToast();
   const router = useRouter();
   const { login } = useAuth();
+  useTitle("Login");
 
   /* ── resend countdown ── */
   useEffect(() => {

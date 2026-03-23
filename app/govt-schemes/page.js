@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Head from "next/head";
+import { useTitle } from "@/hooks/useTitle";
 
 /* ─────────────────────────────────────────────────
    DATA
@@ -462,6 +463,7 @@ function SchemeCard({ scheme, catColor }) {
   const [imgError, setImgError] = useState(false);
   const logoUrl = LOGO_MAP[scheme.name.toLowerCase()] || null;
 
+
   return (
     <article className="scheme-card" style={{ "--cat-color": catColor }}>
       <div className="scheme-card__top">
@@ -561,7 +563,7 @@ export default function GovtSchemesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [year, setYear] = useState("");
-
+  useTitle("Govt Schemes");
   useEffect(() => {
     setYear(new Date().getFullYear().toString());
   }, []);

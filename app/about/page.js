@@ -1,8 +1,10 @@
 "use client";
 
 import { Box, Text, Image, Flex , VStack} from "@chakra-ui/react";
+import { useTitle } from "@/hooks/useTitle";
 
 export default function About() {
+  useTitle("About Us");
   return (
     <Box>
       {/* HERO SECTION */}

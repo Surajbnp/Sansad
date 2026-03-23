@@ -16,7 +16,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import styles from "./profile.module.css";
-
+import { useTitle } from "@/hooks/useTitle";
 
 
 /* ─────────────────────────────────────────
@@ -150,6 +150,7 @@ const InfoChip = ({ label, value }) => (
 const Page = () => {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  useTitle("Profile");
 
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
