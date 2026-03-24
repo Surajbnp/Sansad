@@ -14,7 +14,7 @@ import styles from "./about.module.css";
 import Link from "next/link";
 import { useTitle } from "@/hooks/useTitle";
 export default function AboutPage() {
-  useTitle("About Us");
+  useTitle("हमारे बारे में");
   return (
     <Box bg="#FFF8F2">
 

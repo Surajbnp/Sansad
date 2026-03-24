@@ -107,6 +107,7 @@ const stories = [
 
 
 export default function Page() {
+    useTitle("जनसेवा के परिणाम");
   const [activeFilter, setActiveFilter] = useState("all");
   useEffect(() => {
     const counters = document.querySelectorAll(`.${styles.statNum}`);
