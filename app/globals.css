@@ -1,13 +1,15 @@
 @import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap");
 
 :root {
-  --saffron: #FE6700;
-  --saffron-dark: #CC5500;
+  padding: 0;
+  margin: 0;
+  --saffron: #fe6700;
+  --saffron-dark: #cc5500;
   --saffron-glow: rgba(255, 107, 0, 0.15);
-  --green: #11A400;
+  --green: #11a400;
   --white: #ffffff;
-  --off-white: #FFF8F2;
-  --navy: #0074D1;
+  --off-white: #fff8f2;
+  --navy: #0074d1;
   --gray-light: #f4f4f6;
   --black-text: #222;
   --gray-text: #555;
