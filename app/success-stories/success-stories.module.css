@@ -1,0 +1,606 @@
+:root {
+  --saffron: #FE6700;
+  --saffron-dark: #CC5500;
+  --saffron-glow: rgba(255, 107, 0, 0.15);
+  --green: #11A400;
+  --white: #ffffff;
+  --off-white: #FFF8F2;
+  --navy: #0074D1;
+  --gray-light: #f4f4f6;
+  --black-text: #222;
+  --gray-text: #555;
+  --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  --radius: 14px;
+  --transition: 0.25s ease;
+}
+
+
+/* ── PAGE WRAPPER ── */
+.page {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 64px 5% 80px;
+}
+
+/* ── HERO SECTION ── */
+.hero {
+  position: relative;
+  min-height: 360px;
+  background: linear-gradient(135deg, var(--saffron) 0%, #FF8C00 50%, var(--saffron-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+  background-size: 22px 22px;
+  pointer-events: none;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  padding: 0 20px;
+}
+
+.heroTitle {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  color: #fff;
+  font-weight: 800;
+  line-height: 1.2;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.18);
+  margin-bottom: 12px;
+}
+
+.heroSub {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 500;
+}
+
+/* ── INTRO SECTION ── */
+.intro {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 56px;
+}
+
+.pill {
+  display: inline-block;
+  background: var(--saffron-glow);
+  color: var(--saffron);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  margin-bottom: 18px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.intro h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.intro p {
+  font-size: 0.9rem;
+  line-height: 2;
+}
+
+.statCard {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  padding: 28px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border-top: 4px solid var(--accent, var(--saffron));
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  margin-bottom: 64px;
+}
+
+@media (max-width: 860px) {
+  .statsRow {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .statsRow {
+    grid-template-columns: 1fr;
+  }
+}
+.statCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.12);
+}
+
+.statNum {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--accent, var(--saffron));
+  line-height: 1;
+  margin-bottom: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.statLabel {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: 0.92rem;
+  color: var(--gray-text);
+  line-height: 1.5;
+}
+
+.statIcon {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  font-size: 1.6rem;
+  opacity: 0.15;
+}
+
+
+
+
+
+
+.featuredStory {
+  background: linear-gradient(135deg, #1a2e4a 0%, #0074D1 100%);
+  border-radius: 20px;
+  padding: 48px 44px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+  margin-bottom: 64px;
+  position: relative;
+  overflow: hidden;
+}
+
+.featuredStory::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+}
+
+/* LABEL */
+.featuredStoryLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+
+/* TEXT */
+.featuredStoryText {
+  position: relative;
+}
+
+.featuredStoryQuote {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  color: #fff;
+  line-height: 1.85;
+  margin-bottom: 24px;
+  position: relative;
+  padding-left: 20px;
+}
+
+.featuredStoryQuote::before {
+  content: '"';
+  position: absolute;
+  left: 0;
+  top: -8px;
+  font-size: 4rem;
+  color: var(--saffron);
+  opacity: 0.6;
+}
+
+/* PERSON */
+.featuredStoryPerson {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.featuredStoryAvatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  border: 2px solid rgba(255,255,255,0.3);
+}
+
+.featuredStoryPersonInfo strong {
+  display: block;
+  color: #fff;
+  font-size: 0.97rem;
+  font-weight: 700;
+}
+
+.featuredStoryPersonInfo span {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.65);
+}
+
+/* RIGHT CARD */
+.featuredStoryVisual {
+  text-align: center;
+}
+
+.featuredStoryImpactCard {
+  background: rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 28px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.impactNum {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--saffron);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.impactLabel {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: 0.97rem;
+  color: rgba(255,255,255,0.8);
+  line-height: 1.6;
+}
+
+.impactBadges {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.impactBadge {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* GRID */
+.storiesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 72px;
+}
+
+/* CARD */
+.storyCard {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  border-left: 5px solid var(--cat-color, var(--saffron));
+  overflow: hidden;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.storyCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.13);
+}
+
+/* HEADER */
+.storyCardHeader {
+  padding: 22px 22px 0;
+  display: flex;
+  gap: 14px;
+}
+
+.storyCardAvatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--cat-color, var(--saffron)) 15%, white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  border: 2px solid color-mix(in srgb, var(--cat-color, var(--saffron)) 30%, white);
+}
+
+.storyCardMeta {
+  flex: 1;
+}
+
+.storyCardName {
+  font-size: 0.97rem;
+  font-weight: 700;
+  color: var(--black-text);
+}
+
+.storyCardLocation {
+  font-size: 0.76rem;
+  color: var(--gray-text);
+}
+
+/* BADGE */
+.storyCardBadge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--cat-color, var(--saffron)) 12%, white);
+  color: var(--cat-color, var(--saffron));
+}
+
+/* BODY */
+.storyCardBody {
+  padding: 16px 22px;
+  flex: 1;
+}
+
+.storyCardScheme {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--cat-color, var(--saffron));
+  margin-bottom: 8px;
+}
+
+.storyCardQuote {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: 0.97rem;
+  line-height: 1.85;
+  padding-left: 14px;
+  position: relative;
+}
+
+.storyCardQuote::before {
+  content: '"';
+  position: absolute;
+  left: 0;
+  top: -4px;
+  font-size: 2rem;
+  color: var(--cat-color, var(--saffron));
+  opacity: 0.4;
+}
+
+/* FOOTER */
+.storyCardFooter {
+  padding: 14px 22px 18px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.storyCardBenefit {
+  font-size: 0.78rem;
+  color: var(--gray-text);
+}
+
+.storyCardBenefit strong {
+  color: var(--green);
+}
+
+.storyCardStars {
+  font-size: 0.78rem;
+}
+
+
+.filterBar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+  justify-content: center;
+}
+
+.filterBtn {
+  padding: 8px 20px;
+  border-radius: 30px;
+  border: 2px solid #ddd;
+  background: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  color: var(--gray-text);
+}
+
+/* 👇 IMPORTANT */
+.active {
+  background: var(--saffron);
+  border-color: var(--saffron);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* TABLET */
+@media (max-width: 900px) {
+  .featuredStory {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 40px 28px;
+    text-align: center;
+  }
+
+  .featuredStoryText {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .featuredStoryQuote {
+    padding-left: 0;
+  }
+
+  .featuredStoryQuote::before {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .featuredStoryPerson {
+    justify-content: center;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 520px) {
+  .featuredStory {
+    padding: 28px 18px;
+    border-radius: 16px;
+  }
+
+  .featuredStoryQuote {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  .featuredStoryAvatar {
+    width: 46px;
+    height: 46px;
+    font-size: 1.5rem;
+  }
+
+  .impactNum {
+    font-size: 2.2rem;
+  }
+
+  .impactLabel {
+    font-size: 0.9rem;
+  }
+
+  .impactBadges {
+    gap: 6px;
+  }
+
+  .impactBadge {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+  }
+}
+
+
+/* CTA */
+.cta {
+  background: linear-gradient(135deg, var(--saffron) 0%, #FF8C00 55%, var(--saffron-dark) 100%);
+  border-radius: 22px;
+  padding: 56px 48px;
+  text-align: center;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
+  background-size: 22px 22px;
+  pointer-events: none;
+}
+
+/* TEXT */
+.cta h2 {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: clamp(1.5rem, 3vw, 2.3rem);
+  font-weight: 700;
+  margin-bottom: 18px;
+  line-height: 1.45;
+}
+
+.cta p {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: 1.02rem;
+  opacity: 0.93;
+  max-width: 580px;
+  margin: 0 auto 30px;
+  line-height: 1.9;
+}
+
+/* BUTTONS */
+.ctaBtns {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* BUTTON STYLE */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 28px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all var(--transition);
+}
+
+/* DARK BUTTON */
+.btnDark {
+  background: var(--navy);
+  color: white;
+  border-color: var(--navy);
+}
+
+.btnDark:hover {
+  background: #005bb5;
+  transform: translateY(-2px);
+}
+
+/* OUTLINE BUTTON */
+.btnOutline {
+  background: transparent;
+  border: 2px solid white;
+  color: white;
+}
+
+.btnOutline:hover {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(6px);
+  transform: translateY(-2px);
+}

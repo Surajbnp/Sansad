@@ -9,6 +9,7 @@ import {
   Flex,
   Button,
 } from "@chakra-ui/react";
+
 import styles from "./about.module.css";
 import Link from "next/link";
 import { useTitle } from "@/hooks/useTitle";
