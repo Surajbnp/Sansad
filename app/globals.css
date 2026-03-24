@@ -1,8 +1,19 @@
 @import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap");
 
 :root {
-  padding: 0;
-  margin: 0;
+  --saffron: #FE6700;
+  --saffron-dark: #CC5500;
+  --saffron-glow: rgba(255, 107, 0, 0.15);
+  --green: #11A400;
+  --white: #ffffff;
+  --off-white: #FFF8F2;
+  --navy: #0074D1;
+  --gray-light: #f4f4f6;
+  --black-text: #222;
+  --gray-text: #555;
+  --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  --radius: 14px;
+  --transition: 0.25s ease;
 }
 
 * {
