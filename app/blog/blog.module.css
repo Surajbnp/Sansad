@@ -1,0 +1,453 @@
+
+/* PAGE */
+.page {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 64px 5% 80px;
+}
+
+/* INTRO */
+.intro {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 52px;
+}
+
+/* PILL */
+.pill {
+  display: inline-block;
+  background: var(--saffron-glow);
+  color: var(--saffron);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  margin-bottom: 18px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* HEADING */
+.intro h2 {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: clamp(1.6rem, 3vw, 2.3rem);
+  font-weight: 700;
+  color: var(--black-text);
+  line-height: 1.35;
+  margin-bottom: 16px;
+}
+
+.intro h2 em {
+  color: var(--saffron);
+  font-style: normal;
+}
+
+/* TEXT */
+.intro p {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: 1.05rem;
+  color: var(--gray-text);
+  line-height: 2;
+}
+
+
+/* MAIN */
+.featuredPost {
+  background: linear-gradient(135deg, var(--saffron) 0%, #FF8C00 50%, var(--saffron-dark) 100%);
+  border-radius: 20px;
+  padding: 44px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 44px;
+  align-items: center;
+  margin-bottom: 56px;
+  position: relative;
+  overflow: hidden;
+}
+
+.featuredPost::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+}
+
+/* TEXT */
+.featuredPostText {}
+
+.featuredPostLabel {
+  display: inline-flex;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.featuredPostCat {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 10px;
+}
+
+.featuredPostTitle {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  color: #fff;
+  margin-bottom: 14px;
+}
+
+.featuredPostExcerpt {
+  color: rgba(255,255,255,0.82);
+  margin-bottom: 24px;
+}
+
+/* META */
+.featuredPostMeta {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.featuredPostDate {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.9);
+}
+
+.featuredPostReadmore {
+  background: var(--saffron);
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 6px;
+}
+
+.featuredPostReadmore:hover {
+  background: var(--saffron-dark);
+}
+
+/* RIGHT CARD */
+.featuredPostVisual {}
+
+.featuredPostStatCard {
+  background: rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 28px;
+}
+
+/* STATS */
+.statIcon {
+  font-size: 2rem;
+}
+
+.statNum {
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: var(--green);
+}
+
+.statLabel {
+  color: rgba(255,255,255,0.8);
+}
+
+/* BADGES */
+.featBadges {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.featBadge {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  padding: 5px 11px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+}
+
+@media (max-width: 860px) {
+  .featuredPost {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .featuredPost {
+    padding: 28px 18px;
+  }
+
+  .statNum {
+    font-size: 2rem;
+  }
+}
+
+
+/* FILTER BAR */
+.filterBar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+  justify-content: center;
+}
+
+.filterBtn {
+  padding: 8px 20px;
+  border-radius: 30px;
+  border: 2px solid #ddd;
+  background: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  transition: all var(--transition);
+  color: var(--gray-text);
+}
+
+.filterBtn:hover,
+.active {
+  background: var(--saffron);
+  border-color: var(--saffron);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* POSTS GRID */
+.postsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 24px;
+  margin-bottom: 72px;
+}
+
+/* POST CARD */
+.postCard {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  border-left: 5px solid var(--cat-color, var(--saffron));
+  overflow: hidden;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.postCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.13);
+}
+
+/* TOP */
+.postCardTop {
+  padding: 20px 20px 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.postCardBadge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--cat-color, var(--saffron)) 12%, white);
+  color: var(--cat-color, var(--saffron));
+}
+
+.postCardDate {
+  font-size: 0.72rem;
+  color: var(--gray-text);
+}
+
+/* BODY */
+.postCardBody {
+  padding: 14px 20px;
+  flex: 1;
+}
+
+.postCardTitle {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--black-text);
+  margin-bottom: 10px;
+}
+
+.postCardExcerpt {
+  font-size: 0.88rem;
+  color: var(--gray-text);
+  line-height: 1.8;
+}
+
+/* FOOTER */
+.postCardFooter {
+  padding: 12px 20px 16px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.postCardSource {
+  font-size: 0.72rem;
+  color: var(--gray-text);
+}
+
+.postCardLink {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--cat-color, var(--saffron));
+  transition: gap var(--transition);
+}
+
+.postCardLink:hover {
+  gap: 8px;
+}
+
+.postCardThumb {
+  position: relative;
+  width: 100%;
+  height: 170px;
+  overflow: hidden;
+}
+
+.postCardThumbBg {
+  position: absolute;
+  inset: 0;
+
+  background: color-mix(in srgb, var(--cat-color, var(--saffron)) 10%, white);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ICON */
+.postCardThumbIcon {
+  font-size: 2.5rem;
+  opacity: 0.9;
+}
+
+/* IMAGE */
+.postCardThumb img {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 2;
+}
+
+
+/* CTA */
+.cta {
+  background: linear-gradient(135deg, var(--saffron) 0%, #FF8C00 55%, var(--saffron-dark) 100%);
+  border-radius: 22px;
+  padding: 56px 48px;
+  text-align: center;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* TEXT */
+.cta h2 {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: clamp(1.5rem, 3vw, 2.3rem);
+  font-weight: 700;
+  margin-bottom: 18px;
+  line-height: 1.45;
+}
+
+.cta p {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: 1.02rem;
+  opacity: 0.93;
+  max-width: 580px;
+  margin: 0 auto 30px;
+  line-height: 1.9;
+}
+
+/* BUTTONS */
+.ctaBtns {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* BUTTON BASE */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 28px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  border: 2px solid transparent;
+  transition: all var(--transition);
+}
+
+/* DARK */
+.btnDark {
+  background: var(--navy);
+  color: white;
+}
+
+.btnDark:hover {
+  background: #005bb5;
+  transform: translateY(-2px);
+}
+
+/* OUTLINE */
+.btnOutline {
+  background: transparent;
+  border: 2px solid white;
+  color: white;
+}
+
+.btnOutline:hover {
+  background: rgba(255,255,255,0.15);
+  transform: translateY(-2px);
+}
+
+
+@media (max-width: 860px) {
+  .cta {
+    padding: 40px 24px;
+  }
+
+  .cta p {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .cta h2 {
+    font-size: 1.3rem;
+  }
+
+  .cta p {
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+
+.cta::before {
+  pointer-events: none;   
+}
