@@ -31,7 +31,7 @@ const ticketSchema = new mongoose.Schema(
       type: String,
     },
 
-    phone: {
+    complaintType: {
       type: String,
       required: true,
     },

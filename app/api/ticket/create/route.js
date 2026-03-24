@@ -16,14 +16,14 @@ export async function POST(req) {
       );
     }
 
-    const { user, title, description, phone, fileUrl, assignedDept } =
+    const { user, title, description, complaintType, fileUrl, assignedDept } =
       await req.json();
 
     const newTicket = new TicketModel({
       user: user,
       title,
       description,
-      phone,
+      complaintType: complaintType || null,
       fileUrl: fileUrl || null,
       assignedDept: assignedDept || null,
     });

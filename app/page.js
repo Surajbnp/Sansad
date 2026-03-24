@@ -88,7 +88,7 @@
 //             fontSize={{ base: "22px", md: "28px" }}
 //             fontWeight={600}
 //           >
-//             हेल्पलाइन: +91 123456789
+//             : +91 123456789
 //           </Text>
 //         </Box>
 //       </Box>
@@ -129,7 +129,7 @@ export default function Home() {
       </Box>
 
       {/* ICONS SECTION */}
-      <Box w="100%" className={styles.iconsWrapper} >
+      <Box w="100%" className={styles.iconsWrapper}>
         <Flex
           direction={{ base: "column", md: "row" }}
           align="center"
@@ -137,11 +137,22 @@ export default function Home() {
           gap={{ base: 6, md: 10 }}
           p={6}
           my={{ base: "50px", md: "50px" }}
-
         >
-          <Image src="/SSK-Satna_Point1.webp" alt="icon1" w={{ base: "170px", md: "200px" }} />
-          <Image src="/SSK-Satna_Point2.webp" alt="icon2" w={{ base: "170px", md: "200px" }} />
-          <Image src="/SSK-Satna_Point3.webp" alt="icon3" w={{ base: "170px", md: "200px" }} />
+          <Image
+            src="/SSK-Satna_Point1.webp"
+            alt="icon1"
+            w={{ base: "170px", md: "200px" }}
+          />
+          <Image
+            src="/SSK-Satna_Point2.webp"
+            alt="icon2"
+            w={{ base: "170px", md: "200px" }}
+          />
+          <Image
+            src="/SSK-Satna_Point3.webp"
+            alt="icon3"
+            w={{ base: "170px", md: "200px" }}
+          />
         </Flex>
       </Box>
 
@@ -267,7 +278,7 @@ export default function Home() {
           fontSize={{ base: "22px", md: "40px" }}
           fontWeight={600}
         >
-          हेल्पलाइन: +91 123456789
+          हेल्पलाइन: +91 9425172508
         </Text>
       </Box>
     </Box>
