@@ -503,7 +503,7 @@
 
 /* CTA */
 .cta {
-  background: linear-gradient(135deg, var(--saffron) 0%, #FF8C00 55%, var(--saffron-dark) 100%);
+  background: #ff7800;
   border-radius: 22px;
   padding: 56px 48px;
   text-align: center;

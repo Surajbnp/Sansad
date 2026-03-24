@@ -18,11 +18,14 @@ export default function Contact() {
   return (
     <Box>
 
-      {/* HERO SECTION */}
-      <Box
+          <Box
         position="relative"
-        bgGradient="linear(135deg, #FE6700 0%, #FF8C00 50%, #CC5500 100%)"
-        py={{ base: 20, md: 24 }}  // 🔥 height बढ़ाई
+        bg="#ff7800"
+        bgImage="url('/satna-universal-banner.webp')"
+        bgSize={{ base: "90%", md: "70%", lg: "45%" }}
+        bgRepeat="no-repeat"
+        bgPosition="center"
+        py={{ base: 20, md: 24 }}
         textAlign="center"
         color="white"
         overflow="hidden"
@@ -54,7 +57,7 @@ export default function Contact() {
               animation: "pulse 3s infinite",
             }}
           >
-            <img src="/SSASatna_Favicon_Color.png" width="50" />
+            <img src="/SSASatna_Favicon_Color.png" width="80" />
           </Box>
 
           <Text
