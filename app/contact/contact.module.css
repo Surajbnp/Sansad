@@ -76,7 +76,7 @@
 
 /* MAIN */
 .addressBlock {
-  background: linear-gradient(135deg, var(--saffron) 0%, #FF8C00 50%, var(--saffron-dark) 100%);
+  background: #ff7800;
   border-radius: 20px;
   padding: 44px 48px;
   display: grid;
