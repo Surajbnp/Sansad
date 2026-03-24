@@ -89,8 +89,8 @@ export default function Navbar() {
     <>
       <Box
         bg={{
-          base: scrolled ? "rgba(0,0,0,0.5)" : "transparent",
-          md: "rgba(0,0,0,0.5)",
+          base: scrolled ? "rgba(122, 72, 29)" : "transparent",
+          md: "rgb(122, 72, 29)",
         }}
         backdropFilter={{
           base: scrolled ? "blur(20px)" : "none",
@@ -333,7 +333,6 @@ export default function Navbar() {
                 h="35px"
                 alt="SSA Satna Logo"
                 fallbackSrc="https://via.placeholder.com/120x35?text=Logo"
-                filter="invert(1)"
               />
               <IconButton
                 icon={<CloseIcon fontSize="12px" />}

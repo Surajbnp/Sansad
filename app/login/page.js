@@ -149,7 +149,6 @@ export default function Login() {
         justify="center"
         px={4}
         py={{ base: 6, md: 10 }}
-        bg="#f5f5f0"
       >
         <Box
           bg="white"
@@ -157,8 +156,6 @@ export default function Login() {
           p={{ base: "28px", md: "48px" }}
           w="100%"
           maxW="480px"
-          border="1px solid rgba(0,0,0,0.06)"
-          boxShadow="0 4px 24px rgba(0,0,0,0.07)"
         >
           <Text
             fontSize={{ base: "20px", md: "24px" }}
