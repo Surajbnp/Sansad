@@ -1,11 +1,11 @@
-:root {
-  --saffron: #FE6700;
-  --saffron-dark: #CC5500;
+:global(:root) {
+  --saffron: #fe6700;
+  --saffron-dark: #cc5500;
   --saffron-glow: rgba(255, 107, 0, 0.15);
-  --green: #11A400;
+  --green: #11a400;
   --white: #ffffff;
-  --off-white: #FFF8F2;
-  --navy: #0074D1;
+  --off-white: #fff8f2;
+  --navy: #0074d1;
   --gray-light: #f4f4f6;
   --black-text: #222;
   --gray-text: #555;
@@ -13,7 +13,6 @@
   --radius: 14px;
   --transition: 0.25s ease;
 }
-
 
 /* ── PAGE WRAPPER ── */
 .page {
@@ -26,7 +25,12 @@
 .hero {
   position: relative;
   min-height: 360px;
-  background: linear-gradient(135deg, var(--saffron) 0%, #FF8C00 50%, var(--saffron-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--saffron) 0%,
+    #ff8c00 50%,
+    var(--saffron-dark) 100%
+  );
   display: flex;
   align-items: center;
   justify-content: center;
@@ -38,7 +42,11 @@
   content: "";
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.15) 1px,
+    transparent 1px
+  );
   background-size: 22px 22px;
   pointer-events: none;
 }
@@ -51,7 +59,7 @@
 }
 
 .heroTitle {
-  font-family: 'Tiro Devanagari Hindi', serif;
+  font-family: "Tiro Devanagari Hindi", serif;
   font-size: clamp(2rem, 5vw, 2.8rem);
   color: #fff;
   font-weight: 800;
@@ -61,7 +69,7 @@
 }
 
 .heroSub {
-  font-family: 'Tiro Devanagari Hindi', serif;
+  font-family: "Tiro Devanagari Hindi", serif;
   font-size: clamp(1rem, 2.5vw, 1.2rem);
   color: rgba(255, 255, 255, 0.92);
   font-weight: 500;
@@ -107,7 +115,9 @@
   position: relative;
   overflow: hidden;
   border-top: 4px solid var(--accent, var(--saffron));
-  transition: transform var(--transition), box-shadow var(--transition);
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition);
 }
 
 .statsRow {
@@ -130,7 +140,7 @@
 }
 .statCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 36px rgba(0,0,0,0.12);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
 }
 
 .statNum {
@@ -143,7 +153,7 @@
 }
 
 .statLabel {
-  font-family: 'Tiro Devanagari Hindi', serif;
+  font-family: "Tiro Devanagari Hindi", serif;
   font-size: 0.92rem;
   color: var(--gray-text);
   line-height: 1.5;
@@ -157,13 +167,8 @@
   opacity: 0.15;
 }
 
-
-
-
-
-
 .featuredStory {
-  background: linear-gradient(135deg, #1a2e4a 0%, #0074D1 100%);
+  background: linear-gradient(135deg, #1a2e4a 0%, #0074d1 100%);
   border-radius: 20px;
   padding: 48px 44px;
   display: grid;
@@ -176,10 +181,14 @@
 }
 
 .featuredStory::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.06) 1px,
+    transparent 1px
+  );
   background-size: 20px 20px;
   pointer-events: none;
 }
@@ -189,7 +198,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
   color: #fff;
   font-size: 0.72rem;
   font-weight: 700;
@@ -206,7 +215,7 @@
 }
 
 .featuredStoryQuote {
-  font-family: 'Tiro Devanagari Hindi', serif;
+  font-family: "Tiro Devanagari Hindi", serif;
   font-size: clamp(1.1rem, 2vw, 1.4rem);
   color: #fff;
   line-height: 1.85;
@@ -236,12 +245,12 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.8rem;
-  border: 2px solid rgba(255,255,255,0.3);
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .featuredStoryPersonInfo strong {
@@ -253,7 +262,7 @@
 
 .featuredStoryPersonInfo span {
   font-size: 0.78rem;
-  color: rgba(255,255,255,0.65);
+  color: rgba(255, 255, 255, 0.65);
 }
 
 /* RIGHT CARD */
@@ -262,11 +271,11 @@
 }
 
 .featuredStoryImpactCard {
-  background: rgba(255,255,255,0.12);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 16px;
   padding: 28px;
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .impactNum {
@@ -278,9 +287,9 @@
 }
 
 .impactLabel {
-  font-family: 'Tiro Devanagari Hindi', serif;
+  font-family: "Tiro Devanagari Hindi", serif;
   font-size: 0.97rem;
-  color: rgba(255,255,255,0.8);
+  color: rgba(255, 255, 255, 0.8);
   line-height: 1.6;
 }
 
@@ -293,13 +302,13 @@
 }
 
 .impactBadge {
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
   color: #fff;
   font-size: 0.75rem;
   font-weight: 600;
   padding: 6px 12px;
   border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* GRID */
@@ -319,12 +328,14 @@
   flex-direction: column;
   border-left: 5px solid var(--cat-color, var(--saffron));
   overflow: hidden;
-  transition: transform var(--transition), box-shadow var(--transition);
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition);
 }
 
 .storyCard:hover {
   transform: translateY(-5px);
-  box-shadow: 0 14px 40px rgba(0,0,0,0.13);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.13);
 }
 
 /* HEADER */
@@ -344,7 +355,8 @@
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  border: 2px solid color-mix(in srgb, var(--cat-color, var(--saffron)) 30%, white);
+  border: 2px solid
+    color-mix(in srgb, var(--cat-color, var(--saffron)) 30%, white);
 }
 
 .storyCardMeta {
@@ -387,7 +399,7 @@
 }
 
 .storyCardQuote {
-  font-family: 'Tiro Devanagari Hindi', serif;
+  font-family: "Tiro Devanagari Hindi", serif;
   font-size: 0.97rem;
   line-height: 1.85;
   padding-left: 14px;
@@ -425,7 +437,6 @@
   font-size: 0.78rem;
 }
 
-
 .filterBar {
   display: flex;
   gap: 10px;
@@ -446,7 +457,6 @@
   color: var(--gray-text);
 }
 
-/* 👇 IMPORTANT */
 .active {
   background: var(--saffron);
   border-color: var(--saffron);
@@ -519,10 +529,14 @@
   }
 }
 
-
 /* CTA */
 .cta {
-  background: linear-gradient(135deg, var(--saffron) 0%, #FF8C00 55%, var(--saffron-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--saffron) 0%,
+    #ff8c00 55%,
+    var(--saffron-dark) 100%
+  );
   border-radius: 22px;
   padding: 56px 48px;
   text-align: center;
@@ -532,17 +546,21 @@
 }
 
 .cta::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.12) 1px,
+    transparent 1px
+  );
   background-size: 22px 22px;
   pointer-events: none;
 }
 
 /* TEXT */
 .cta h2 {
-  font-family: 'Tiro Devanagari Hindi', serif;
+  font-family: "Tiro Devanagari Hindi", serif;
   font-size: clamp(1.5rem, 3vw, 2.3rem);
   font-weight: 700;
   margin-bottom: 18px;
@@ -550,7 +568,7 @@
 }
 
 .cta p {
-  font-family: 'Tiro Devanagari Hindi', serif;
+  font-family: "Tiro Devanagari Hindi", serif;
   font-size: 1.02rem;
   opacity: 0.93;
   max-width: 580px;
