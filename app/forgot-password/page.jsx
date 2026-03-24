@@ -19,6 +19,7 @@ import {
 } from "@chakra-ui/react";
 import NextLink from "next/link";
 import styles from "./page.module.css";
+import { useTitle } from "@/hooks/useTitle";
 
 const Page = () => {
   const [step, setStep] = useState(1); // 1 = email, 2 = otp
@@ -27,6 +28,7 @@ const Page = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
+  useTitle("Forget Password");
 
   let mailHeading = "Password Reset OTP";
   let mailSubject = "Your Password Reset OTP";

@@ -16,6 +16,8 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import styles from "./profile.module.css";
+import { useTitle } from "@/hooks/useTitle";
+
 
 /* ─────────────────────────────────────────
    STAT CARD
@@ -27,6 +29,7 @@ const StatCard = ({
   buttonText = "View",
   onClick,
   delay = 0,
+  icon,
 }) => (
   <Box
     bg="white"
@@ -46,7 +49,9 @@ const StatCard = ({
       boxShadow: "0 8px 28px rgba(250,118,2,0.15)",
       borderColor: "#fa7602",
     }}
+
     onClick={onClick}
+
   >
     {/* orange accent bar on left */}
     <Box
@@ -57,8 +62,17 @@ const StatCard = ({
       h="100%"
       bg="#fa7602"
       borderRadius="16px 0 0 16px"
-    />
 
+    />
+    {icon && (
+      <Box
+        position="absolute"
+        top="12px"
+        right="12px"
+      >
+        {icon}
+      </Box>
+    )}
     <Text
       fontSize="xs"
       color="gray.400"
@@ -136,6 +150,7 @@ const InfoChip = ({ label, value }) => (
 const Page = () => {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  useTitle("Profile");
 
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
@@ -305,6 +320,9 @@ const Page = () => {
                     value={stats?.totalTickets ?? 0}
                     subText="All complaints"
                     onClick={() => router.push("/tickets?state=all")}
+                    icon={
+                      <img src="/dashboard_create-ticket.svg" width={28} height={28} />
+                    }
                   />
                   <StatCard
                     delay={60}
@@ -312,6 +330,9 @@ const Page = () => {
                     value={stats?.stats?.submitted ?? 0}
                     subText="Awaiting triage"
                     onClick={() => router.push("/tickets?state=submitted")}
+                    icon={
+                      <img src="/dashboard_add.svg" width={28} height={28} />
+                    }
                   />
                   <StatCard
                     delay={120}
@@ -319,6 +340,9 @@ const Page = () => {
                     value={stats?.stats?.inProgress ?? 0}
                     subText="Needs action"
                     onClick={() => router.push("/tickets?state=inProgress")}
+                    icon={
+                      <img src="/dashboard_progress.svg" width={28} height={28} />
+                    }
                   />
                   <StatCard
                     delay={180}
@@ -326,6 +350,9 @@ const Page = () => {
                     value={stats?.stats?.completed ?? 0}
                     subText="Closed & resolved"
                     onClick={() => router.push("/tickets?state=completed")}
+                    icon={
+                      <img src="/dashboard_completed.svg" width={28} height={28} />
+                    }
                   />
                   <StatCard
                     delay={240}
@@ -334,6 +361,9 @@ const Page = () => {
                     subText="Active departments"
                     buttonText="Open"
                     onClick={() => router.push("/admin/departments")}
+                    icon={
+                      <img src="/dashboard_add.svg" width={28} height={28} />
+                    }
                   />
                 </>
               )}

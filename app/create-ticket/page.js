@@ -23,6 +23,7 @@ import { useState } from "react";
 import styles from "./page.module.css";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { useTitle } from "@/hooks/useTitle";
 
 const TICKET_TYPES = [
   "राजस्व",
@@ -97,6 +98,7 @@ export default function TicketCreatePage() {
   const toast = useToast();
   const router = useRouter();
   const { user, accessToken } = useAuth();
+useTitle("Create Ticket");
 
   const isOthers = formData.type === "अन्य (Others)";
 

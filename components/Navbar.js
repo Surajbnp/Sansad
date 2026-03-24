@@ -329,7 +329,7 @@ export default function Navbar() {
           <DrawerHeader borderBottomWidth="1px" px={4} py={4}>
             <Flex justifyContent="space-between" alignItems="center">
               <Image
-                src="/SSASatna_White_Logo.png"
+                src="/SSASatna_Color_Logo_color.png"
                 h="35px"
                 alt="SSA Satna Logo"
                 fallbackSrc="https://via.placeholder.com/120x35?text=Logo"

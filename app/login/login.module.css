@@ -12,12 +12,34 @@
 
 
 
+.hero {
+  width: 100%;
+  background-image: url("/SatnaSSK_Homeslide_Desktop.webp");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+/* TABLET HERO*/
+@media (min-width: 769px) and (max-width: 1024px) {
+  .hero {
+    background-image: url("/SatnaSSK_Homeslide_Desktop.webp"); 
+    background-size: cover;
+    background-position: center top; 
+    height: 500px;
+  }
+}
+
+/* MOBILE HERO */
+
 @media (max-width: 768px) {
   .hero {
     background-image: url("/SatnaSSK_Homeslide_Mobile.webp");
     background-size: contain;
     background-position: top center;
-    aspect-ratio: 9 / 16;
+    aspect-ratio: auto;
+    width: 100vw;
+    height: 56.25vw;
   }
 }
 

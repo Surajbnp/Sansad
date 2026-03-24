@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
+  <!-- Generator: Adobe Illustrator 30.2.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 1)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: url(#New_Gradient_Swatch);
+      }
+    </style>
+    <linearGradient id="New_Gradient_Swatch" data-name="New Gradient Swatch" x1="74.98" y1="76.98" x2="437.02" y2="439.02" gradientTransform="translate(0 514) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#168203"/>
+      <stop offset="1" stop-color="#86be28"/>
+    </linearGradient>
+  </defs>
+  <g id="ESSENTIAL_UI">
+    <path class="st0" d="M256,0C114.62,0,0,114.61,0,256s114.62,256,256,256,256-114.62,256-256S397.38,0,256,0ZM405.44,256c0,15.66-12.7,28.36-28.36,28.36h-92.72v92.72c0,15.66-12.7,28.36-28.36,28.36h0c-15.66,0-28.36-12.7-28.36-28.36v-92.72h-92.72c-15.66,0-28.36-12.7-28.36-28.36h0c0-15.66,12.7-28.36,28.36-28.36h92.72v-92.72c0-15.66,12.7-28.36,28.36-28.36h0c15.66,0,28.36,12.7,28.36,28.36v92.72h92.72c15.66,0,28.36,12.7,28.36,28.36h0Z"/>
+  </g>
+</svg>

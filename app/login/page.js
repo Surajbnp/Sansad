@@ -17,6 +17,7 @@ import {
   PinInputField,
   Flex,
   Divider,
+  Image
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { MdPhone } from "react-icons/md";
@@ -24,6 +25,7 @@ import styles from "./login.module.css";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import NextLink from "next/link";
+import { useTitle } from "@/hooks/useTitle";
 
 export default function Login() {
   const [phone, setPhone] = useState("");
@@ -37,6 +39,7 @@ export default function Login() {
   const toast = useToast();
   const router = useRouter();
   const { login } = useAuth();
+  useTitle("Login");
 
   /* ── resend countdown ── */
   useEffect(() => {
@@ -139,72 +142,20 @@ export default function Login() {
   return (
     <Box minH="100vh" display="flex" flexDirection="column">
       {/* ── HERO BANNER ── */}
-      <Box
-        bg="#fa7602"
-        w="100%"
-        minH={{ base: "130px", md: "200px" }}
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        position="relative"
-        overflow="hidden"
-      >
-        <Box
-          position="absolute"
-          top="-40px"
-          right="-40px"
-          w="180px"
-          h="180px"
-          borderRadius="full"
-          bg="rgba(255,255,255,0.08)"
+     <Box className={styles.heroWrapper} w="100%">
+        <Image
+          src="/SatnaSSK_Homeslide_Mobile.webp"
+          display={{ base: "block", md: "none" }}
+          w="100%"
+          alt="Hero Mobile"
         />
         <Box
-          position="absolute"
-          bottom="-60px"
-          left="10%"
-          w="220px"
-          h="220px"
-          borderRadius="full"
-          bg="rgba(255,255,255,0.05)"
+          className={styles.hero}
+          display={{ base: "none", md: "block" }} 
+          w="100%"
+          minH="90vh"
+          position="relative"
         />
-        <Box
-          position="absolute"
-          top="20px"
-          left="-30px"
-          w="100px"
-          h="100px"
-          borderRadius="full"
-          bg="rgba(255,255,255,0.06)"
-        />
-        <Text
-          color="white"
-          fontWeight="800"
-          fontSize={{ base: "28px", md: "38px" }}
-          letterSpacing="3px"
-          textTransform="uppercase"
-          zIndex={1}
-        >
-          Login
-        </Text>
-      </Box>
-
-      {/* ── WAVE DIVIDER ── */}
-      <Box w="100%" lineHeight={0} bg="#fa7602">
-        <svg
-          viewBox="0 0 1200 30"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="none"
-          style={{ display: "block", width: "100%", height: "30px" }}
-        >
-          <path
-            d="M0,0 L0,15 Q150,30 300,15 Q450,0 600,15 Q750,30 900,15 Q1050,0 1200,15 L1200,0 Z"
-            fill="#fa7602"
-          />
-          <path
-            d="M0,15 Q150,30 300,15 Q450,0 600,15 Q750,30 900,15 Q1050,0 1200,15 L1200,30 L0,30 Z"
-            fill="#f5f5f0"
-          />
-        </svg>
       </Box>
 
       {/* ── FORM CARD ── */}
