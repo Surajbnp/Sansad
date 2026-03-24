@@ -3,6 +3,19 @@
 :root {
   padding: 0;
   margin: 0;
+  --saffron: #fe6700;
+  --saffron-dark: #cc5500;
+  --saffron-glow: rgba(255, 107, 0, 0.15);
+  --green: #11a400;
+  --white: #ffffff;
+  --off-white: #fff8f2;
+  --navy: #0074d1;
+  --gray-light: #f4f4f6;
+  --black-text: #222;
+  --gray-text: #555;
+  --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  --radius: 14px;
+  --transition: 0.25s ease;
 }
 
 * {
