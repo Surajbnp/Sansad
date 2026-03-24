@@ -17,7 +17,7 @@ import {
   PinInputField,
   Flex,
   Divider,
-  Image
+  Image,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { MdPhone } from "react-icons/md";
@@ -141,23 +141,7 @@ export default function Login() {
 
   return (
     <Box minH="100vh" display="flex" flexDirection="column">
-      {/* ── HERO BANNER ── */}
-     <Box className={styles.heroWrapper} w="100%">
-        <Image
-          src="/SatnaSSK_Homeslide_Mobile.webp"
-          display={{ base: "block", md: "none" }}
-          w="100%"
-          alt="Hero Mobile"
-        />
-        <Box
-          className={styles.hero}
-          display={{ base: "none", md: "block" }} 
-          w="100%"
-          minH="90vh"
-          position="relative"
-        />
-      </Box>
-
+    
       {/* ── FORM CARD ── */}
       <Flex
         flex={1}
