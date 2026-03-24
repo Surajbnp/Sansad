@@ -63,7 +63,7 @@
 
 /* 🔥 ORANGE CARD (WITH DOT PATTERN) */
 .intro__card {
-  background: linear-gradient(140deg, #FE6700, #FF8C00);
+  background:  #ff7800;
   border-radius: 22px;
   padding: 36px 28px;
   color: white;
@@ -214,7 +214,7 @@
 
 /* 🔥 CTA (WITH DOT PATTERN) */
 .cta {
-  background: linear-gradient(135deg, #FE6700, #FF8C00, #CC5500);
+  background:  #ff7800;
   border-radius: 22px;
   padding: 60px 120px;
   text-align: center;
