@@ -1,95 +1,248 @@
 "use client";
 
-import { Box, Text, Image, Flex , VStack} from "@chakra-ui/react";
-
-export default function About() {
+import {
+  Box,
+  Text,
+  Heading,
+  Container,
+  SimpleGrid,
+  Flex,
+  Button,
+} from "@chakra-ui/react";
+import styles from "./about.module.css";
+import Link from "next/link";
+import { useTitle } from "@/hooks/useTitle";
+export default function AboutPage() {
+  useTitle("About Us");
   return (
-    <Box>
-      {/* HERO SECTION */}
+    <Box bg="#FFF8F2">
+
+      {/* 🔥 HERO */}
       <Box
-        bg="#fa7602"
-        w="100%"
-        minH={{ base: "130px", md: "300px" }}
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
         position="relative"
+        bgGradient="linear(135deg, #FE6700 0%, #FF8C00 50%, #CC5500 100%)"
+        py={{ base: 20, md: 24 }}  // 🔥 height बढ़ाई
+        textAlign="center"
+        color="white"
         overflow="hidden"
       >
-        {/* Decorative circles */}
+        {/* pattern */}
         <Box
           position="absolute"
-          top="-40px"
-          right="-40px"
-          w="180px"
-          h="180px"
-          borderRadius="full"
-          bg="rgba(255,255,255,0.08)"
-        />
-        <Box
-          position="absolute"
-          bottom="-60px"
-          left="10%"
-          w="220px"
-          h="220px"
-          borderRadius="full"
-          bg="rgba(255,255,255,0.05)"
-        />
-        <Box
-          position="absolute"
-          top="20px"
-          left="-30px"
-          w="100px"
-          h="100px"
-          borderRadius="full"
-          bg="rgba(255,255,255,0.06)"
+          inset={0}
+          bgImage="radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px)"
+          bgSize="22px 22px"
         />
 
-        <VStack spacing={1} zIndex={1}>
-          <Text
-            color="white"
-            fontWeight="800"
-            fontSize={{ base: "28px", md: "38px" }}
-            letterSpacing="3px"
-            textTransform="uppercase"
+        <Container position="relative">
+
+          {/* emblem */}
+          <Box
+            bg="rgba(255,255,255,0.18)"
+            w="80px"
+            h="80px"
+            mx="auto"
+            mt={6}
+            borderRadius="full"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            mb={6} // 🔥 gap बढ़ाया
+            sx={{
+              backdropFilter: "blur(4px)",
+              animation: "pulse 3s infinite",
+            }}
           >
-            About Us
+            <img src="/SSASatna_Favicon_Color.png" width="50" />
+          </Box>
+
+          <Text
+            fontSize="xs"
+            letterSpacing="2px"
+            bg="rgba(255,255,255,0.22)"
+            display="inline-block"
+            px={4}
+            py={1}
+            borderRadius="full"
+            mb={4}
+            fontWeight="bold"
+            border="1px solid rgba(255,255,255,0.4)"
+          >
+            सतना-मैहर लोकसभा क्षेत्र
           </Text>
-        
-        </VStack>
+
+          <Heading
+            fontSize={{ base: "2xl", md: "5xl" }}
+            mb={6}
+          >
+            हमारे बारे में
+          </Heading>
+
+          <Text
+            mt={2}
+            opacity={0.9}
+            fontSize={{ base: "sm", md: "md" }}
+          >
+            सुविधाओं का लाभ - बस एक क्लिक दूर
+          </Text>
+
+        </Container>
+
+        {/* animation */}
+        <style>
+          {`
+      @keyframes pulse {
+        0%,100% { box-shadow: 0 0 0 2px rgba(255,255,255,0.35); }
+        50% { box-shadow: 0 0 0 12px rgba(255,255,255,0.08); }
+      }
+    `}
+        </style>
       </Box>
 
-      {/* CONTENT SECTION */}
-      <Flex
-        direction="column"
-        align="center"
-        textAlign="justify"
-        maxW="900px"
-        m="auto"
-        px={{ base: 6, md: 8 }}
-        py={{ base: 10, md: 16 }}
-        gap={6}
-      >
-        <Text fontSize={{ base: "15px", md: "18px" }} lineHeight="1.8">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat.
-        </Text>
+      <main className={styles.page}>
 
-        <Text fontSize={{ base: "15px", md: "18px" }} lineHeight="1.8">
-          Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-          proident, sunt in culpa qui officia deserunt mollit anim id est
-          laborum.
-        </Text>
+        {/* ══ 1. INTRO ══ */}
+        <div className={styles.intro}>
+          <div className={`${styles.intro__body} ${styles["fade-up"]}`}>
+            <div className={styles.pill}>परिचय</div>
 
-        <Text fontSize={{ base: "15px", md: "18px" }} lineHeight="1.8">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae
-          asperiores, molestiae tempora pariatur eaque perspiciatis laboriosam
-          unde dolore aliquam possimus.
-        </Text>
-      </Flex>
+            <h2>
+              सांसद सुविधा केंद्र -<br />
+              <em>क्यों और किसके लिए?</em>
+            </h2>
+
+            <p>
+              सांसद सुविधा केंद्र, आप सभी <strong className={styles["text-orange"]}>सतना-मैहर लोकसभा क्षेत्र</strong> के
+              क्षेत्रीय जनों तक <strong className={styles["text-orange"]}>मूलभूत सुविधाएं पहुंचाने</strong> एवं किसी भी
+              प्रकार की व्यक्तिगत अथवा सामूहिक समस्या के <strong className={styles["text-orange"]}>त्वरित निराकरण</strong>
+              के उद्देश्य से शुरू किया गया है।
+            </p>
+          </div>
+        </div>
+
+        {/* ══ 2. THREE CARDS ══ */}
+        <div className={styles["cards-row"]}>
+
+          <div className={`${styles["intro__card"]} ${styles["fade-up"]}`}>
+            <div className={styles["intro__card__icon"]}>🤝</div>
+
+            <h3>
+              <strong>आपकी समस्या,<br />हमारी प्राथमिकता</strong>
+            </h3>
+
+            <p>
+              चाहे समस्या <strong>व्यक्तिगत</strong> हो अथवा <strong>सामूहिक</strong> -
+              सांसद सुविधा केंद्र हर क्षेत्रीय जन तक मूलभूत सुविधाएं पहुंचाने और
+              समस्याओं का त्वरित निराकरण करने के लिए सदैव तत्पर है।
+            </p>
+          </div>
+
+          <div className={`${styles.pillar} ${styles["pillar--suvidha"]} ${styles["fade-up"]}`}>
+            <div className={styles["pillar__deco"]}>🏠</div>
+            <div className={styles["pillar__icon"]}>🏠</div>
+
+            <h3><strong>मूलभूत सुविधाएं पहुंचाना</strong></h3>
+
+            <p>
+              सतना-मैहर लोकसभा क्षेत्र के प्रत्येक क्षेत्रीय जन तक मूलभूत सुविधाएं
+              सरल, सुलभ और सहज रूप से पहुंचाना इस केंद्र का प्रमुख उद्देश्य है।
+              कोई भी नागरिक सुविधाओं से वंचित न रहे - यही हमारा संकल्प है।
+            </p>
+          </div>
+
+          <div className={`${styles.pillar} ${styles["pillar--samasya"]} ${styles["fade-up"]}`}>
+            <div className={styles["pillar__deco"]}>⚡</div>
+            <div className={styles["pillar__icon"]}>⚡</div>
+
+            <h3><strong>त्वरित समस्या निराकरण</strong></h3>
+
+            <p>
+              किसी भी प्रकार की व्यक्तिगत अथवा सामूहिक समस्या का त्वरित निराकरण -
+              बिना देरी, बिना भटकाव। सांसद सुविधा केंद्र आपकी हर समस्या को
+              प्राथमिकता से सुनता है और शीघ्र समाधान देता है।
+            </p>
+          </div>
+
+        </div>
+
+        {/* ══ 3. DOCUMENTS ══ */}
+        <div className={styles["docs-section"]}>
+
+          <div className={`${styles.pill} ${styles["center-pill"]}`}>
+            📄 आवश्यक दस्तावेज
+          </div>
+
+          <h1><strong> फॉर्म भरने के लिए क्या लाएं?</strong></h1>
+
+          <p className={styles.sub}>
+            सुविधाओं की प्राप्ति अथवा समस्याओं के निराकरण हेतु फॉर्म भरने के लिए
+            पहचान पत्र के रूप में अपना <strong className={styles["text-blue"]}>आधार कार्ड</strong> एवं
+            <strong className={styles["text-blue"]}> वोटर आईडी कार्ड</strong> अवश्य रख लें।
+          </p>
+
+          <div className={styles["docs-grid"]}>
+
+            <div
+              className={`${styles["doc-card"]} ${styles["fade-up"]}`}
+              style={{ "--accent": "#FF6B00" }}
+            >
+              <div className={styles["doc-card__body"]}>
+                <h4 className={styles["text-blue"]}>आधार कार्ड</h4>
+                <p>
+                  सुविधाओं की प्राप्ति अथवा किसी भी समस्या के निराकरण हेतु फॉर्म
+                  भरते समय पहचान पत्र के रूप में <strong className={styles["text-blue"]}>आधार कार्ड अवश्य साथ रखें।</strong>
+                  यह आपकी पहचान का प्रमुख प्रमाण है।
+                </p>
+              </div>
+            </div>
+
+            <div
+              className={`${styles["doc-card"]} ${styles["fade-up"]}`}
+              style={{ "--accent": "#138808" }}
+            >
+              <div className={styles["doc-card__body"]}>
+                <h4 className={styles["text-blue"]}>वोटर आईडी कार्ड</h4>
+                <p>
+                  पहचान पत्र के रूप में <strong className={styles["text-blue"]}>वोटर आईडी कार्ड</strong> भी अनिवार्य
+                  रूप से साथ रखें। यह इस बात की पुष्टि करता है कि आप
+                  सतना-मैहर लोकसभा क्षेत्र के निवासी हैं।
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* ══ 4. CTA ══ */}
+        <div className={`${styles.cta} ${styles["fade-up"]}`}>
+
+          <h2>
+            सांसद सुविधा केंद्र से अब आपके लिए<br />
+            सुविधाओं का लाभ है बस एक क्लिक दूर...
+          </h2>
+
+          <p>
+            सतना-मैहर लोकसभा क्षेत्र के क्षेत्रीय जन —
+            अपना <strong>आधार कार्ड</strong> एवं <strong>वोटर आईडी कार्ड</strong> साथ रखें
+            और मूलभूत सुविधाओं का लाभ उठाएं अथवा अपनी किसी भी व्यक्तिगत या
+            सामूहिक समस्या का त्वरित निराकरण पाएं।
+          </p>
+
+          <div className={styles["cta__btns"]}>
+
+            <Link href="/govt-schemes" className={`${styles.btn} ${styles["btn--dark"]}`}>
+              📋 सरकारी योजनाएं देखें
+            </Link>
+
+            <Link href="/contact" className={`${styles.btn} ${styles["btn--outline"]}`}>
+              📞 संपर्क करें
+            </Link>
+
+          </div>
+        </div>
+
+      </main>
+
     </Box>
   );
 }

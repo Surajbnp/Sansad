@@ -18,6 +18,7 @@ import { useState } from "react";
 import styles from "./page.module.css";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { useTitle } from "@/hooks/useTitle";
 
 const initialState = {
   title: "",
@@ -34,6 +35,7 @@ export default function TicketCreatePage() {
   const toast = useToast();
   const router = useRouter();
   const { user, accessToken } = useAuth();
+useTitle("Create Ticket");
 
   const handleChange = (key, value) => {
     setFormData({ ...formData, [key]: value });
