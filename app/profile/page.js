@@ -18,7 +18,6 @@ import { useRouter } from "next/navigation";
 import styles from "./profile.module.css";
 import { useTitle } from "@/hooks/useTitle";
 
-
 /* ─────────────────────────────────────────
    STAT CARD
 ───────────────────────────────────────── */
@@ -49,9 +48,7 @@ const StatCard = ({
       boxShadow: "0 8px 28px rgba(250,118,2,0.15)",
       borderColor: "#fa7602",
     }}
-
     onClick={onClick}
-
   >
     {/* orange accent bar on left */}
     <Box
@@ -62,14 +59,9 @@ const StatCard = ({
       h="100%"
       bg="#fa7602"
       borderRadius="16px 0 0 16px"
-
     />
     {icon && (
-      <Box
-        position="absolute"
-        top="12px"
-        right="12px"
-      >
+      <Box position="absolute" top="12px" right="12px">
         {icon}
       </Box>
     )}
@@ -321,7 +313,11 @@ const Page = () => {
                     subText="All complaints"
                     onClick={() => router.push("/tickets?state=all")}
                     icon={
-                      <img src="/dashboard_create-ticket.svg" width={28} height={28} />
+                      <img
+                        src="/dashboard_create-ticket.svg"
+                        width={28}
+                        height={28}
+                      />
                     }
                   />
                   <StatCard
@@ -341,7 +337,11 @@ const Page = () => {
                     subText="Needs action"
                     onClick={() => router.push("/tickets?state=inProgress")}
                     icon={
-                      <img src="/dashboard_progress.svg" width={28} height={28} />
+                      <img
+                        src="/dashboard_progress.svg"
+                        width={28}
+                        height={28}
+                      />
                     }
                   />
                   <StatCard
@@ -351,7 +351,11 @@ const Page = () => {
                     subText="Closed & resolved"
                     onClick={() => router.push("/tickets?state=completed")}
                     icon={
-                      <img src="/dashboard_completed.svg" width={28} height={28} />
+                      <img
+                        src="/dashboard_completed.svg"
+                        width={28}
+                        height={28}
+                      />
                     }
                   />
                   <StatCard
@@ -375,24 +379,48 @@ const Page = () => {
                     title="Total Tickets"
                     value={stats?.totalTickets ?? 0}
                     onClick={() => router.push("/tickets")}
+                    icon={
+                      <img
+                        src="/dashboard_create-ticket.svg"
+                        width={28}
+                        height={28}
+                      />
+                    }
                   />
                   <StatCard
                     delay={60}
                     title="Assigned"
                     value={stats?.stats?.assigned ?? 0}
                     onClick={() => router.push("/tickets?state=assigned")}
+                    icon={
+                      <img src="/dashboard_add.svg" width={28} height={28} />
+                    }
                   />
                   <StatCard
                     delay={120}
                     title="In Progress"
                     value={stats?.stats?.inProgress ?? 0}
                     onClick={() => router.push("/tickets?state=inProgress")}
+                    icon={
+                      <img
+                        src="/dashboard_progress.svg"
+                        width={28}
+                        height={28}
+                      />
+                    }
                   />
                   <StatCard
                     delay={180}
                     title="Completed"
                     value={stats?.stats?.completed ?? 0}
                     onClick={() => router.push("/tickets?state=completed")}
+                    icon={
+                      <img
+                        src="/dashboard_completed.svg"
+                        width={28}
+                        height={28}
+                      />
+                    }
                   />
                 </>
               )}
@@ -405,6 +433,13 @@ const Page = () => {
                     value={stats?.totalTickets ?? 0}
                     subText="Your issues"
                     onClick={() => router.push("/tickets")}
+                    icon={
+                      <img
+                        src="/dashboard_create-ticket.svg"
+                        width={28}
+                        height={28}
+                      />
+                    }
                   />
                   <StatCard
                     delay={60}
@@ -412,6 +447,13 @@ const Page = () => {
                     value={stats?.stats?.inProgress ?? 0}
                     subText="Being resolved"
                     onClick={() => router.push("/tickets?state=inProgress")}
+                    icon={
+                      <img
+                        src="/dashboard_progress.svg"
+                        width={28}
+                        height={28}
+                      />
+                    }
                   />
                   <StatCard
                     delay={120}
@@ -419,6 +461,13 @@ const Page = () => {
                     value={stats?.stats?.completed ?? 0}
                     subText="Resolved"
                     onClick={() => router.push("/tickets?state=completed")}
+                    icon={
+                      <img
+                        src="/dashboard_completed.svg"
+                        width={28}
+                        height={28}
+                      />
+                    }
                   />
                   <StatCard
                     delay={180}
@@ -427,6 +476,9 @@ const Page = () => {
                     subText="Raise an issue"
                     buttonText="Create"
                     onClick={() => router.push("/create-ticket")}
+                    icon={
+                      <img src="/dashboard_add.svg" width={28} height={28} />
+                    }
                   />
                 </>
               )}
