@@ -79,7 +79,7 @@ export default function Providers({ children }) {
           <Navbar />
         </Box>
         {children}
-        {showFooter && <Footer />}
+        {<Footer />}
       </AuthProvider>
     </ChakraProvider>
   );

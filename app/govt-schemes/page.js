@@ -1,12 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Head from "next/head";
-import { useTitle } from "@/hooks/useTitle";
 
-/* ─────────────────────────────────────────────────
-   DATA
-───────────────────────────────────────────────── */
+// ── Data ────────────────────────────────────────────────────────────────────
 const categories = [
   {
     id: "agriculture",
@@ -398,30 +395,46 @@ const LOGO_MAP = {
   pmfby: "https://pmfby.gov.in/assets/images/PMFBY-Logo.png",
   "ayushman bharat pm-jay":
     "https://pmjay.gov.in/sites/default/files/2018-09/AB-PMJAY-Logo.png",
-  mgnrega: "https://nrega.nic.in/Netnrega/mgnrega_new/images/mgnregs-logo.png",
   "pm jan dhan yojana": "https://pmjdy.gov.in/images/PMJDY-Logo.png",
-  "jal jeevan mission":
-    "https://jaljeevanmission.gov.in/sites/default/files/logo.png",
   "digital india mission":
     "https://digitalindia.gov.in/assets/images/digital-india-logo.png",
   digilocker: "https://www.digilocker.gov.in/assets/img/digilocker_logo.png",
+  "jal jeevan mission":
+    "https://jaljeevanmission.gov.in/sites/default/files/logo.png",
+  mgnrega: "https://nrega.nic.in/Netnrega/mgnrega_new/images/mgnregs-logo.png",
   "beti bachao beti padhao":
     "https://wcd.nic.in/sites/default/files/BBBP-LOGO.png",
   "swachh bharat mission": "https://sbm.gov.in/sbm/assets/img/logo.png",
 };
 
-/* ─────────────────────────────────────────────────
-   SUB-COMPONENTS
-───────────────────────────────────────────────── */
+// ── Sub-components ───────────────────────────────────────────────────────────
+
+function ArrowIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M5 12h14M12 5l7 7-7 7" />
+    </svg>
+  );
+}
 
 function IndianFlag() {
   const spokes = Array.from({ length: 24 }, (_, k) => {
     const a = (k * 15 * Math.PI) / 180;
     return {
-      x1: (450 + 20 * Math.cos(a)).toFixed(1),
-      y1: (300 + 20 * Math.sin(a)).toFixed(1),
-      x2: (450 + 60 * Math.cos(a)).toFixed(1),
-      y2: (300 + 60 * Math.sin(a)).toFixed(1),
+      x1: 450 + 20 * Math.cos(a),
+      y1: 300 + 20 * Math.sin(a),
+      x2: 450 + 60 * Math.cos(a),
+      y2: 300 + 60 * Math.sin(a),
     };
   });
   return (
@@ -447,10 +460,10 @@ function IndianFlag() {
       {spokes.map((s, i) => (
         <line
           key={i}
-          x1={s.x1}
-          y1={s.y1}
-          x2={s.x2}
-          y2={s.y2}
+          x1={s.x1.toFixed(1)}
+          y1={s.y1.toFixed(1)}
+          x2={s.x2.toFixed(1)}
+          y2={s.y2.toFixed(1)}
           stroke="#000080"
           strokeWidth="2"
         />
@@ -459,13 +472,15 @@ function IndianFlag() {
   );
 }
 
-function SchemeCard({ scheme, catColor }) {
+function SchemeCard({ scheme, color }) {
   const [imgError, setImgError] = useState(false);
   const logoUrl = LOGO_MAP[scheme.name.toLowerCase()] || null;
 
-
   return (
-    <article className="scheme-card" style={{ "--cat-color": catColor }}>
+    <article
+      className="scheme-card"
+      style={{ "--cat-color": color, borderLeftColor: color }}
+    >
       <div className="scheme-card__top">
         <div className="scheme-card__logo">
           {!imgError && logoUrl ? (
@@ -492,34 +507,21 @@ function SchemeCard({ scheme, catColor }) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Learn more about ${scheme.name} – opens in new tab`}
+        style={{ color }}
       >
-        आधिकारिक पेज देखें
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M5 12h14M12 5l7 7-7 7" />
-        </svg>
+        आधिकारिक पेज देखें <ArrowIcon />
       </a>
     </article>
   );
 }
 
-function CategorySection({ cat, index }) {
+function CategorySection({ cat, visible }) {
+  if (!visible) return null;
   return (
     <section
       className="category"
       id={`cat-${cat.id}`}
       aria-labelledby={`cat-title-${cat.id}`}
-      data-cat-id={cat.id}
-      style={{ animationDelay: `${index * 0.03}s` }}
     >
       <div className="category__header">
         <div
@@ -533,7 +535,7 @@ function CategorySection({ cat, index }) {
           <h2 className="category__title" id={`cat-title-${cat.id}`}>
             {cat.title}
           </h2>
-          <small style={{ color: "var(--gray-text)", fontSize: "0.78rem" }}>
+          <small style={{ color: "#555", fontSize: "0.78rem" }}>
             {cat.titleHi}
           </small>
         </div>
@@ -546,45 +548,43 @@ function CategorySection({ cat, index }) {
       </div>
       <div className="schemes-grid">
         {cat.schemes.map((scheme) => (
-          <SchemeCard key={scheme.name} scheme={scheme} catColor={cat.color} />
+          <SchemeCard key={scheme.name} scheme={scheme} color={cat.color} />
         ))}
       </div>
     </section>
   );
 }
 
+// ── Main Page ────────────────────────────────────────────────────────────────
 
-/* ─────────────────────────────────────────────────
-   MAIN PAGE COMPONENT
-───────────────────────────────────────────────── */
 export default function GovtSchemesPage() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [showBackTop, setShowBackTop] = useState(false);
   const [year, setYear] = useState("");
-  useTitle("Govt Schemes");
+
   useEffect(() => {
     setYear(new Date().getFullYear().toString());
   }, []);
 
-  // Back-to-top scroll listener
+  // Back to top scroll listener
   useEffect(() => {
     let ticking = false;
-    const handleScroll = () => {
+    const onScroll = () => {
       if (!ticking) {
         requestAnimationFrame(() => {
-          setShowBackToTop(window.scrollY > 400);
+          setShowBackTop(window.scrollY > 400);
           ticking = false;
         });
         ticking = true;
       }
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Body overflow lock when drawer open
+  // Lock body scroll when drawer open
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? "hidden" : "";
     return () => {
@@ -592,30 +592,33 @@ export default function GovtSchemesPage() {
     };
   }, [drawerOpen]);
 
+  const filteredCategories = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return categories
+      .filter((cat) => activeFilter === "all" || activeFilter === cat.id)
+      .map((cat) => ({
+        ...cat,
+        schemes: q
+          ? cat.schemes.filter(
+              (s) =>
+                s.name.toLowerCase().includes(q) ||
+                s.desc.toLowerCase().includes(q),
+            )
+          : cat.schemes,
+      }))
+      .filter((cat) => cat.schemes.length > 0);
+  }, [activeFilter, searchQuery]);
+
   const handleChipClick = (catId) => {
     setActiveFilter(catId);
     setSearchQuery("");
     if (catId !== "all") {
-      const el = document.getElementById(`cat-${catId}`);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      setTimeout(() => {
+        const el = document.getElementById(`cat-${catId}`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
     }
   };
-
-  const handleBackToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
-
-  // Filtering logic
-  const filteredCategories = categories
-    .map((cat) => {
-      if (activeFilter !== "all" && activeFilter !== cat.id) return null;
-      const q = searchQuery.toLowerCase();
-      if (!q) return cat;
-      const matchedSchemes = cat.schemes.filter(
-        (s) =>
-          s.name.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q),
-      );
-      return matchedSchemes.length ? { ...cat, schemes: matchedSchemes } : null;
-    })
-    .filter(Boolean);
 
   return (
     <>
@@ -629,6 +632,22 @@ export default function GovtSchemesPage() {
         <meta name="theme-color" content="#FF6B00" />
         <link rel="canonical" href="https://ssksatna.com/govt-schemes" />
         <link rel="icon" href="/SSASatna_Favicon_Color.png" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://ssksatna.com/govt-schemes" />
+        <meta
+          property="og:title"
+          content="सरकारी योजनाएं | सांसद सुविधा केंद्र – सतना-मैहर"
+        />
+        <meta
+          property="og:description"
+          content="भारत सरकार की 80+ प्रमुख योजनाओं की संपूर्ण जानकारी।"
+        />
+        <meta
+          property="og:image"
+          content="https://ssksatna.com/Satna_SSK_MicroBanner.webp"
+        />
+        <meta property="og:locale" content="hi_IN" />
+        <meta name="twitter:card" content="summary_large_image" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -639,740 +658,136 @@ export default function GovtSchemesPage() {
           href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Tiro+Devanagari+Hindi:ital@0;1&display=swap"
           rel="stylesheet"
         />
-        {/* Open Graph */}
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://ssksatna.com/govt-schemes" />
-        <meta
-          property="og:title"
-          content="सरकारी योजनाएं | सांसद सुविधा केंद्र – सतना-मैहर"
-        />
-        <meta
-          property="og:description"
-          content="भारत सरकार की 80+ प्रमुख योजनाओं की संपूर्ण जानकारी – एक क्लिक में।"
-        />
-        <meta
-          property="og:image"
-          content="https://ssksatna.com/Satna_SSK_MicroBanner.webp"
-        />
-        <meta property="og:locale" content="hi_IN" />
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:title"
-          content="सरकारी योजनाएं | सांसद सुविधा केंद्र – सतना-मैहर"
-        />
-        <meta
-          name="twitter:description"
-          content="भारत सरकार की 80+ प्रमुख योजनाओं की संपूर्ण जानकारी – एक क्लिक में।"
-        />
-        <meta
-          name="twitter:image"
-          content="https://ssksatna.com/Satna_SSK_MicroBanner.webp"
-        />
       </Head>
 
-      <style jsx global>{`
-        :root {
-          --saffron: #ff6b00;
-          --saffron-dark: #cc5500;
-          --saffron-glow: rgba(255, 107, 0, 0.18);
-          --green: #138808;
-          --green-dark: #0d6405;
-          --white: #ffffff;
-          --off-white: #fff8f2;
-          --navy: #1a2035;
-          --gray-light: #f4f4f6;
-          --gray-text: #555;
-          --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.09);
-          --card-hover: 0 8px 32px rgba(255, 107, 0, 0.18);
-          --radius: 12px;
-          --transition: 0.25s ease;
-        }
-        *,
-        *::before,
-        *::after {
-          box-sizing: border-box;
-          margin: 0;
-          padding: 0;
-        }
-        html {
-          scroll-behavior: smooth;
-        }
-        body {
-          font-family: "Poppins", sans-serif;
-          background: var(--off-white);
-          color: var(--navy);
-          line-height: 1.6;
-        }
-        a {
-          text-decoration: none;
-          color: inherit;
-        }
-        img {
-          display: block;
-          max-width: 100%;
-        }
-        ul {
-          list-style: none;
-        }
+      {/* ── Global Styles ── */}
+      <style>{`
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Poppins', sans-serif; background: #FFF8F2; color: #1a2035; line-height: 1.6; }
+        a { text-decoration: none; color: inherit; }
+        img { display: block; max-width: 100%; }
 
-        /* NAVBAR */
-        .navbar {
-          position: sticky;
-          top: 0;
-          z-index: 1000;
-          background: #7d3b01;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 5%;
-          height: 64px;
-          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
-        }
-        .navbar__brand {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          text-decoration: none;
-        }
-        .navbar__brand img {
-          width: 77px;
-          height: auto;
-          object-fit: contain;
-          flex-shrink: 0;
-        }
-        .navbar__links {
-          display: flex;
-          gap: 28px;
-          align-items: center;
-        }
-        .navbar__links a {
-          color: rgba(255, 255, 255, 0.85);
-          font-size: 0.88rem;
-          font-weight: 500;
-          transition: color var(--transition);
-        }
-        .navbar__links a:hover {
-          color: #fff;
-        }
-        .navbar__login-btn {
-          border: 1.5px solid var(--saffron) !important;
-          color: var(--saffron) !important;
-          padding: 6px 16px;
-          border-radius: 5px;
-          font-weight: 600 !important;
-          transition:
-            background var(--transition),
-            color var(--transition) !important;
-        }
-        .navbar__login-btn:hover {
-          background: var(--saffron) !important;
-          color: #fff !important;
-        }
-        .hamburger {
-          display: none;
-          flex-direction: column;
-          gap: 5px;
-          cursor: pointer;
-          background: none;
-          border: none;
-          padding: 4px;
-        }
-        .hamburger span {
-          display: block;
-          width: 24px;
-          height: 2px;
-          background: #fff;
-          border-radius: 2px;
-          transition: var(--transition);
-        }
+        /* Navbar */
+        .navbar { position: sticky; top: 0; z-index: 1000; background: #7d3b01; display: flex; align-items: center; justify-content: space-between; padding: 0 5%; height: 64px; box-shadow: 0 2px 12px rgba(0,0,0,0.25); }
+        .navbar__brand { display: flex; align-items: center; gap: 10px; }
+        .navbar__brand img { width: 77px; height: auto; object-fit: contain; }
+        .navbar__links { display: flex; gap: 28px; align-items: center; list-style: none; }
+        .navbar__links a { color: rgba(255,255,255,0.85); font-size: 0.88rem; font-weight: 500; transition: color 0.25s; }
+        .navbar__links a:hover { color: #fff; }
+        .navbar__login-btn { border: 1.5px solid #FF6B00 !important; color: #FF6B00 !important; padding: 6px 16px; border-radius: 5px; font-weight: 600 !important; transition: background 0.25s, color 0.25s !important; }
+        .navbar__login-btn:hover { background: #FF6B00 !important; color: #fff !important; }
+        .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+        .hamburger span { display: block; width: 24px; height: 2px; background: #fff; border-radius: 2px; }
 
-        /* DRAWER */
-        .drawer-overlay {
-          display: none;
-          position: fixed;
-          inset: 0;
-          background: rgba(0, 0, 0, 0.45);
-          z-index: 1100;
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
-        .drawer-overlay.open {
-          display: block;
-          opacity: 1;
-        }
-        .mobile-drawer {
-          position: fixed;
-          top: 0;
-          right: 0;
-          bottom: 0;
-          width: 80%;
-          max-width: 320px;
-          background: #fff;
-          z-index: 1200;
-          display: flex;
-          flex-direction: column;
-          transform: translateX(100%);
-          transition: transform 0.3s ease;
-          box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
-        }
-        .mobile-drawer.open {
-          transform: translateX(0);
-        }
-        .mobile-drawer__header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 16px 20px;
-          border-bottom: 1px solid #eee;
-        }
-        .mobile-drawer__header img {
-          height: 44px;
-          width: auto;
-          object-fit: contain;
-        }
-        .mobile-drawer__close {
-          background: none;
-          border: none;
-          cursor: pointer;
-          font-size: 1.5rem;
-          color: #555;
-          line-height: 1;
-          padding: 4px;
-        }
-        .mobile-drawer__close:hover {
-          color: #111;
-        }
-        .mobile-drawer__nav {
-          flex: 1;
-          list-style: none;
-          padding: 8px 0;
-          overflow-y: auto;
-        }
-        .mobile-drawer__nav li {
-          border-bottom: 1px solid #f0f0f0;
-        }
-        .mobile-drawer__nav a {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          padding: 16px 24px;
-          font-size: 1rem;
-          font-weight: 500;
-          color: #333;
-          text-decoration: none;
-          transition: background var(--transition);
-        }
-        .mobile-drawer__nav a:hover {
-          background: #fff8f2;
-          color: var(--saffron);
-        }
-        .mobile-drawer__footer {
-          padding: 20px 24px;
-          border-top: 1px solid #eee;
-        }
-        .mobile-drawer__login {
-          display: block;
-          width: 100%;
-          padding: 15px;
-          background: var(--saffron);
-          color: #fff;
-          text-align: center;
-          font-size: 1rem;
-          font-weight: 700;
-          border-radius: 8px;
-          text-decoration: none;
-          transition: background var(--transition);
-        }
-        .mobile-drawer__login:hover {
-          background: var(--saffron-dark);
-          color: #fff;
-        }
+        /* Drawer */
+        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1100; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .drawer-overlay.open { opacity: 1; pointer-events: all; }
+        .mobile-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 80%; max-width: 320px; background: #fff; z-index: 1200; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.3s; box-shadow: -4px 0 24px rgba(0,0,0,0.15); }
+        .mobile-drawer.open { transform: translateX(0); }
+        .mobile-drawer__header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #eee; }
+        .mobile-drawer__header img { height: 44px; width: auto; }
+        .mobile-drawer__close { background: none; border: none; cursor: pointer; font-size: 1.5rem; color: #555; }
+        .mobile-drawer__nav { flex: 1; list-style: none; padding: 8px 0; overflow-y: auto; }
+        .mobile-drawer__nav li { border-bottom: 1px solid #f0f0f0; }
+        .mobile-drawer__nav a { display: flex; align-items: center; gap: 16px; padding: 16px 24px; font-size: 1rem; font-weight: 500; color: #333; }
+        .mobile-drawer__nav a:hover { background: #fff8f2; color: #FF6B00; }
+        .nav-icon { width: 36px; height: 36px; border-radius: 50%; background: #FF6B00; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; }
+        .mobile-drawer__footer { padding: 20px 24px; border-top: 1px solid #eee; }
+        .mobile-drawer__login { display: block; width: 100%; padding: 15px; background: #FF6B00; color: #fff; text-align: center; font-size: 1rem; font-weight: 700; border-radius: 8px; }
+        .mobile-drawer__login:hover { background: #CC5500; }
 
-        /* HERO */
-        .hero {
-          position: relative;
-          min-height: 420px;
-          background: linear-gradient(
-            135deg,
-            var(--saffron) 0%,
-            #ff8c00 50%,
-            var(--saffron-dark) 100%
-          );
-          overflow: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          padding: 60px 5% 70px;
-        }
-        .hero::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background-image: radial-gradient(
-            circle,
-            rgba(255, 255, 255, 0.15) 1px,
-            transparent 1px
-          );
-          background-size: 22px 22px;
-          pointer-events: none;
-        }
-        .hero__watermark {
-          position: absolute;
-          right: 5%;
-          top: 50%;
-          transform: translateY(-50%);
-          font-size: 14rem;
-          opacity: 0.06;
-          pointer-events: none;
-          user-select: none;
-          line-height: 1;
-        }
-        .hero__content {
-          position: relative;
-          z-index: 1;
-          max-width: 760px;
-        }
-        .hero__emblem {
-          width: 72px;
-          height: 72px;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.18);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto 18px;
-          backdrop-filter: blur(4px);
-          overflow: hidden;
-        }
-        .hero__emblem img {
-          width: 60px;
-          height: auto;
-          object-fit: contain;
-        }
-        .hero__tag {
-          display: inline-block;
-          background: rgba(255, 255, 255, 0.22);
-          color: #fff;
-          font-size: 0.78rem;
-          font-weight: 600;
-          letter-spacing: 2px;
-          text-transform: uppercase;
-          padding: 4px 14px;
-          border-radius: 20px;
-          border: 1px solid rgba(255, 255, 255, 0.4);
-          margin-bottom: 14px;
-        }
-        .hero__title {
-          font-family: "Tiro Devanagari Hindi", serif;
-          font-size: clamp(2rem, 5vw, 3.4rem);
-          color: #fff;
-          font-weight: 700;
-          line-height: 1.2;
-          text-shadow: 0 2px 16px rgba(0, 0, 0, 0.18);
-        }
-        .hero__subtitle {
-          font-size: clamp(1rem, 2.5vw, 1.3rem);
-          color: rgba(255, 255, 255, 0.9);
-          font-weight: 600;
-          margin: 10px 0 20px;
-          border-bottom: 3px solid rgba(255, 255, 255, 0.5);
-          display: inline-block;
-          padding-bottom: 4px;
-        }
-        .hero__desc {
-          font-size: 0.95rem;
-          color: rgba(255, 255, 255, 0.88);
-          max-width: 560px;
-          margin: 0 auto 28px;
-        }
+        /* Hero */
+        .hero { position: relative; min-height: 420px; background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 50%, #CC5500 100%); overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; padding: 60px 5% 70px; }
+        .hero::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px); background-size: 22px 22px; pointer-events: none; }
+        .hero__watermark { position: absolute; right: 5%; top: 50%; transform: translateY(-50%); font-size: 14rem; opacity: 0.06; pointer-events: none; user-select: none; line-height: 1; }
+        .hero__content { position: relative; z-index: 1; max-width: 760px; }
+        .hero__emblem { width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; backdrop-filter: blur(4px); overflow: hidden; }
+        .hero__emblem img { width: 60px; height: auto; object-fit: contain; }
+        .hero__tag { display: inline-block; background: rgba(255,255,255,0.22); color: #fff; font-size: 0.78rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.4); margin-bottom: 14px; }
+        .hero__title { font-family: 'Tiro Devanagari Hindi', serif; font-size: clamp(2rem,5vw,3.4rem); color: #fff; font-weight: 700; line-height: 1.2; text-shadow: 0 2px 16px rgba(0,0,0,0.18); }
+        .hero__subtitle { font-size: clamp(1rem,2.5vw,1.3rem); color: rgba(255,255,255,0.9); font-weight: 600; margin: 10px 0 20px; border-bottom: 3px solid rgba(255,255,255,0.5); display: inline-block; padding-bottom: 4px; }
+        .hero__desc { font-size: 0.95rem; color: rgba(255,255,255,0.88); max-width: 560px; margin: 0 auto 28px; }
 
-        /* SANSAD BANNER */
-        .sansad-banner img {
-          width: 50%;
-          display: block;
-          margin: 30px auto;
-          border-radius: 12px;
-          box-shadow: var(--card-shadow);
-          height: auto;
-        }
+        /* Sansad Banner */
+        .sansad-banner img { width: 50%; display: block; margin: 30px auto; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.09); height: auto; }
 
-        /* STATS BAR */
-        .stats-bar {
-          background: var(--white);
-          box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
-          display: flex;
-          justify-content: center;
-          flex-wrap: wrap;
-          gap: 0;
-        }
-        .stats-bar__item {
-          flex: 1 1 150px;
-          text-align: center;
-          padding: 20px 16px;
-          border-right: 1px solid #eee;
-        }
-        .stats-bar__item:last-child {
-          border-right: none;
-        }
-        .stats-bar__num {
-          font-size: 1.8rem;
-          font-weight: 800;
-          color: var(--saffron);
-          line-height: 1;
-        }
-        .stats-bar__label {
-          font-size: 0.76rem;
-          color: var(--gray-text);
-          font-weight: 500;
-          margin-top: 4px;
-        }
+        /* Stats */
+        .stats-bar { background: #fff; box-shadow: 0 2px 16px rgba(0,0,0,0.08); display: flex; justify-content: center; flex-wrap: wrap; }
+        .stats-bar__item { flex: 1 1 150px; text-align: center; padding: 20px 16px; border-right: 1px solid #eee; }
+        .stats-bar__item:last-child { border-right: none; }
+        .stats-bar__num { font-size: 1.8rem; font-weight: 800; color: #FF6B00; line-height: 1; }
+        .stats-bar__label { font-size: 0.76rem; color: #555; font-weight: 500; margin-top: 4px; }
 
-        /* FILTER SECTION */
-        .filter-section {
-          max-width: 1200px;
-          margin: 40px auto 0;
-          padding: 0 5%;
-        }
-        .filter-section__title {
-          font-size: 1.7rem;
-          font-weight: 800;
-          color: var(--navy);
-          margin-bottom: 20px;
-          text-align: center;
-        }
-        .filter-section__title span {
-          color: var(--saffron);
-        }
-        .search-bar {
-          display: flex;
-          align-items: center;
-          background: var(--white);
-          border: 2px solid #e0e0e0;
-          border-radius: 50px;
-          padding: 6px 8px 6px 20px;
-          box-shadow: var(--card-shadow);
-          max-width: 560px;
-          margin: 0 auto 28px;
-          transition: border-color var(--transition);
-        }
-        .search-bar:focus-within {
-          border-color: var(--saffron);
-        }
-        .search-bar input {
-          flex: 1;
-          border: none;
-          outline: none;
-          font-size: 0.95rem;
-          font-family: "Poppins", sans-serif;
-          background: transparent;
-          color: var(--navy);
-        }
-        .search-bar input::placeholder {
-          color: #aaa;
-        }
-        .search-bar button {
-          background: var(--saffron);
-          color: #fff;
-          border: none;
-          border-radius: 40px;
-          padding: 9px 22px;
-          font-size: 0.88rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: background var(--transition);
-        }
-        .search-bar button:hover {
-          background: var(--saffron-dark);
-        }
-        .filter-chips {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          justify-content: center;
-          margin-bottom: 36px;
-        }
-        .chip {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 7px 16px;
-          border-radius: 30px;
-          border: 2px solid #ddd;
-          background: var(--white);
-          font-size: 0.8rem;
-          font-weight: 600;
-          cursor: pointer;
-          white-space: nowrap;
-          transition:
-            background var(--transition),
-            border-color var(--transition),
-            color var(--transition),
-            transform var(--transition);
-        }
-        .chip:hover,
-        .chip.active {
-          background: var(--saffron);
-          border-color: var(--saffron);
-          color: #fff;
-          transform: translateY(-1px);
-        }
-        .chip__dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: currentColor;
-          opacity: 0.7;
-        }
+        /* Filter */
+        .filter-section { max-width: 1200px; margin: 40px auto 0; padding: 0 5%; }
+        .filter-section__title { font-size: 1.7rem; font-weight: 800; color: #1a2035; margin-bottom: 20px; text-align: center; }
+        .filter-section__title span { color: #FF6B00; }
+        .search-bar { display: flex; align-items: center; background: #fff; border: 2px solid #e0e0e0; border-radius: 50px; padding: 6px 8px 6px 20px; box-shadow: 0 4px 24px rgba(0,0,0,0.09); max-width: 560px; margin: 0 auto 28px; transition: border-color 0.25s; }
+        .search-bar:focus-within { border-color: #FF6B00; }
+        .search-bar input { flex: 1; border: none; outline: none; font-size: 0.95rem; font-family: 'Poppins', sans-serif; background: transparent; color: #1a2035; }
+        .search-bar input::placeholder { color: #aaa; }
+        .search-bar button { background: #FF6B00; color: #fff; border: none; border-radius: 40px; padding: 9px 22px; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: background 0.25s; }
+        .search-bar button:hover { background: #CC5500; }
+        .filter-chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 36px; }
+        .chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 30px; border: 2px solid #ddd; background: #fff; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.25s; white-space: nowrap; font-family: 'Poppins', sans-serif; }
+        .chip:hover, .chip.active { background: #FF6B00; border-color: #FF6B00; color: #fff; transform: translateY(-1px); }
+        .chip__dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: 0.7; }
 
-        /* SCHEME SECTIONS */
-        .schemes-wrapper {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 0 5% 60px;
-        }
-        .category {
-          margin-bottom: 52px;
-          animation: fadeUp 0.5s ease both;
-        }
-        @keyframes fadeUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .category__header {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-          margin-bottom: 20px;
-          padding-bottom: 12px;
-          border-bottom: 3px solid var(--gray-light);
-        }
-        .category__icon {
-          width: 48px;
-          height: 48px;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.5rem;
-          flex-shrink: 0;
-        }
-        .category__title {
-          font-size: 1.25rem;
-          font-weight: 800;
-          color: var(--navy);
-        }
-        .category__count {
-          margin-left: auto;
-          background: var(--gray-light);
-          color: var(--gray-text);
-          font-size: 0.78rem;
-          font-weight: 700;
-          padding: 4px 12px;
-          border-radius: 20px;
-        }
-        .schemes-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          gap: 18px;
-        }
+        /* Category & Cards */
+        .schemes-wrapper { max-width: 1200px; margin: 0 auto; padding: 0 5% 60px; }
+        .category { margin-bottom: 52px; animation: fadeUp 0.5s ease both; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .category__header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 3px solid #f4f4f6; }
+        .category__icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+        .category__title { font-size: 1.25rem; font-weight: 800; color: #1a2035; }
+        .category__count { margin-left: auto; background: #f4f4f6; color: #555; font-size: 0.78rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+        .schemes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+        .scheme-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.09); padding: 20px 20px 16px; display: flex; flex-direction: column; gap: 10px; border-left: 4px solid var(--cat-color, #FF6B00); transition: box-shadow 0.25s, transform 0.25s; position: relative; overflow: hidden; }
+        .scheme-card:hover { box-shadow: 0 8px 32px rgba(255,107,0,0.18); transform: translateY(-4px); }
+        .scheme-card__top { display: flex; align-items: center; gap: 12px; }
+        .scheme-card__logo { width: 48px; height: 48px; border-radius: 10px; background: #f4f4f6; border: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+        .scheme-card__logo img { width: 36px; height: 36px; object-fit: contain; border-radius: 4px; }
+        .flag-fallback { display: flex; align-items: center; justify-content: center; }
+        .scheme-card__name { font-size: 0.96rem; font-weight: 700; color: #1a2035; line-height: 1.35; }
+        .scheme-card__desc { font-size: 0.8rem; color: #555; line-height: 1.5; flex: 1; }
+        .scheme-card__link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 600; margin-top: 4px; transition: gap 0.25s; }
+        .scheme-card__link:hover { gap: 10px; }
 
-        /* SCHEME CARD */
-        .scheme-card {
-          background: var(--white);
-          border-radius: var(--radius);
-          box-shadow: var(--card-shadow);
-          padding: 20px 20px 16px;
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          border-left: 4px solid var(--cat-color, var(--saffron));
-          transition:
-            box-shadow var(--transition),
-            transform var(--transition);
-          position: relative;
-          overflow: hidden;
-        }
-        .scheme-card::after {
-          content: "";
-          position: absolute;
-          top: 0;
-          right: 0;
-          bottom: 0;
-          width: 4px;
-          background: var(--cat-color, var(--saffron));
-          opacity: 0;
-          transition: opacity var(--transition);
-        }
-        .scheme-card:hover {
-          box-shadow: var(--card-hover);
-          transform: translateY(-4px);
-        }
-        .scheme-card:hover::after {
-          opacity: 1;
-        }
-        .scheme-card__top {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .scheme-card__logo {
-          width: 48px;
-          height: 48px;
-          border-radius: 10px;
-          background: var(--gray-light);
-          border: 1px solid #e8e8e8;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-          overflow: hidden;
-        }
-        .scheme-card__logo img {
-          width: 36px;
-          height: 36px;
-          object-fit: contain;
-          border-radius: 4px;
-        }
-        .scheme-card__logo .flag-fallback {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 36px;
-          height: 36px;
-        }
-        .scheme-card__name {
-          font-size: 0.96rem;
-          font-weight: 700;
-          color: var(--navy);
-          line-height: 1.35;
-        }
-        .scheme-card__desc {
-          font-size: 0.8rem;
-          color: var(--gray-text);
-          line-height: 1.5;
-          flex: 1;
-        }
-        .scheme-card__link {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 0.78rem;
-          font-weight: 600;
-          color: var(--cat-color, var(--saffron));
-          margin-top: 4px;
-          transition: gap var(--transition);
-        }
-        .scheme-card__link:hover {
-          gap: 10px;
-        }
+        /* Footer */
+        footer { background: #fff; border-top: 1px solid #e8e8e8; text-align: center; padding: 28px 5% 20px; font-size: 0.78rem; color: #777; }
+        footer .footer__logo { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px; }
+        footer .footer__logo img { width: 160px; height: auto; object-fit: contain; }
+        footer a { color: #FF6B00; transition: color 0.25s; }
+        footer a:hover { color: #CC5500; }
 
-        /* FOOTER */
-        footer {
-          background: #ffffff;
-          border-top: 1px solid #e8e8e8;
-          text-align: center;
-          padding: 28px 5% 20px;
-          font-size: 0.78rem;
-          color: #777;
-        }
-        footer .footer__logo {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 12px;
-          margin-bottom: 12px;
-        }
-        footer .footer__logo img {
-          height: auto;
-          width: 160px;
-          object-fit: contain;
-        }
-        footer a {
-          color: var(--saffron);
-          transition: color var(--transition);
-        }
-        footer a:hover {
-          color: var(--saffron-dark);
-        }
+        /* Back to top */
+        #backToTop { position: fixed; bottom: 28px; right: 28px; width: 44px; height: 44px; border-radius: 50%; background: #FF6B00; color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 4px 18px rgba(255,107,0,0.4); opacity: 0; transform: translateY(20px); transition: opacity 0.25s, transform 0.25s, background 0.25s; z-index: 500; pointer-events: none; }
+        #backToTop.visible { opacity: 1; transform: translateY(0); pointer-events: all; }
+        #backToTop:hover { background: #CC5500; transform: translateY(-3px); }
 
-        /* BACK TO TOP */
-        #backToTop {
-          position: fixed;
-          bottom: 28px;
-          right: 28px;
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          background: var(--saffron);
-          color: #fff;
-          border: none;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.2rem;
-          box-shadow: 0 4px 18px rgba(255, 107, 0, 0.4);
-          opacity: 0;
-          transform: translateY(20px);
-          transition:
-            opacity var(--transition),
-            transform var(--transition),
-            background var(--transition);
-          z-index: 500;
-        }
-        #backToTop.visible {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        #backToTop:hover {
-          background: var(--saffron-dark);
-          transform: translateY(-3px);
-        }
+        /* Mobile dropdown */
+        .filter-select-wrap { display: none; position: relative; margin-bottom: 28px; }
+        .filter-select-wrap::after { content: ''; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #FF6B00; pointer-events: none; }
+        .filter-select { width: 100%; padding: 9px 36px 9px 16px; border: 2px solid #e0e0e0; border-radius: 50px; background: #fff; font-family: 'Poppins', sans-serif; font-size: 0.82rem; font-weight: 600; color: #1a2035; appearance: none; -webkit-appearance: none; cursor: pointer; box-shadow: 0 4px 24px rgba(0,0,0,0.09); outline: none; }
+        .filter-select:focus { border-color: #FF6B00; }
 
-        /* RESPONSIVE */
         @media (max-width: 768px) {
-          .navbar__links {
-            display: none;
-          }
-          .hamburger {
-            display: flex;
-          }
-          .stats-bar__item {
-            flex: 1 1 50%;
-          }
-          .schemes-grid {
-            grid-template-columns: 1fr;
-          }
-          .category__header {
-            flex-wrap: wrap;
-          }
-          .sansad-banner img {
-            width: 90%;
-          }
+          .navbar__links { display: none; }
+          .hamburger { display: flex; }
+          .stats-bar__item { flex: 1 1 50%; }
+          .schemes-grid { grid-template-columns: 1fr; }
+          .sansad-banner img { width: 90%; }
+          .filter-chips { display: none; }
+          .filter-select-wrap { display: block; }
         }
         @media (max-width: 480px) {
-          .hero {
-            padding: 44px 5% 54px;
-          }
-          .stats-bar__item {
-            flex: 1 1 100%;
-            border-right: none;
-            border-bottom: 1px solid #eee;
-          }
+          .hero { padding: 44px 5% 54px; }
+          .stats-bar__item { flex: 1 1 50%; border-right: none; border-bottom: 1px solid #eee; }
         }
       `}</style>
 
-
-
-      {/* HERO */}
+      {/* ── Hero ── */}
       <header className="hero">
         <div className="hero__watermark" aria-hidden="true">
           🇮🇳
@@ -1397,22 +812,22 @@ export default function GovtSchemesPage() {
         </div>
       </header>
 
-      {/* STATS BAR */}
+      {/* ── Stats Bar ── */}
       <section className="stats-bar" aria-label="Quick statistics">
         {[
           { num: "80+", label: "सरकारी योजनाएं" },
           { num: "12", label: "श्रेणियाँ" },
           { num: "₹5L", label: "स्वास्थ्य बीमा तक" },
           { num: "100%", label: "मुफ़्त जानकारी" },
-        ].map(({ num, label }) => (
-          <div key={label} className="stats-bar__item">
-            <div className="stats-bar__num">{num}</div>
-            <div className="stats-bar__label">{label}</div>
+        ].map((s) => (
+          <div className="stats-bar__item" key={s.label}>
+            <div className="stats-bar__num">{s.num}</div>
+            <div className="stats-bar__label">{s.label}</div>
           </div>
         ))}
       </section>
 
-      {/* SANSAD BANNER */}
+      {/* ── Sansad Banner ── */}
       <section className="sansad-banner">
         <img
           src="https://res.cloudinary.com/dxwwnettz/image/upload/v1773993978/Satna_SSK_MicroBanner_ciqocz.webp"
@@ -1422,7 +837,7 @@ export default function GovtSchemesPage() {
         />
       </section>
 
-      {/* SEARCH & FILTER */}
+      {/* ── Filter Section ── */}
       <section
         className="filter-section"
         aria-label="Search and Filter Schemes"
@@ -1430,18 +845,21 @@ export default function GovtSchemesPage() {
         <h2 className="filter-section__title">
           सभी <span>सरकारी योजनाएं</span> खोजें
         </h2>
+
         <div className="search-bar" role="search">
           <input
             type="search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="योजना का नाम खोजें… (e.g. PM-KISAN, Ayushman)"
             aria-label="Search government schemes"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button type="button" aria-label="Search">
             खोजें
           </button>
         </div>
+
+        {/* Desktop chips */}
         <div
           className="filter-chips"
           role="group"
@@ -1467,21 +885,58 @@ export default function GovtSchemesPage() {
             </button>
           ))}
         </div>
+
+        {/* Mobile dropdown */}
+        <div className="filter-select-wrap">
+          <select
+            className="filter-select"
+            aria-label="Filter by category"
+            value={activeFilter}
+            onChange={(e) => handleChipClick(e.target.value)}
+          >
+            <option value="all">📋 सभी योजनाएं</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.emoji} {cat.titleHi}
+              </option>
+            ))}
+          </select>
+        </div>
       </section>
 
-      {/* SCHEMES LISTING */}
+      {/* ── Schemes Listing ── */}
       <main className="schemes-wrapper" aria-label="Government Schemes Listing">
-        {filteredCategories.map((cat, i) => (
-          <CategorySection key={cat.id} cat={cat} index={i} />
+        {filteredCategories.map((cat) => (
+          <CategorySection key={cat.id} cat={cat} visible={true} />
         ))}
+        {filteredCategories.length === 0 && (
+          <p style={{ textAlign: "center", color: "#888", padding: "40px 0" }}>
+            कोई योजना नहीं मिली। कृपया दूसरे कीवर्ड से खोजें।
+          </p>
+        )}
       </main>
 
+      {/* ── Footer ── */}
+      <footer role="contentinfo">
+        <div className="footer__logo">
+          <img
+            src="/SSASatna_Color_Logo.png"
+            alt="Sansad Suvidha Kendra Satna"
+          />
+        </div>
+        <p className="footer__copy">
+          Copyright &copy; {year} All Rights Reserved |{" "}
+          <a href="https://ssksatna.com" target="_blank" rel="noopener">
+            ssksatna.com
+          </a>
+        </p>
+      </footer>
 
-      {/* BACK TO TOP */}
+      {/* ── Back to Top ── */}
       <button
         id="backToTop"
-        className={showBackToTop ? "visible" : ""}
-        onClick={handleBackToTop}
+        className={showBackTop ? "visible" : ""}
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         aria-label="Back to top"
       >
         <svg

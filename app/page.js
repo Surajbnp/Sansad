@@ -113,7 +113,7 @@ import { useTitle } from "@/hooks/useTitle";
 export default function Home() {
   useTitle("सांसद सुविधा केंद्र – सतना-मैहर");
   return (
-    <Box className={styles.page} minH={{ base: "fit-content", md: "100vh" }}>
+    <Box className={styles.page} minH={{ base: "fit-content", md: "100vh" }} >
       <Box className={styles.heroWrapper} w="100%">
         <Image
           src="/SatnaSSK_Homeslide_Mobile.webp"

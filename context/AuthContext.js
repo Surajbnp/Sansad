@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     await fetch("/api/user/logout", { method: "POST" });
     setUser(null);
+    window.location.href = "/";
   };
 
   /* ------------------ BOOTSTRAP AUTH ------------------ */

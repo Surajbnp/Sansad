@@ -41,11 +41,12 @@ import {
 } from "react-icons/md";
 import { IoMdCreate } from "react-icons/io";
 import { GrUserWorker } from "react-icons/gr";
+import { FaHandHoldingUsd } from "react-icons/fa";
 
 const Links = [
   { name: "Home", href: "/", icon: MdHome },
   { name: "About", href: "/about", icon: MdInfo },
-  { name: "Govt Schemes", href: "/govt-schemes", icon: MdInfo },
+  { name: "Govt Schemes", href: "/govt-schemes", icon: FaHandHoldingUsd },
   { name: "Success Stories", href: "/success-stories", icon: MdAutoGraph },
   { name: "Blog & News", href: "/blog", icon: MdBook },
   { name: "Contact", href: "/contact", icon: MdContactPhone },
@@ -74,7 +75,7 @@ export default function Navbar() {
   // authReady: true once we know whether user is logged in or not
   const { user, logout, loading: authLoading } = useAuth();
   const authReady = !authLoading;
-  console.log(user, 'from usr')
+  console.log(user, "from usr");
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -89,7 +90,7 @@ export default function Navbar() {
     <>
       <Box
         bg={{
-          base: scrolled ? "rgba(122, 72, 29)" : "transparent",
+          base: scrolled ? "rgba(122, 72, 29)" : "rgba(122, 72, 29)",
           md: "rgb(122, 72, 29)",
         }}
         backdropFilter={{
@@ -99,9 +100,9 @@ export default function Navbar() {
         transition="background 0.3s ease"
         color="white"
         w="100%"
-        position="fixed"
-        top={0}
-        zIndex={1000}
+        // position="fixed"
+        // top={0}
+        // zIndex={1000}
         borderBottom={{
           base: scrolled ? "1px solid rgba(255,255,255,0.08)" : "none",
           md: "1px solid rgba(255,255,255,0.08)",

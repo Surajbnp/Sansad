@@ -15,10 +15,11 @@ const css = `
   }
 
   .ts-card {
-    border-radius: 20px;
     padding: 2rem 1.75rem;
     width: 100%;
     max-width: 440px;
+              border:1px solid rgba(250,118,2,0.12);
+
   }
 
   /* header */

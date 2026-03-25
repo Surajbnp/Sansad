@@ -175,7 +175,7 @@ const Page = () => {
   const badge = roleMeta[user?.role] ?? roleMeta.User;
 
   return (
-    <Box minH="100vh" bg="#fafafa" pt="100px" pb="60px" px={{ base: 4, md: 8 }}>
+    <Box minH="100vh" bg="#fafafa" pt={10} px={{ base: 4, md: 8 }}>
       <Box maxW="1100px" mx="auto">
         {isLoading ? (
           <VStack spacing={4}>
