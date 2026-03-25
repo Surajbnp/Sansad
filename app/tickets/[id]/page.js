@@ -311,7 +311,7 @@ export default function TicketDetailsPage() {
     ticket?.statusHistory?.[ticket?.statusHistory?.length - 1];
 
   return (
-    <Box minH="100vh" bg="#fafafa" pt="90px" pb="80px" px={{ base: 4, md: 8 }}>
+    <Box minH="100vh" bg="#fafafa" py={10}   px={{ base: 4, md: 8 }}>
       <Box maxW="800px" mx="auto">
         {!ticket ? (
           <Box bg="white" borderRadius="16px" p={6}>

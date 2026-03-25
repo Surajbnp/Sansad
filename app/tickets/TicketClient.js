@@ -11,7 +11,6 @@ import {
   SkeletonCircle,
   VStack,
   useToast,
-  Badge,
   HStack,
   Select,
   Input,
@@ -19,7 +18,6 @@ import {
   InputLeftElement,
 } from "@chakra-ui/react";
 import { useAuth } from "@/context/AuthContext";
-import { IoTicket } from "react-icons/io5";
 import { IoMdCreate } from "react-icons/io";
 import { MdSearch, MdFilterList } from "react-icons/md";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -46,13 +44,25 @@ const STATUS_CONFIG = {
 const getStatusStyle = (status) =>
   STATUS_CONFIG[status] || { color: "#6b7280", bg: "#f9fafb", label: status };
 
-/* ── date formatter ── */
 const fmtDate = (d) =>
   new Date(d).toLocaleDateString("hi-IN", {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
+
+// Map URL param values → Select option values (normalise whatever comes in)
+const PARAM_TO_OPTION = {
+  all: "All",
+  submitted: "submitted",
+  assigned: "assigned",
+  inprogress: "inprogress",
+  "in progress": "inprogress",
+  "in-progress": "inprogress",
+  completed: "completed",
+  resolved: "completed",
+  closed: "completed",
+};
 
 /* ─────────────────────────────────────────
    TICKET CARD
@@ -98,7 +108,6 @@ const TicketCard = ({ ticket, onClick, index }) => {
         direction={{ base: "column", md: "row" }}
       >
         <VStack align="flex-start" spacing={2} flex={1}>
-          {/* ticket id + date */}
           <HStack spacing={3}>
             <Text
               fontSize="10px"
@@ -119,7 +128,6 @@ const TicketCard = ({ ticket, onClick, index }) => {
             )}
           </HStack>
 
-          {/* title */}
           <Text
             fontSize="md"
             fontWeight="700"
@@ -129,12 +137,10 @@ const TicketCard = ({ ticket, onClick, index }) => {
             {ticket.title}
           </Text>
 
-          {/* description */}
           <Text fontSize="sm" color="gray.500" noOfLines={2} lineHeight="1.6">
             {ticket.description}
           </Text>
 
-          {/* badges */}
           <HStack spacing={2} mt={1} flexWrap="wrap">
             <Box
               px={3}
@@ -164,7 +170,6 @@ const TicketCard = ({ ticket, onClick, index }) => {
           </HStack>
         </VStack>
 
-        {/* view button */}
         <Button
           size="sm"
           minW="110px"
@@ -202,9 +207,11 @@ export default function Page() {
   const [isFetching, setIsFetching] = useState(false);
   const [search, setSearch] = useState("");
 
-  const state = searchParams.get("state") || "All";
+  // Normalise the URL param to one of our Select option values
+  const rawState = searchParams.get("state") || "All";
+  const state = PARAM_TO_OPTION[rawState.toLowerCase()] || "All";
 
-  /* ── fetch tickets — cookie sent automatically ── */
+  /* ── fetch tickets ── */
   const fetchTickets = async () => {
     if (!user) return;
     setIsFetching(true);
@@ -244,12 +251,24 @@ export default function Page() {
       ? "All Tickets"
       : user?.role === "Department"
         ? "Department Tickets"
-        : "Your Tickets";
+        : "आपकी Tickets";
+
+  /* ── empty state label based on active filter ── */
+  const emptyLabel = (() => {
+    if (search.trim()) return `"${search}" से कोई ticket नहीं मिली`;
+    const labels = {
+      submitted: "कोई submitted ticket नहीं है",
+      assigned: "कोई assigned ticket नहीं है",
+      inprogress: "कोई in-progress ticket नहीं है",
+      completed: "कोई completed ticket नहीं है",
+      All: "अभी कोई ticket नहीं है",
+    };
+    return labels[state] || "कोई ticket नहीं मिली";
+  })();
 
   /* ─────────────── RENDER ─────────────── */
   return (
-    
-    <Box minH="100vh" bg="#fafafa" pt="90px" pb="60px" px={{ base: 4, md: 8 }}>
+    <Box minH="100vh" bg="#fafafa" py={10} px={{ base: 4, md: 8 }}>
       <Box maxW="860px" mx="auto">
         {loading || isFetching ? (
           <VStack spacing={4} pt={8}>
@@ -284,7 +303,7 @@ export default function Page() {
                 </Text>
                 <Text fontSize="sm" color="gray.400" mt="1px">
                   {filtered.length} ticket{filtered.length !== 1 ? "s" : ""}{" "}
-                  found
+                  मिली
                 </Text>
               </Box>
 
@@ -308,7 +327,6 @@ export default function Page() {
 
             {/* ── FILTERS ── */}
             <Flex gap={3} mb={6} wrap="wrap">
-              {/* search */}
               <InputGroup flex={1} minW="200px">
                 <InputLeftElement pointerEvents="none" h="42px">
                   <MdSearch color="#a0aec0" size={18} />
@@ -319,7 +337,7 @@ export default function Page() {
                   borderColor="gray.200"
                   bg="white"
                   fontSize="sm"
-                  placeholder="Search by title or ID..."
+                  placeholder="Title या ID से खोजें..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   focusBorderColor="#fa7602"
@@ -327,7 +345,6 @@ export default function Page() {
                 />
               </InputGroup>
 
-              {/* state filter */}
               <Select
                 w={{ base: "100%", sm: "180px" }}
                 h="42px"
@@ -351,28 +368,21 @@ export default function Page() {
             {/* ── TICKET LIST ── */}
             {filtered.length === 0 ? (
               <Flex
-                h="50vh"
+                h="40vh"
                 align="center"
                 justify="center"
                 flexDir="column"
-                gap={4}
+                gap={3}
               >
-                <Box fontSize="48px">🎫</Box>
-                <Text color="gray.400" fontSize="lg" fontWeight="600">
-                  {search ? "कोई ticket नहीं मिली" : "अभी कोई ticket नहीं है"}
+                <Box fontSize="44px">🎫</Box>
+                <Text
+                  color="gray.400"
+                  fontSize="lg"
+                  fontWeight="600"
+                  textAlign="center"
+                >
+                  {emptyLabel}
                 </Text>
-                {user?.role === "User" && !search && (
-                  <Button
-                    bg="#fa7602"
-                    color="white"
-                    borderRadius="full"
-                    leftIcon={<IoTicket />}
-                    _hover={{ bg: "#e06800" }}
-                    onClick={() => router.push("/create-ticket")}
-                  >
-                    पहली Ticket बनाएं
-                  </Button>
-                )}
               </Flex>
             ) : (
               <VStack spacing={3} align="stretch">
@@ -392,4 +402,3 @@ export default function Page() {
     </Box>
   );
 }
-

@@ -233,7 +233,7 @@ useTitle("Create Ticket");
       mx="auto"
       px={{ base: 4, md: 6 }}
       py={8}
-      mt={{ base: 16, md: 20 }}
+      // mt={{ base: 16, md: 20 }}
     >
       {/* ══════════ PAGE HEADER ══════════ */}
       <Box mb={7}>
