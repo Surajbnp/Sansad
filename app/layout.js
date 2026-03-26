@@ -1,6 +1,6 @@
 
 
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Khand, Mukta } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
 
@@ -20,6 +20,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const khand = Khand({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-khand",
+});
+
+const mukta = Mukta({
+  subsets: ["latin", "devanagari"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-mukta",
+});
+
 function RootLayout({ children }) {
   return (
     <html lang="en">
@@ -29,7 +41,8 @@ function RootLayout({ children }) {
           type="text/javascript"
         ></script>
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className={`${geistSans.variable} ${geistMono.variable}   ${khand.variable} 
+    ${mukta.variable}`}>
         <Providers>
           {children}
         </Providers>

@@ -13,13 +13,14 @@
   gap: 6px;
   background: var(--saffron-glow);
   color: var(--saffron);
-  font-size: 0.72rem;
+  font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
   padding: 5px 14px;
   border-radius: 20px;
   margin-bottom: 18px;
+  font-family: var(--font-mukta);
 }
 
 /* INTRO */
@@ -38,7 +39,7 @@
 
 /* HEADING */
 .intro h2 {
-  font-family: 'Tiro Devanagari Hindi', serif;
+  font-family: var(--font-mukta);
   font-size: clamp(1.6rem, 3vw, 2.3rem);
   font-weight: 700;
   color: var(--black-text);
@@ -49,11 +50,12 @@
 .intro h2 em {
   color: var(--saffron);
   font-style: normal;
+    font-family: var(--font-mukta);
 }
 
 /* TEXT */
 .intro p {
-  font-family: 'Tiro Devanagari Hindi', serif;
+  font-family: var(--font-mukta);
   font-size: 1.05rem;
   color: var(--gray-text);
   line-height: 2;
@@ -109,10 +111,11 @@
   margin-bottom: 20px;
   font-size: 0.72rem;
   font-weight: 700;
+    font-family: var(--font-mukta);
 }
 
 .addressBlockName {
-  font-family: 'Tiro Devanagari Hindi', serif;
+   font-family: var(--font-mukta);
   color: #fff;
   margin-bottom: 18px;
 }
@@ -142,6 +145,7 @@
 .addressLineText {
   color: rgba(255, 255, 255, 0.88);
   font-size: 0.95rem;
+    font-family: var(--font-mukta);
 }
 
 .addressLineText a {
@@ -169,6 +173,7 @@
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
+  
 }
 
 .mapEmbedBtn {
@@ -217,7 +222,7 @@
 
 /* TEXT */
 .reachStripText h3 {
-  font-family: 'Tiro Devanagari Hindi', serif;
+    font-family: var(--font-mukta);
   font-size: 1.3rem;
   font-weight: 700;
   color: var(--black-text);
@@ -225,7 +230,7 @@
 }
 
 .reachStripText p {
-  font-family: 'Tiro Devanagari Hindi', serif;
+    font-family: var(--font-mukta);
   font-size: 0.93rem;
   color: var(--gray-text);
   line-height: 1.75;
@@ -321,7 +326,7 @@
 
 /* TEXT */
 .cta h2 {
-  font-family: 'Tiro Devanagari Hindi', serif;
+  font-family: var(--font-mukta);
   font-size: clamp(1.5rem, 3vw, 2.3rem);
   font-weight: 700;
   margin-bottom: 18px;
@@ -329,7 +334,7 @@
 }
 
 .cta p {
-  font-family: 'Tiro Devanagari Hindi', serif;
+  font-family: var(--font-mukta);
   font-size: 1.02rem;
   opacity: 0.93;
   max-width: 580px;
@@ -365,7 +370,7 @@
   cursor: pointer;
   border: 2px solid transparent;
   transition: all var(--transition);
-  font-family: 'Poppins', sans-serif;
+   font-family: var(--font-mukta);
 }
 
 /* DARK */
