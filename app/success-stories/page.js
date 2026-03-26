@@ -133,7 +133,7 @@ export default function Page() {
   }, []);
 
 
-  useTitle("Success Stories");
+  useTitle("जनसेवा के परिणाम | सांसद सुविधा केंद्र – सतना-मैहर");
   return (
     <>
       {/* HERO */}
@@ -206,7 +206,7 @@ export default function Page() {
             opacity={0.9}
             fontSize={{ base: "sm", md: "md" }}
           >
-            सुहर काम में दिखता है जनसेवा का संकल्प
+            हर काम में दिखता है जनसेवा का संकल्प
           </Text>
 
         </Container>

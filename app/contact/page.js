@@ -14,7 +14,7 @@ import styles from "./contact.module.css";
 import Link from "next/link";
 
 export default function Contact() {
-  useTitle("संपर्क करें");
+  useTitle("संपर्क करें | सांसद सुविधा केंद्र – सतना-मैहर");
   return (
     <Box>
 

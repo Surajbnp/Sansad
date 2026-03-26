@@ -142,7 +142,7 @@ const InfoChip = ({ label, value }) => (
 const Page = () => {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
-  useTitle("Profile");
+  useTitle("Profile | सांसद सुविधा केंद्र – सतना-मैहर");
 
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);

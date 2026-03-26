@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import NextLink from "next/link";
 import { useTitle } from "@/hooks/useTitle";
+import styles from "./login.module.css";
 
 const SAFFRON = "#FA7602";
 const SAFFRON_DARK = "#D96200";
@@ -43,7 +44,7 @@ export default function Login() {
   const toast = useToast();
   const router = useRouter();
   const { login } = useAuth();
-  useTitle("Login");
+  useTitle("Login | सांसद सुविधा केंद्र – सतना-मैहर");
 
   useEffect(() => {
     if (resendTimer === 0) return;
@@ -285,10 +286,19 @@ export default function Login() {
         }
       `}</style>
 
-      <div className="login-page">
-        <div className="login-card">
-          {/* ── Header ── */}
-          <div className="login-header">
+      <div className={styles.pageWrapper}>
+
+        <section className={styles.sansadBanner}>
+          <img
+            src="https://res.cloudinary.com/dxwwnettz/image/upload/v1773993978/Satna_SSK_MicroBanner_ciqocz.webp"
+            alt="Sansad Suvidha Kendra Satna – Government Schemes Banner"
+            fetchPriority="high"
+            loading="eager"
+          />
+        </section>
+
+        {/* ── Header ── */}
+        {/* <div className="login-header">
             <Box position="relative" zIndex={1}>
               <HStack spacing={3} mb={2}>
                 <Badge
@@ -323,10 +333,15 @@ export default function Login() {
                 Login · Madhya Pradesh
               </Text>
             </Box>
-          </div>
+          </div> */}
 
-          {/* ── Body ── */}
-          <div className="login-body">
+
+
+
+        {/* ── Body ── */}
+        <div className={styles.formWrapper}>
+          <div className={styles.loginCard}>
+
             <VStack spacing={5} align="stretch">
               {/* Phone Field */}
               <FormControl isInvalid={!!phoneError}>
@@ -545,7 +560,9 @@ export default function Login() {
             </VStack>
           </div>
         </div>
+
       </div>
+
     </>
   );
 }

@@ -155,7 +155,7 @@ export default function Blog() {
     }
   ];
 
-  useTitle("ब्लॉग और समाचार ");
+  useTitle("ब्लॉग और समाचार | सांसद सुविधा केंद्र – सतना-मैहर");
   return (
     <Box>
 

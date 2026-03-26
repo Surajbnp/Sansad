@@ -14,7 +14,7 @@ import styles from "./about.module.css";
 import Link from "next/link";
 import { useTitle } from "@/hooks/useTitle";
 export default function AboutPage() {
-  useTitle("हमारे बारे में");
+  useTitle("हमारे बारे में | सांसद सुविधा केंद्र – सतना-मैहर");
   return (
     <Box bg="#FFF8F2">
 
