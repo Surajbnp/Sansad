@@ -20,10 +20,19 @@
 
 * {
   box-sizing: border-box;
-  font-family: "Geist", sans-serif;
 }
 
 #nprogress .bar {
   background: #fa7602 !important;
   height: 3px !important;
+}
+
+
+
+.hindiText {
+  font-family: var(--font-mukta);
+}
+
+.headingHindi {
+  font-family: var(--font-khand);
 }

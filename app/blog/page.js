@@ -155,7 +155,7 @@ export default function Blog() {
     }
   ];
 
-  useTitle("ब्लॉग और समाचार ");
+  useTitle("ब्लॉग और समाचार | सांसद सुविधा केंद्र – सतना-मैहर");
   return (
     <Box>
 
@@ -203,7 +203,7 @@ export default function Blog() {
           </Box>
 
           <Text
-            fontSize="xs"
+            fontSize="sm"
             letterSpacing="2px"
             bg="rgba(255,255,255,0.22)"
             display="inline-block"
@@ -213,13 +213,15 @@ export default function Blog() {
             mb={4}
             fontWeight="bold"
             border="1px solid rgba(255,255,255,0.4)"
+            fontFamily="var(--font-mukta)"
           >
             सतना-मैहर लोकसभा क्षेत्र
           </Text>
 
           <Heading
-            fontSize={{ base: "2xl", md: "5xl" }}
-            mb={6}
+            fontSize={{ base: "3xl", md: "5xl" }}
+            mb={4}
+             className="hindiText"
           >
             ब्लॉग और समाचार
           </Heading>
@@ -227,7 +229,9 @@ export default function Blog() {
           <Text
             mt={2}
             opacity={0.9}
-            fontSize={{ base: "sm", md: "md" }}
+            fontSize={{ base: "lg", md: "lg" }}
+        className="hindiText"
+
           >
             क्षेत्र की खबरें, योजनाओं की जानकारी
           </Text>

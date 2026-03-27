@@ -14,7 +14,7 @@ import styles from "./about.module.css";
 import Link from "next/link";
 import { useTitle } from "@/hooks/useTitle";
 export default function AboutPage() {
-  useTitle("हमारे बारे में");
+  useTitle("हमारे बारे में | सांसद सुविधा केंद्र – सतना-मैहर");
   return (
     <Box bg="#FFF8F2">
 
@@ -62,23 +62,25 @@ export default function AboutPage() {
           </Box>
 
           <Text
-            fontSize="xs"
+            fontSize="sm"
             letterSpacing="2px"
             bg="rgba(255,255,255,0.22)"
             display="inline-block"
             px={4}
             py={1}
             borderRadius="full"
-            mb={4}
+            mb={6}
             fontWeight="bold"
             border="1px solid rgba(255,255,255,0.4)"
+            className="hindiText"
           >
             सतना-मैहर लोकसभा क्षेत्र
           </Text>
 
           <Heading
-            fontSize={{ base: "2xl", md: "5xl" }}
-            mb={6}
+            fontSize={{ base: "3xl", md: "5xl" }}
+            mb={4}
+              className="headingHindi"
           >
             हमारे बारे में
           </Heading>
@@ -86,7 +88,8 @@ export default function AboutPage() {
           <Text
             mt={2}
             opacity={0.9}
-            fontSize={{ base: "sm", md: "md" }}
+            fontSize={{ base: "lg", md: "xl" }}
+            className="hindiText"
           >
             सुविधाओं का लाभ - बस एक क्लिक दूर
           </Text>
@@ -109,7 +112,7 @@ export default function AboutPage() {
         {/* ══ 1. INTRO ══ */}
         <div className={styles.intro}>
           <div className={`${styles.intro__body} ${styles["fade-up"]}`}>
-            <div className={styles.pill}>परिचय</div>
+            <div className={styles.pill} >परिचय</div>
 
             <h2>
               सांसद सुविधा केंद्र -<br />

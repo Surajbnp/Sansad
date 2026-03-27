@@ -14,7 +14,7 @@ import styles from "./contact.module.css";
 import Link from "next/link";
 
 export default function Contact() {
-  useTitle("संपर्क करें");
+  useTitle("संपर्क करें | सांसद सुविधा केंद्र – सतना-मैहर");
   return (
     <Box>
 
@@ -29,6 +29,7 @@ export default function Contact() {
         textAlign="center"
         color="white"
         overflow="hidden"
+        
       >
         {/* pattern */}
         <Box
@@ -61,7 +62,7 @@ export default function Contact() {
           </Box>
 
           <Text
-            fontSize="xs"
+            fontSize="sm"
             letterSpacing="2px"
             bg="rgba(255,255,255,0.22)"
             display="inline-block"
@@ -71,13 +72,15 @@ export default function Contact() {
             mb={4}
             fontWeight="bold"
             border="1px solid rgba(255,255,255,0.4)"
+             className="hindiText"
           >
             सतना-मैहर लोकसभा क्षेत्र
           </Text>
 
           <Heading
             fontSize={{ base: "2xl", md: "5xl" }}
-            mb={6}
+            mb={4}
+            className="hindiText"
           >
             संपर्क करें
           </Heading>
@@ -85,7 +88,8 @@ export default function Contact() {
           <Text
             mt={2}
             opacity={0.9}
-            fontSize={{ base: "sm", md: "md" }}
+            fontSize={{ base: "lg", md: "lg" }}
+            className="hindiText"
           >
             आपकी शिकायत, हमारी जिम्मेदारी
           </Text>

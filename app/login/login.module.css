@@ -1,60 +1,66 @@
-.page {
-  font-family: var(--font-geist-sans);
-  padding: 0px;
-  margin: 0px;
+.pageWrapper {
   width: 100%;
-  min-height: 80vh;
+  min-height: 100vh;
+  background: #fff;
+    font-family: var(--font-mukta);
+}
+
+/* Banner */
+.sansadBanner {
+  width: 100%;
+}
+
+.sansadBanner img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 🔥 FORM CENTER FIX */
+.formWrapper {
+  width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
+  justify-content: center;   /* ⭐ MAIN FIX */
+  margin-top: 30px;
+  position: relative;
+  z-index: 2;
 }
 
-
-
-.hero {
+/* Card */
+.loginCard {
   width: 100%;
-  background-image: url("/SatnaSSK_Homeslide_Desktop.webp");
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
+  max-width: 420px;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+  border: 1px solid rgba(250,118,2,0.12);
+  padding: 24px;   
 }
 
-/* TABLET HERO*/
-@media (min-width: 769px) and (max-width: 1024px) {
-  .hero {
-    background-image: url("/SatnaSSK_Homeslide_Desktop.webp"); 
-    background-size: cover;
-    background-position: center top; 
-    height: 500px;
+
+@media (max-width: 480px) {
+  .loginCard {
+    max-width: 100%;  
+    padding: 18px;     
+    border-radius: 14px;
+  }
+
+  .formWrapper {
+    margin-top: 20px;
+    padding: 0 10px;
   }
 }
 
-/* MOBILE HERO */
-
-@media (max-width: 768px) {
-  .hero {
-    background-image: url("/SatnaSSK_Homeslide_Mobile.webp");
-    background-size: contain;
-    background-position: top center;
-    aspect-ratio: auto;
-    width: 100vw;
-    height: 56.25vw;
+/* ⭐ MOBILE FIX */
+@media (max-width: 480px) {
+  .sansadBanner {
+    aspect-ratio: 16 / 6;   /* 🔥 banner shape control */
+    overflow: hidden;
   }
-}
 
-
-.icons {
-  background-image: url("https://res.cloudinary.com/dddnxiqpq/image/upload/v1753632500/icons_gotiyz.png");
-  background-repeat: no-repeat;
-  background-position: center;
-   background-size: contain;
-}
-
-.iconsWrapper {
-  width: 100%;
-}
-.form {
-  max-width: 600px;
-  margin: auto;
+  .sansadBanner img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;   /* no cut */
+  }
 }

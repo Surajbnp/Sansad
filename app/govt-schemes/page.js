@@ -2,7 +2,16 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import Head from "next/head";
-
+import {
+  Box,
+  Text,
+  Heading,
+  Container,
+  SimpleGrid,
+  Flex,
+  Button,
+} from "@chakra-ui/react";
+import { useTitle } from "@/hooks/useTitle";
 // ── Data ────────────────────────────────────────────────────────────────────
 const categories = [
   {
@@ -475,6 +484,7 @@ function IndianFlag() {
 function SchemeCard({ scheme, color }) {
   const [imgError, setImgError] = useState(false);
   const logoUrl = LOGO_MAP[scheme.name.toLowerCase()] || null;
+  useTitle("सरकारी योजनाएं | सांसद सुविधा केंद्र – सतना-मैहर")
 
   return (
     <article
@@ -788,29 +798,118 @@ export default function GovtSchemesPage() {
       `}</style>
 
       {/* ── Hero ── */}
-      <header className="hero">
-        <div className="hero__watermark" aria-hidden="true">
-          🇮🇳
-        </div>
-        <div className="hero__content">
-          <div
-            className="hero__emblem"
-            aria-label="Sansad Suvidha Kendra emblem"
+       <Box
+        position="relative"
+        bg="#ff7800"
+        bgImage="url('/satna-universal-banner.webp')"
+        bgSize={{ base: "90%", md: "70%", lg: "45%" }}
+        bgRepeat="no-repeat"
+        bgPosition="center"
+        py={{ base: 20, md: 24 }}
+        textAlign="center"
+        color="white"
+        overflow="hidden"
+      >
+        {/* pattern */}
+        <Box
+          position="absolute"
+          inset={0}
+          bgImage="radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px)"
+          bgSize="22px 22px"
+        />
+
+
+        <Container position="relative">
+
+
+          {/* emblem */}
+          <Box
+            bg="rgba(255,255,255,0.18)"
+            w="80px"
+            h="80px"
+            mx="auto"
+            mt={6}
+            borderRadius="full"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            mb={6} // 🔥 gap बढ़ाया
+            sx={{
+              backdropFilter: "blur(4px)",
+              animation: "pulse 3s infinite",
+            }}
           >
-            <img
-              src="/SSASatna_Favicon_Color.png"
-              alt="Sansad Suvidha Kendra Satna"
-            />
-          </div>
-          <span className="hero__tag">सतना-मैहर लोकसभा क्षेत्र</span>
-          <h1 className="hero__title">सरकारी योजनाएं</h1>
-          <p className="hero__subtitle">एक क्लिक, संपूर्ण जानकारी</p>
-          <p className="hero__desc">
-            भारत सरकार की सभी प्रमुख कल्याणकारी योजनाओं की जानकारी यहाँ एक ही
-            जगह पाएं। योजना का चुनाव करें और सीधे आधिकारिक पेज पर जाएं।
-          </p>
-        </div>
-      </header>
+            <img src="/SSASatna_Favicon_Color.png" width="80" />
+          </Box>
+
+
+          <Text
+            fontSize="xs"
+            letterSpacing="2px"
+            bg="rgba(255,255,255,0.22)"
+            display="inline-block"
+            px={4}
+            py={1}
+            borderRadius="full"
+            mb={4}
+            fontWeight="bold"
+            border="1px solid rgba(255,255,255,0.4)"
+          >
+            सतना-मैहर लोकसभा क्षेत्र
+          </Text>
+
+
+          <Heading
+            fontSize={{ base: "2xl", md: "5xl" }}
+            mb={6}
+          >
+            सरकारी योजनाएं
+          </Heading>
+          <Heading
+            position="relative"
+            display="inline-block"
+            fontSize={{ base: "lg", md: "xl" }}
+            mb={6}
+            _after={{
+              content: '""',
+              position: "absolute",
+              left: 0,
+              bottom: "-12px",
+              width: "100%",
+              height: "3px",
+              bg: "white",
+              opacity: 0.6,
+
+
+              borderRadius: "full",
+            }}
+          >
+            एक क्लिक, संपूर्ण जानकारी
+          </Heading>
+          <Text
+            mt={2}
+            opacity={0.9}
+            fontSize={{ base: "sm", md: "md" }}
+          >
+            भारत सरकार की सभी प्रमुख कल्याणकारी योजनाओं की जानकारी यहाँ एक ही जगह पाएं। योजना का चुनाव करें और सीधे आधिकारिक पेज पर जाएं।
+          </Text>
+
+
+        </Container>
+
+
+        {/* animation */}
+        <style>
+          {`
+            @keyframes pulse {
+              0%,100% { box-shadow: 0 0 0 2px rgba(255,255,255,0.35); }
+              50% { box-shadow: 0 0 0 12px rgba(255,255,255,0.08); }
+            }
+          `}
+        </style>
+      </Box>
+
+
 
       {/* ── Stats Bar ── */}
       <section className="stats-bar" aria-label="Quick statistics">

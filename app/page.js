@@ -186,21 +186,21 @@ export default function Home() {
         maxW="800px"
         m="auto"
         textAlign="center"
-        fontSize={{ base: "14px", md: "20px" }}
+        fontSize={{ base: "18px", md: "20px" }}
       >
-        <Text>
+        <Text className="hindiText">
           सांसद सुविधा केंद्र, आप सभी सतना-मैहर लोकसभा क्षेत्र के क्षेत्रीय जनों
           तक मूलभूत सुविधाएं पहुंचाने एवं किसी भी प्रकार की व्यक्तिगत अथवा
           सामूहिक समस्या के त्वरित निराकरण के उद्देश्य से शुरू किया गया है।
         </Text>
 
-        <Text mt={4}>
+        <Text mt={4}  className="hindiText">
           सुविधाओं की प्राप्ति अथवा समस्याओं के निराकरण हेतु फॉर्म भरने के लिए
           पहचान पत्र के रूप में अपना आधार कार्ड एवं वोटर आईडी कार्ड अवश्य रख
           लें।
         </Text>
 
-        <Text mt={4}>
+        <Text mt={4}  className="hindiText">
           सांसद सुविधा केंद्र से अब आपके लिए सुविधाओं का लाभ है बस एक क्लिक
           दूर...
         </Text>
@@ -239,13 +239,14 @@ export default function Home() {
             color="white"
             onClick={() => (window.location.href = "/login")}
             _hover={{ bg: "#e66a00" }}
-            fontSize={{ base: "15px", md: "28px" }}
+            fontSize={{ base: "18px", md: "30px" }}
             // Padding and Sizing
             px={{ base: 12, md: 10 }}
             py={{ base: 2, md: 5 }}
             h="auto"
             borderRadius="md"
             fontWeight="bold"
+            className="hindiText"
           >
             लॉग इन / रजिस्टर
           </Button>
@@ -263,13 +264,14 @@ export default function Home() {
             color="white"
             onClick={() => (window.location.href = "/ticket-status")}
             _hover={{ bg: "#289409" }}
-            fontSize={{ base: "15px", md: "28px" }}
+            fontSize={{ base: "18px", md: "30px" }}
             // Padding and Sizing
             px={{ base: 12, md: 12 }}
             py={{ base: 2, md: 5 }}
             h="auto"
             borderRadius="md"
             fontWeight="bold"
+            className="hindiText"
           >
             टिकट स्टेटस देखें
           </Button>
@@ -277,8 +279,9 @@ export default function Home() {
 
         <Text
           mt={{ base: 8, md: 16 }}
-          fontSize={{ base: "22px", md: "40px" }}
+          fontSize={{ base: "28px", md: "45px" }}
           fontWeight={600}
+            className="headingHindi"
         >
           हेल्पलाइन: +91 9425172508
         </Text>
