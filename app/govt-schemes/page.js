@@ -1016,20 +1016,7 @@ export default function GovtSchemesPage() {
       </main>
 
       {/* ── Footer ── */}
-      <footer role="contentinfo">
-        <div className="footer__logo">
-          <img
-            src="/SSASatna_Color_Logo.png"
-            alt="Sansad Suvidha Kendra Satna"
-          />
-        </div>
-        <p className="footer__copy">
-          Copyright &copy; {year} All Rights Reserved |{" "}
-          <a href="https://ssksatna.com" target="_blank" rel="noopener">
-            ssksatna.com
-          </a>
-        </p>
-      </footer>
+  
 
       {/* ── Back to Top ── */}
       <button
