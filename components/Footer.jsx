@@ -23,7 +23,6 @@ export default function Footer() {
               w={{ base: "110px", md: "160px" }}   // mobile small, desktop big
               src="/SSASatna_Color_Logo_color.png"
               alt="Sansad Suvidha Kendra Logo"
-              fallbackSrc="https://via.placeholder.com/220x80?text=Logo+Not+Found"
             />
           </VStack>
 

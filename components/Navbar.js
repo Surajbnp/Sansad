@@ -195,7 +195,6 @@ export default function Navbar() {
               src="/SSASatna_White_Logo.png"
               h="38px"
               alt="SSA Satna Logo"
-              fallbackSrc="https://via.placeholder.com/120x38?text=Logo"
             />
           </Link>
 
@@ -413,7 +412,6 @@ export default function Navbar() {
                 src="/SSASatna_Color_Logo_color.png"
                 h="35px"
                 alt="SSA Satna Logo"
-                fallbackSrc="https://via.placeholder.com/120x35?text=Logo"
               />
               <IconButton
                 icon={<CloseIcon fontSize="12px" />}
