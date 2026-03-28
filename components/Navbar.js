@@ -57,19 +57,19 @@ const BOTTOM_NAV = {
     { name: "Home", href: "/", icon: MdHome },
     { name: "Tickets", href: "/tickets", icon: MdConfirmationNumber },
     { name: "Departments", href: "/admin/departments", icon: GrUserWorker },
-    { name: "Dashboard", href: "/dashboard", icon: MdDashboard },
+    { name: "Dashboard", href: "/profile", icon: MdDashboard },
   ],
   User: [
     { name: "Home", href: "/", icon: MdHome },
     { name: "Tickets", href: "/tickets", icon: MdConfirmationNumber },
     { name: "Schemes", href: "/govt-schemes", icon: FaHandHoldingUsd },
-    { name: "Dashboard", href: "/dashboard", icon: MdDashboard },
+    { name: "Dashboard", href: "/profile", icon: MdDashboard },
   ],
   Department: [
     { name: "Home", href: "/", icon: MdHome },
     { name: "Tickets", href: "/tickets", icon: MdConfirmationNumber },
     { name: "Blog", href: "/blog", icon: MdBook },
-    { name: "Dashboard", href: "/dashboard", icon: MdDashboard },
+    { name: "Dashboard", href: "/profile", icon: MdDashboard },
   ],
 };
 
@@ -332,7 +332,7 @@ export default function Navbar() {
                         icon={<MdDashboard />}
                         _hover={{ bg: "#fa7602", color: "white" }}
                         as={Link}
-                        href="/dashboard"
+                        href="/profile"
                       >
                         Dashboard
                       </MenuItem>
@@ -503,7 +503,7 @@ export default function Navbar() {
                       textDecoration: "none",
                     }}
                   >
-                    <Icon as={MdPerson} fontSize="20px" color="#fa7602" />
+                    <Icon as={MdDashboard} fontSize="20px" color="#fa7602" />
                     <Text fontSize="15px" fontWeight="500">
                       Dashboard
                     </Text>

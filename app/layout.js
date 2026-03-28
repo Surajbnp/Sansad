@@ -1,8 +1,8 @@
-
-
 import { Geist, Geist_Mono, Khand, Mukta } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import InstallPrompt from "@/components/InstallPrompt";
 
 export const metadata = {
   icons: {
@@ -36,16 +36,23 @@ function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Satna App" />
+        <link rel="apple-touch-icon" href="/icons/icon1.png" />
         <script
           src="https://upload-widget.cloudinary.com/latest/global/all.js"
           type="text/javascript"
         ></script>
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable}   ${khand.variable} 
-    ${mukta.variable}`}>
-        <Providers>
-          {children}
-        </Providers>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable}   ${khand.variable} 
+    ${mukta.variable}`}
+      >
+        <ServiceWorkerRegister />
+        <InstallPrompt />
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
