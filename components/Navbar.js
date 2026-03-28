@@ -23,6 +23,7 @@ import {
   DrawerContent,
   VStack,
   Skeleton,
+  Avatar,
 } from "@chakra-ui/react";
 import { Divider, Icon } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
@@ -231,8 +232,8 @@ export default function Navbar() {
               <>
                 <Button
                   variant="outline"
-                  color="#fa7602"
-                  borderColor="#fa7602"
+                  color="white"
+                  borderColor="white"
                   fontSize="14px"
                   fontWeight="600"
                   h="36px"
@@ -240,7 +241,7 @@ export default function Navbar() {
                   borderRadius="md"
                   display={{ base: "none", md: "inline-flex" }}
                   onClick={() => router.push("/login")}
-                  _hover={{ bg: "#fa7602", color: "white" }}
+                  _hover={{ bg: "#fa7602", color: "white", borderColor: "#fa7602" }}
                   transition="all 0.2s"
                 >
                   Login / Register
@@ -291,12 +292,11 @@ export default function Navbar() {
                   h="36px"
                   px={4}
                   borderRadius="md"
-                  rightIcon={<MdPerson />}
                   _hover={{ bg: "#e56a00" }}
                   _active={{ bg: "#fa7602" }}
                   _focus={{ boxShadow: "none" }}
                 >
-                  {user?.name}
+                {user?.name.split(" ")[0]}
                 </MenuButton>
                 <MenuList
                   bg="white"

@@ -330,7 +330,7 @@ const DepartmentsPage = () => {
   };
 
   return (
-    <Box minH="100vh" bg="#fafafa" pt="90px" pb="60px" px={{ base: 4, md: 8 }}>
+    <Box minH="100vh" bg="#fafafa" py={10} px={{ base: 4, md: 8 }}>
       <Box maxW="860px" mx="auto">
         {/* ── header ── */}
         <Flex justify="space-between" align="center" mb={6}>

@@ -2,8 +2,6 @@ import { Geist, Geist_Mono, Khand, Mukta } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
 
-
-
 export const metadata = {
   icons: {
     icon: "/SSASatna_Favicon_Color.ico",
@@ -36,6 +34,10 @@ function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700&family=Noto+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap"
+          rel="stylesheet"
+        />
         <script
           src="https://upload-widget.cloudinary.com/latest/global/all.js"
           type="text/javascript"

@@ -14,6 +14,12 @@ const config = {
 const theme = extendTheme({
   config,
 
+  fonts: {
+    heading: `'Mukta', sans-serif`,
+    body: `'Noto Sans', sans-serif`,
+    mono: `'Roboto Mono', monospace`,
+  },
+
   colors: {
     brand: {
       primary: "#fa7602",
@@ -79,7 +85,7 @@ export default function Providers({ children }) {
           <Navbar />
         </Box>
         {children}
-        {<Footer />}
+        {showFooter && <Footer />}
       </AuthProvider>
     </ChakraProvider>
   );

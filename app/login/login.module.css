@@ -8,6 +8,7 @@
 /* Banner */
 .sansadBanner {
   width: 100%;
+  margin: auto;
 }
 
 .sansadBanner img {

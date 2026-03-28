@@ -287,7 +287,6 @@ export default function Login() {
       `}</style>
 
       <div className={styles.pageWrapper}>
-
         <section className={styles.sansadBanner}>
           <img
             src="https://res.cloudinary.com/dxwwnettz/image/upload/v1773993978/Satna_SSK_MicroBanner_ciqocz.webp"
@@ -335,13 +334,9 @@ export default function Login() {
             </Box>
           </div> */}
 
-
-
-
         {/* ── Body ── */}
         <div className={styles.formWrapper}>
           <div className={styles.loginCard}>
-
             <VStack spacing={5} align="stretch">
               {/* Phone Field */}
               <FormControl isInvalid={!!phoneError}>
@@ -483,7 +478,7 @@ export default function Login() {
                     onClick={verifyOtp}
                     isLoading={isVerifying}
                     loadingText="सत्यापित कर रहे हैं..."
-                    color={'white'}
+                    color={"white"}
                   >
                     OTP सत्यापित करें ✓
                   </Button>
@@ -560,9 +555,7 @@ export default function Login() {
             </VStack>
           </div>
         </div>
-
       </div>
-
     </>
   );
 }
