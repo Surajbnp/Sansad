@@ -23,10 +23,17 @@ export async function POST(request) {
     await database();
     const user = await UserModel.findOne({ phone });
 
-    if (!user) {
+    // send-otp/route.js
+    if (user) {
       return NextResponse.json(
-        { message: "इस नंबर से कोई अकाउंट नहीं मिला, पहले रजिस्टर करें" },
-        { status: 404 },
+        {
+          message: "इस नंबर से पहले से अकाउंट मौजूद है",
+          actions: [
+            { label: "लॉगिन करें", href: "/login" },
+            { label: "दूसरा नंबर दर्ज करें", action: "reset" },
+          ],
+        },
+        { status: 409 },
       );
     }
 

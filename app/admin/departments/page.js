@@ -177,7 +177,6 @@ const DepartmentsPage = () => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // form fields — no email/password anymore
   const [newDepName, setNewDepName] = useState("");
   const [assignedName, setAssignedName] = useState("");
   const [assignedPhone, setAssignedPhone] = useState("");
@@ -185,8 +184,9 @@ const DepartmentsPage = () => {
   const [assignedDesignation, setAssignedDesignation] = useState("");
 
   const [errors, setErrors] = useState({});
+  const [error, setError] = useState(null); // ← 409 conflict error
   const [otp, setOtp] = useState("");
-  const [otpStep, setOtpStep] = useState(1); // 1=form, 2=otp
+  const [otpStep, setOtpStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [progressText, setProgressText] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
@@ -233,6 +233,7 @@ const DepartmentsPage = () => {
   const sendOtp = async () => {
     if (!validateForm()) return;
     setSubmitting(true);
+    setError(null);
     try {
       const res = await fetch("/api/departments/send-otp", {
         method: "POST",
@@ -240,6 +241,12 @@ const DepartmentsPage = () => {
         body: JSON.stringify({ phone: assignedPhone }),
       });
       const data = await res.json();
+
+      if (res.status === 409) {
+        setError({ message: data.message, actions: data.actions });
+        return;
+      }
+
       if (!res.ok) throw new Error(data.message);
       setOtpStep(2);
       setResendTimer(OTP_TIME);
@@ -272,7 +279,7 @@ const DepartmentsPage = () => {
     }
   };
 
-  /* ── STEP 2: verify OTP + create dept in one call ── */
+  /* ── STEP 2: verify OTP + create dept ── */
   const verifyOtpAndCreate = async () => {
     if (otp.length !== 6) {
       toast({ title: "कृपया 6 अंकों का OTP दर्ज करें", status: "warning" });
@@ -300,7 +307,7 @@ const DepartmentsPage = () => {
       handleClose();
       fetchDepartments();
     } catch (err) {
-      setOtp(""); // clear wrong OTP
+      setOtp("");
       toast({ title: err.message, status: "error" });
     } finally {
       setSubmitting(false);
@@ -321,6 +328,7 @@ const DepartmentsPage = () => {
     setAssignedContact("");
     setAssignedDesignation("");
     setErrors({});
+    setError(null); // ← clear conflict error on close
   };
 
   const goBack = () => {
@@ -473,6 +481,7 @@ const DepartmentsPage = () => {
                       onChange={(e) => {
                         setAssignedPhone(e.target.value.replace(/\D/g, ""));
                         setErrors((er) => ({ ...er, assignedPhone: false }));
+                        setError(null); // clear conflict error on retype
                       }}
                       borderRadius="0 10px 10px 0"
                       focusBorderColor="#fa7602"
@@ -480,7 +489,59 @@ const DepartmentsPage = () => {
                   </InputGroup>
                 </Field>
 
-                {/* optional contact — if different from staff phone */}
+                {/* ── 409 conflict error banner ── */}
+                {error && (
+                  <Box
+                    mt={-2}
+                    mb={4}
+                    px={4}
+                    py={3}
+                    borderRadius="10px"
+                    border="1px solid"
+                    borderColor="orange.200"
+                    bg="orange.50"
+                  >
+                    <Text fontSize="sm" color="orange.800" mb={2}>
+                      {error.message}
+                    </Text>
+                    <HStack spacing={3}>
+                      {error.actions?.map((a) =>
+                        a.href ? (
+                          <Button
+                            key={a.label}
+                            as="a"
+                            href={a.href}
+                            size="xs"
+                            bg="#fa7602"
+                            color="white"
+                            borderRadius="full"
+                            _hover={{ bg: "#e06800" }}
+                          >
+                            {a.label}
+                          </Button>
+                        ) : (
+                          <Button
+                            key={a.label}
+                            size="xs"
+                            variant="outline"
+                            borderColor="#fa7602"
+                            color="#fa7602"
+                            borderRadius="full"
+                            _hover={{ bg: "orange.50" }}
+                            onClick={() => {
+                              setAssignedPhone("");
+                              setError(null);
+                            }}
+                          >
+                            {a.label}
+                          </Button>
+                        ),
+                      )}
+                    </HStack>
+                  </Box>
+                )}
+
+                {/* optional contact */}
                 <Field
                   label="Department Contact (optional)"
                   error={errors.assignedContact}

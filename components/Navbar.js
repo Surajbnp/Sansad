@@ -107,7 +107,7 @@ const NavLink = ({ children, href }) => (
     href={href}
     px={3}
     py={2}
-    fontSize="15px"
+    fontSize={{ base: "10px", md: "12px", lg: "14px" }}
     fontWeight="500"
     rounded="md"
     color="white"
@@ -241,7 +241,11 @@ export default function Navbar() {
                   borderRadius="md"
                   display={{ base: "none", md: "inline-flex" }}
                   onClick={() => router.push("/login")}
-                  _hover={{ bg: "#fa7602", color: "white", borderColor: "#fa7602" }}
+                  _hover={{
+                    bg: "#fa7602",
+                    color: "white",
+                    borderColor: "#fa7602",
+                  }}
                   transition="all 0.2s"
                 >
                   Login / Register
@@ -296,7 +300,7 @@ export default function Navbar() {
                   _active={{ bg: "#fa7602" }}
                   _focus={{ boxShadow: "none" }}
                 >
-                {user?.name.split(" ")[0]}
+                  {user?.name.split(" ")[0]}
                 </MenuButton>
                 <MenuList
                   bg="white"

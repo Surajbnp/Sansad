@@ -67,24 +67,30 @@ const PARAM_TO_OPTION = {
 /* ─────────────────────────────────────────
    TICKET CARD
 ───────────────────────────────────────── */
+/* ─────────────────────────────────────────
+   DROP-IN REPLACEMENT — paste over your
+   existing TicketCard component
+───────────────────────────────────────── */
+
 const TicketCard = ({ ticket, onClick, index }) => {
   const s = getStatusStyle(ticket.status);
   return (
     <Box
       bg="white"
-      borderRadius="14px"
+      borderRadius="10px"
       border="1px solid"
       borderColor="gray.100"
-      boxShadow="0 2px 8px rgba(0,0,0,0.05)"
-      p={5}
+      boxShadow="0 1px 4px rgba(0,0,0,0.04)"
+      px={4}
+      py={3}
       cursor="pointer"
-      transition="all 0.2s ease"
+      transition="all 0.15s ease"
       style={{ animationDelay: `${index * 40}ms` }}
       className={styles.cardIn}
       _hover={{
-        transform: "translateY(-2px)",
-        boxShadow: "0 8px 24px rgba(250,118,2,0.12)",
+        boxShadow: "0 4px 16px rgba(250,118,2,0.09)",
         borderColor: "#fa7602",
+        bg: "#fffcf9",
       }}
       onClick={onClick}
       position="relative"
@@ -98,102 +104,159 @@ const TicketCard = ({ ticket, onClick, index }) => {
         w="3px"
         h="100%"
         bg={s.color}
-        borderRadius="14px 0 0 14px"
+        opacity={0.7}
       />
 
-      <Flex
-        justify="space-between"
-        align="flex-start"
-        gap={4}
-        direction={{ base: "column", md: "row" }}
-      >
-        <VStack align="flex-start" spacing={2} flex={1}>
-          <HStack spacing={3}>
-            <Text
-              fontSize="10px"
-              color="gray.400"
-              fontWeight="600"
-              letterSpacing="0.08em"
-              bg="gray.50"
-              px={2}
-              py="2px"
-              borderRadius="6px"
-            >
-              #{ticket._id?.slice(-8).toUpperCase()}
-            </Text>
-            {ticket.createdAt && (
-              <Text fontSize="10px" color="gray.400">
-                {fmtDate(ticket.createdAt)}
-              </Text>
-            )}
-          </HStack>
-
+      <Flex align="center" gap={3} pl={2}>
+        {/* ID + date col */}
+        <VStack
+          align="flex-start"
+          spacing={0}
+          minW="90px"
+          display={{ base: "none", sm: "flex" }}
+        >
           <Text
-            fontSize="md"
+            fontSize="10px"
+            fontWeight="700"
+            color="gray.400"
+            letterSpacing="0.08em"
+          >
+            #{ticket._id?.slice(-8).toUpperCase()}
+          </Text>
+          {ticket.createdAt && (
+            <Text fontSize="10px" color="gray.300" mt="2px">
+              {fmtDate(ticket.createdAt)}
+            </Text>
+          )}
+        </VStack>
+
+        {/* divider */}
+        <Box
+          w="1px"
+          h="32px"
+          bg="gray.100"
+          display={{ base: "none", sm: "block" }}
+        />
+
+        {/* title + description */}
+        <Box flex={1} minW={0}>
+          <Text
+            fontSize="sm"
             fontWeight="700"
             color="gray.800"
-            lineHeight="1.3"
+            noOfLines={1}
+            lineHeight="1.4"
           >
             {ticket.title}
           </Text>
-
-          <Text fontSize="sm" color="gray.500" noOfLines={2} lineHeight="1.6">
+          <Text
+            fontSize="xs"
+            color="gray.400"
+            noOfLines={1}
+            lineHeight="1.4"
+            mt="1px"
+          >
             {ticket.description}
           </Text>
+        </Box>
 
-          <HStack spacing={2} mt={1} flexWrap="wrap">
+        {/* badges */}
+        <HStack
+          spacing={2}
+          flexShrink={0}
+          display={{ base: "none", md: "flex" }}
+        >
+          {ticket.assignedDept && (
             <Box
-              px={3}
-              py="3px"
-              borderRadius="full"
-              fontSize="11px"
-              fontWeight="700"
-              bg={s.bg}
-              color={s.color}
-              letterSpacing="0.04em"
+              px={2}
+              py="2px"
+              borderRadius="5px"
+              fontSize="10px"
+              fontWeight="600"
+              bg="#f5f3ff"
+              color="#7c3aed"
+              whiteSpace="nowrap"
             >
-              {s.label}
+              {ticket.assignedDept}
             </Box>
-            {ticket.assignedDept && (
-              <Box
-                px={3}
-                py="3px"
-                borderRadius="full"
-                fontSize="11px"
-                fontWeight="600"
-                bg="#f5f3ff"
-                color="#7c3aed"
-              >
-                {ticket.assignedDept}
-              </Box>
-            )}
-          </HStack>
-        </VStack>
+          )}
+          <Box
+            px={2}
+            py="2px"
+            borderRadius="5px"
+            fontSize="10px"
+            fontWeight="700"
+            bg={s.bg}
+            color={s.color}
+            whiteSpace="nowrap"
+            letterSpacing="0.03em"
+          >
+            {s.label}
+          </Box>
+        </HStack>
 
+        {/* action */}
         <Button
-          size="sm"
-          minW="110px"
-          mt={{ base: 1, md: 0 }}
-          bg="#fa7602"
-          color="white"
+          size="xs"
+          variant="ghost"
+          color="#fa7602"
           borderRadius="full"
           fontWeight="700"
-          fontSize="12px"
-          px={5}
-          _hover={{ bg: "#e06800", transform: "scale(1.03)" }}
-          transition="all 0.2s"
+          fontSize="11px"
+          px={3}
+          h="28px"
+          flexShrink={0}
+          _hover={{ bg: "#fff3e0" }}
+          transition="all 0.15s"
           onClick={(e) => {
             e.stopPropagation();
             onClick();
           }}
         >
-          View Details →
+          View →
         </Button>
+      </Flex>
+
+      {/* mobile: badges row */}
+      <Flex
+        display={{ base: "flex", md: "none" }}
+        gap={2}
+        mt={2}
+        pl={2}
+        flexWrap="wrap"
+        justifyContent={"end"}
+      >
+        {/* <Text fontSize="10px" fontWeight="600" color="gray.300">
+          #{ticket._id?.slice(-8).toUpperCase()}
+        </Text> */}
+        {ticket.assignedDept && (
+          <Box
+            px={2}
+            py="1px"
+            borderRadius="5px"
+            fontSize="10px"
+            fontWeight="600"
+            bg="#f5f3ff"
+            color="#7c3aed"
+          >
+            {ticket.assignedDept}
+          </Box>
+        )}
+        <Box
+          px={2}
+          py="1px"
+          borderRadius="5px"
+          fontSize="10px"
+          fontWeight="700"
+          bg={s.bg}
+          color={s.color}
+        >
+          {s.label}
+        </Box>
       </Flex>
     </Box>
   );
 };
-
 /* ─────────────────────────────────────────
    MAIN PAGE
 ───────────────────────────────────────── */
