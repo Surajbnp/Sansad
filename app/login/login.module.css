@@ -7,7 +7,7 @@
 
 /* Banner */
 .sansadBanner {
-  width: 100%;
+  width: 60%;
   margin: auto;
 }
 
@@ -39,11 +39,15 @@
 }
 
 
-@media (max-width: 480px) {
+@media (max-width: 700px) {
   .loginCard {
     max-width: 100%;  
     padding: 18px;     
     border-radius: 14px;
+  }
+
+  .sansadBanner {
+    width: 100%;
   }
 
   .formWrapper {
@@ -55,8 +59,8 @@
 /* ⭐ MOBILE FIX */
 @media (max-width: 480px) {
   .sansadBanner {
-    aspect-ratio: 16 / 6;   /* 🔥 banner shape control */
     overflow: hidden;
+    width: 100%;
   }
 
   .sansadBanner img {
