@@ -89,7 +89,7 @@ const TicketCard = ({ ticket, onClick, index }) => {
       className={styles.cardIn}
       _hover={{
         boxShadow: "0 4px 16px rgba(250,118,2,0.09)",
-        borderColor: "#fa7602",
+        borderColor: s.color,
         bg: "#fffcf9",
       }}
       onClick={onClick}
@@ -104,7 +104,7 @@ const TicketCard = ({ ticket, onClick, index }) => {
         w="3px"
         h="100%"
         bg={s.color}
-        opacity={0.7}
+        opacity={1}
       />
 
       <Flex align="center" gap={3} pl={2}>

@@ -10,16 +10,33 @@ import {
   Flex,
   HStack,
   VStack,
-  Divider,
   SimpleGrid,
+  Divider,
 } from "@chakra-ui/react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import styles from "./profile.module.css";
 import { useTitle } from "@/hooks/useTitle";
+import { SiTicktick } from "react-icons/si";
+import { RiProgress6Line } from "react-icons/ri";
+import { IoMdAddCircleOutline } from "react-icons/io";
+import {
+  MdOutlineConfirmationNumber,
+  MdOutlineDashboard,
+  MdOutlineCheckCircle,
+  MdOutlineHourglassEmpty,
+  MdOutlineBusinessCenter,
+  MdOutlineAssignment,
+  MdPhone,
+  MdLocationOn,
+  MdBadge,
+  MdAccountCircle,
+  MdLogout,
+  MdArrowForwardIos,
+} from "react-icons/md";
 
 /* ─────────────────────────────────────────
-   STAT CARD
+   STAT CARD — compact horizontal layout
 ───────────────────────────────────────── */
 const StatCard = ({
   title,
@@ -29,112 +46,96 @@ const StatCard = ({
   onClick,
   delay = 0,
   icon,
+  accentColor = "#fa7602",
 }) => (
   <Box
     bg="white"
-    borderRadius="16px"
-    p={5}
+    borderRadius="12px"
+    p={4}
     border="1px solid"
     borderColor="gray.100"
-    boxShadow="0 2px 12px rgba(0,0,0,0.06)"
-    position="relative"
-    overflow="hidden"
+    boxShadow="0 1px 4px rgba(0,0,0,0.05)"
     cursor="pointer"
-    transition="all 0.25s ease"
+    transition="all 0.2s ease"
     style={{ animationDelay: `${delay}ms` }}
     className={styles.cardIn}
     _hover={{
-      transform: "translateY(-3px)",
-      boxShadow: "0 8px 28px rgba(250,118,2,0.15)",
+      boxShadow: "0 4px 16px rgba(250,118,2,0.1)",
       borderColor: "#fa7602",
+      bg: "#fffcf9",
     }}
     onClick={onClick}
   >
-    {/* orange accent bar on left */}
-    <Box
-      position="absolute"
-      top={0}
-      left={0}
-      w="4px"
-      h="100%"
-      bg="#fa7602"
-      borderRadius="16px 0 0 16px"
-    />
-    {icon && (
-      <Box position="absolute" top="12px" right="12px">
+    <Flex align="center" justify="space-between" mb={3}>
+      <Box
+        w="34px"
+        h="34px"
+        borderRadius="9px"
+        bg="#fff3e0"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        color="#fa7602"
+        fontSize="16px"
+      >
         {icon}
       </Box>
-    )}
+      <Box as={MdArrowForwardIos} fontSize="11px" color="gray.300" />
+    </Flex>
+
+    <Text fontSize="22px" fontWeight="700" color="gray.800" lineHeight="1">
+      {value}
+    </Text>
     <Text
-      fontSize="xs"
+      fontSize="11px"
+      fontWeight="500"
       color="gray.400"
-      fontWeight="600"
-      letterSpacing="0.08em"
-      textTransform="uppercase"
-      mb={1}
+      mt="4px"
+      letterSpacing="0.02em"
     >
       {title}
     </Text>
-
-    <Text
-      fontSize="3xl"
-      fontWeight="800"
-      color="gray.800"
-      lineHeight="1.1"
-      mb={1}
-    >
-      {value}
-    </Text>
-
-    <Flex align="center" justify="space-between" mt={3}>
-      {subText && (
-        <Text fontSize="xs" color="gray.400">
-          {subText}
-        </Text>
-      )}
-      <Button
-        size="xs"
-        ml="auto"
-        bg="#fa7602"
-        color="white"
-        borderRadius="full"
-        px={3}
-        fontSize="10px"
-        fontWeight="700"
-        letterSpacing="0.05em"
-        _hover={{ bg: "#e06800", transform: "scale(1.05)" }}
-        transition="all 0.2s"
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick?.();
-        }}
-      >
-        {buttonText}
-      </Button>
-    </Flex>
+    {subText && (
+      <Text fontSize="10px" color="gray.300" mt="2px">
+        {subText}
+      </Text>
+    )}
   </Box>
 );
 
 /* ─────────────────────────────────────────
-   INFO CHIP
+   INFO ROW
 ───────────────────────────────────────── */
-const InfoChip = ({ label, value }) => (
-  <Box bg="gray.50" borderRadius="12px" px={4} py={3} minW="130px">
-    <Text
-      fontSize="10px"
-      color="gray.400"
-      fontWeight="700"
-      letterSpacing="0.1em"
-      textTransform="uppercase"
-      mb="2px"
-    >
-      {label}
-    </Text>
-    <Text fontSize="sm" fontWeight="600" color="gray.700">
-      {value || "—"}
-    </Text>
-  </Box>
+const InfoRow = ({ icon, label, value }) => (
+  <HStack spacing={3} py={2}>
+    <Box color="#fa7602" fontSize="15px" flexShrink={0}>
+      {icon}
+    </Box>
+    <Box>
+      <Text
+        fontSize="10px"
+        color="gray.400"
+        fontWeight="600"
+        letterSpacing="0.06em"
+        textTransform="uppercase"
+      >
+        {label}
+      </Text>
+      <Text fontSize="13px" color="gray.700" fontWeight="500">
+        {value || "—"}
+      </Text>
+    </Box>
+  </HStack>
 );
+
+/* ─────────────────────────────────────────
+   ROLE BADGE CONFIG
+───────────────────────────────────────── */
+const ROLE_META = {
+  Admin: { bg: "#fff3e0", color: "#e65100", dot: "#fa7602" },
+  Department: { bg: "#e8f5e9", color: "#2e7d32", dot: "#43a047" },
+  User: { bg: "#e3f2fd", color: "#1565c0", dot: "#1976d2" },
+};
 
 /* ─────────────────────────────────────────
    MAIN PAGE
@@ -147,7 +148,6 @@ const Page = () => {
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
 
-  /* fetch stats — cookie sent automatically, no token header needed */
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -160,71 +160,68 @@ const Page = () => {
         setStatsLoading(false);
       }
     };
-
     fetchStats();
   }, []);
 
   const isLoading = loading || statsLoading;
-
-  /* role badge */
-  const roleMeta = {
-    Admin: { bg: "#fff3e0", color: "#e65100" },
-    Department: { bg: "#e8f5e9", color: "#2e7d32" },
-    User: { bg: "#e3f2fd", color: "#1565c0" },
-  };
-  const badge = roleMeta[user?.role] ?? roleMeta.User;
+  const badge = ROLE_META[user?.role] ?? ROLE_META.User;
 
   return (
-    <Box minH="100vh" bg="#fafafa" pt={10} px={{ base: 4, md: 8 }}>
-      <Box maxW="1100px" mx="auto">
+    <Box minH="100vh" bg="#f7f7f5" pt={8} px={{ base: 4, md: 8 }} pb={16}>
+      <Box maxW="960px" mx="auto">
         {isLoading ? (
           <VStack spacing={4}>
-            <Skeleton height="180px" borderRadius="20px" w="100%" />
+            <Skeleton height="140px" borderRadius="14px" w="100%" />
             <SimpleGrid
               columns={{ base: 1, sm: 2, md: 4 }}
-              spacing={4}
+              spacing={3}
               w="100%"
             >
               {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} height="130px" borderRadius="16px" />
+                <Skeleton key={i} height="110px" borderRadius="12px" />
               ))}
             </SimpleGrid>
           </VStack>
         ) : (
           <>
-            {/* ── PROFILE HEADER ── */}
+            {/* ── PROFILE CARD ── */}
             <Box
               bg="white"
-              borderRadius="20px"
+              borderRadius="14px"
               border="1px solid"
               borderColor="gray.100"
-              boxShadow="0 2px 16px rgba(0,0,0,0.06)"
-              p={{ base: 5, md: 8 }}
-              mb={6}
+              boxShadow="0 1px 6px rgba(0,0,0,0.05)"
+              overflow="hidden"
+              mb={5}
             >
+              {/* thin top bar */}
+
               <Flex
+                direction={{ base: "column", sm: "row" }}
+                align={{ base: "flex-start", sm: "center" }}
                 justify="space-between"
-                align="flex-start"
-                wrap="wrap"
+                px={{ base: 5, md: 7 }}
+                py={5}
                 gap={4}
+                borderBottom="1px solid"
+                borderColor="gray.50"
               >
-                <HStack spacing={5} align="center">
+                <HStack spacing={4}>
                   <Box position="relative">
                     <Avatar
-                      size="xl"
+                      size="lg"
                       name={user?.name}
                       bg="#fa7602"
                       color="white"
-                      fontWeight="800"
-                      fontSize="xl"
+                      fontWeight="700"
+                      fontSize="lg"
                     />
-                    {/* online dot */}
                     <Box
                       position="absolute"
-                      bottom="2px"
-                      right="2px"
-                      w="14px"
-                      h="14px"
+                      bottom="1px"
+                      right="1px"
+                      w="11px"
+                      h="11px"
                       bg="green.400"
                       borderRadius="full"
                       border="2px solid white"
@@ -233,77 +230,86 @@ const Page = () => {
 
                   <Box>
                     <Text
-                      fontSize={{ base: "xl", md: "2xl" }}
-                      fontWeight="800"
+                      fontSize="lg"
+                      fontWeight="700"
                       color="gray.800"
                       lineHeight="1.2"
                     >
                       {user?.name}
                     </Text>
-                    <Box
-                      display="inline-block"
-                      mt={1}
-                      bg={badge.bg}
-                      color={badge.color}
-                      fontSize="11px"
-                      fontWeight="700"
-                      px={3}
-                      py="2px"
-                      borderRadius="full"
-                      letterSpacing="0.06em"
-                    >
-                      {user?.role}
-                    </Box>
+                    <HStack spacing={2} mt="5px">
+                      <Box w="6px" h="6px" borderRadius="full" bg={badge.dot} />
+                      <Text
+                        fontSize="11px"
+                        fontWeight="600"
+                        color={badge.color}
+                        letterSpacing="0.05em"
+                      >
+                        {user?.role}
+                      </Text>
+                    </HStack>
                   </Box>
                 </HStack>
 
                 <Button
                   size="sm"
-                  variant="outline"
-                  borderColor="gray.200"
-                  color="gray.500"
-                  borderRadius="full"
-                  px={5}
-                  fontWeight="600"
-                  fontSize="sm"
-                  _hover={{
-                    bg: "red.50",
-                    borderColor: "red.300",
-                    color: "red.500",
-                  }}
-                  transition="all 0.2s"
+                  variant="ghost"
+                  color="gray.400"
+                  borderRadius="8px"
+                  fontWeight="500"
+                  fontSize="13px"
+                  leftIcon={<MdLogout />}
+                  _hover={{ bg: "red.50", color: "red.500" }}
+                  transition="all 0.15s"
                   onClick={logout}
                 >
                   Logout
                 </Button>
               </Flex>
 
-              {/* info chips */}
-              <Flex mt={6} gap={3} wrap="wrap">
-                <InfoChip label="Phone" value={user?.phone} />
-                <InfoChip label="Vidhan Sabha" value={user?.vidhansabha} />
-                <InfoChip label="Address" value={user?.address} />
-                {user?.voterId && (
-                  <InfoChip label="Voter ID" value={user?.voterId} />
-                )}
-              </Flex>
+              {/* info rows */}
+              <Box px={{ base: 5, md: 7 }} py={4}>
+                <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} spacing={0}>
+                  <InfoRow
+                    icon={<MdPhone />}
+                    label="Phone"
+                    value={user?.phone ? `+91 ${user.phone}` : null}
+                  />
+                  <InfoRow
+                    icon={<MdLocationOn />}
+                    label="Vidhan Sabha"
+                    value={user?.vidhansabha}
+                  />
+                  <InfoRow
+                    icon={<MdAccountCircle />}
+                    label="Address"
+                    value={user?.address}
+                  />
+                  {user?.voterId && (
+                    <InfoRow
+                      icon={<MdBadge />}
+                      label="Voter ID"
+                      value={user?.voterId}
+                    />
+                  )}
+                </SimpleGrid>
+              </Box>
             </Box>
 
-            {/* ── SECTION HEADING ── */}
-            <HStack mb={4} spacing={3}>
-              <Box w="4px" h="22px" bg="#fa7602" borderRadius="full" />
-              <Text
-                fontSize="md"
-                fontWeight="700"
-                color="gray.700"
-                letterSpacing="0.02em"
-              >
-                Overview
-              </Text>
-            </HStack>
+            {/* ── SECTION LABEL ── */}
+            <Text
+              fontSize="11px"
+              fontWeight="600"
+              color="gray.400"
+              letterSpacing="0.1em"
+              textTransform="uppercase"
+              mb={3}
+            >
+              Overview
+            </Text>
 
             {/* ── STAT CARDS ── */}
-            <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} spacing={4}>
+            <SimpleGrid columns={{ base: 2, sm: 2, md: 4 }} spacing={3}>
               {user?.role === "Admin" && (
                 <>
                   <StatCard
@@ -312,62 +318,40 @@ const Page = () => {
                     value={stats?.totalTickets ?? 0}
                     subText="All complaints"
                     onClick={() => router.push("/tickets?state=all")}
-                    icon={
-                      <img
-                        src="/dashboard_create-ticket.svg"
-                        width={28}
-                        height={28}
-                      />
-                    }
+                    icon={<MdOutlineConfirmationNumber />}
                   />
                   <StatCard
-                    delay={60}
+                    delay={50}
                     title="New"
                     value={stats?.stats?.submitted ?? 0}
                     subText="Awaiting triage"
                     onClick={() => router.push("/tickets?state=submitted")}
-                    icon={
-                      <img src="/dashboard_add.svg" width={28} height={28} />
-                    }
+                    icon={<IoMdAddCircleOutline />}
                   />
                   <StatCard
-                    delay={120}
+                    delay={100}
                     title="In Progress"
                     value={stats?.stats?.inProgress ?? 0}
                     subText="Needs action"
                     onClick={() => router.push("/tickets?state=inProgress")}
-                    icon={
-                      <img
-                        src="/dashboard_progress.svg"
-                        width={28}
-                        height={28}
-                      />
-                    }
+                    icon={<RiProgress6Line />}
                   />
                   <StatCard
-                    delay={180}
+                    delay={150}
                     title="Resolved"
                     value={stats?.stats?.completed ?? 0}
                     subText="Closed & resolved"
                     onClick={() => router.push("/tickets?state=completed")}
-                    icon={
-                      <img
-                        src="/dashboard_completed.svg"
-                        width={28}
-                        height={28}
-                      />
-                    }
+                    icon={<MdOutlineCheckCircle />}
                   />
                   <StatCard
-                    delay={240}
+                    delay={200}
                     title="Departments"
                     value={stats?.departmentCount ?? 0}
                     subText="Active departments"
                     buttonText="Open"
                     onClick={() => router.push("/admin/departments")}
-                    icon={
-                      <img src="/dashboard_add.svg" width={28} height={28} />
-                    }
+                    icon={<MdOutlineBusinessCenter />}
                   />
                 </>
               )}
@@ -379,48 +363,28 @@ const Page = () => {
                     title="Total Tickets"
                     value={stats?.totalTickets ?? 0}
                     onClick={() => router.push("/tickets")}
-                    icon={
-                      <img
-                        src="/dashboard_create-ticket.svg"
-                        width={28}
-                        height={28}
-                      />
-                    }
+                    icon={<MdOutlineConfirmationNumber />}
                   />
                   <StatCard
-                    delay={60}
+                    delay={50}
                     title="Assigned"
                     value={stats?.stats?.assigned ?? 0}
                     onClick={() => router.push("/tickets?state=assigned")}
-                    icon={
-                      <img src="/dashboard_add.svg" width={28} height={28} />
-                    }
+                    icon={<MdOutlineAssignment />}
                   />
                   <StatCard
-                    delay={120}
+                    delay={100}
                     title="In Progress"
                     value={stats?.stats?.inProgress ?? 0}
                     onClick={() => router.push("/tickets?state=inProgress")}
-                    icon={
-                      <img
-                        src="/dashboard_progress.svg"
-                        width={28}
-                        height={28}
-                      />
-                    }
+                    icon={<RiProgress6Line />}
                   />
                   <StatCard
-                    delay={180}
+                    delay={150}
                     title="Completed"
                     value={stats?.stats?.completed ?? 0}
                     onClick={() => router.push("/tickets?state=completed")}
-                    icon={
-                      <img
-                        src="/dashboard_completed.svg"
-                        width={28}
-                        height={28}
-                      />
-                    }
+                    icon={<MdOutlineCheckCircle />}
                   />
                 </>
               )}
@@ -433,65 +397,47 @@ const Page = () => {
                     value={stats?.totalTickets ?? 0}
                     subText="Your issues"
                     onClick={() => router.push("/tickets")}
-                    icon={
-                      <img
-                        src="/dashboard_create-ticket.svg"
-                        width={28}
-                        height={28}
-                      />
-                    }
+                    icon={<MdOutlineConfirmationNumber />}
                   />
                   <StatCard
-                    delay={60}
+                    delay={50}
                     title="In Progress"
                     value={stats?.stats?.inProgress ?? 0}
                     subText="Being resolved"
                     onClick={() => router.push("/tickets?state=inProgress")}
-                    icon={
-                      <img
-                        src="/dashboard_progress.svg"
-                        width={28}
-                        height={28}
-                      />
-                    }
+                    icon={<RiProgress6Line />}
                   />
                   <StatCard
-                    delay={120}
+                    delay={100}
                     title="Completed"
                     value={stats?.stats?.completed ?? 0}
                     subText="Resolved"
                     onClick={() => router.push("/tickets?state=completed")}
-                    icon={
-                      <img
-                        src="/dashboard_completed.svg"
-                        width={28}
-                        height={28}
-                      />
-                    }
+                    icon={<MdOutlineCheckCircle />}
                   />
                   <StatCard
-                    delay={180}
+                    delay={150}
                     title="New Ticket"
                     value="+"
                     subText="Raise an issue"
                     buttonText="Create"
                     onClick={() => router.push("/create-ticket")}
-                    icon={
-                      <img src="/dashboard_add.svg" width={28} height={28} />
-                    }
+                    icon={<IoMdAddCircleOutline />}
                   />
                 </>
               )}
             </SimpleGrid>
 
             {/* ── FOOTER ── */}
-            <Box mt="80px">
-              <Divider borderColor="gray.200" />
+            <Box mt={16}>
+              <Divider borderColor="gray.100" />
               <Box
                 w="100%"
-                h="30vh"
+                h={{base : "20vh", md: "30vh"}}
                 className={styles.icons}
-                backgroundSize={{ base: "350px", md: "600px" }}
+                backgroundSize={{ base: "100%", md: "600px" }}
+                borderRadius={"md"}
+                overflow={"hidden"}
               />
             </Box>
           </>
