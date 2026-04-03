@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import database from "@/lib/database";
 import TicketModel from "@/models/Ticket.model";
+import mongoose from "mongoose";
 
 export async function GET(req, { params }) {
   try {
@@ -18,26 +19,47 @@ export async function GET(req, { params }) {
 
     /* ── 2. validate id ── */
     const { id } = await params;
-    console.log("decoded:", JSON.stringify(decoded));
-    console.log("ticket id from params:", id);
     if (!id)
       return NextResponse.json(
         { success: false, message: "Ticket ID is required" },
         { status: 400 },
       );
 
-    /* ── 3. fetch ── */
     await database();
 
-    // Admin + Department → any ticket
-    // User → only their own tickets
-    const query =
-      decoded.role === "Admin" || decoded.role === "Department"
+    /* ── 3. build query ── */
+    const isFullId = id.length === 24 && mongoose.Types.ObjectId.isValid(id);
+    const isAdmin = decoded.role === "Admin" || decoded.role === "Department";
+
+    let ticket = null;
+
+    if (isFullId) {
+      // ✅ normal flow — existing functionality unchanged
+      const query = isAdmin
         ? { _id: id }
         : { _id: id, "user.userId": decoded.id };
 
-    const ticket = await TicketModel.findOne(query);
+      ticket = await TicketModel.findOne(query);
+    } else {
+      // ✅ short id from SMS link — match last N chars
+      const candidates = await TicketModel.find(
+        isAdmin ? {} : { "user.userId": decoded.id },
+      )
+        .select("_id")
+        .lean();
 
+      const match = candidates.find((t) => t._id.toString().endsWith(id));
+
+      if (match) {
+        const query = isAdmin
+          ? { _id: match._id }
+          : { _id: match._id, "user.userId": decoded.id };
+
+        ticket = await TicketModel.findOne(query);
+      }
+    }
+
+    /* ── 4. respond ── */
     if (!ticket)
       return NextResponse.json(
         { success: false, message: "Ticket not found" },

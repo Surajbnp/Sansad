@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import styles from "./tickets.module.css";
 import {
   Box,
@@ -41,8 +41,9 @@ const STATUS_CONFIG = {
   Closed: { color: "#6b7280", bg: "#f9fafb", label: "Closed" },
 };
 
+const FALLBACK_STATUS = { color: "#6b7280", bg: "#f9fafb", label: "" };
 const getStatusStyle = (status) =>
-  STATUS_CONFIG[status] || { color: "#6b7280", bg: "#f9fafb", label: status };
+  STATUS_CONFIG[status] || { ...FALLBACK_STATUS, label: status };
 
 const fmtDate = (d) =>
   new Date(d).toLocaleDateString("hi-IN", {
@@ -51,7 +52,6 @@ const fmtDate = (d) =>
     year: "numeric",
   });
 
-// Map URL param values → Select option values (normalise whatever comes in)
 const PARAM_TO_OPTION = {
   all: "All",
   submitted: "submitted",
@@ -64,15 +64,16 @@ const PARAM_TO_OPTION = {
   closed: "completed",
 };
 
-/* ─────────────────────────────────────────
-   TICKET CARD
-───────────────────────────────────────── */
-/* ─────────────────────────────────────────
-   DROP-IN REPLACEMENT — paste over your
-   existing TicketCard component
-───────────────────────────────────────── */
+const EMPTY_LABELS = {
+  submitted: "कोई submitted ticket नहीं है",
+  assigned: "कोई assigned ticket नहीं है",
+  inprogress: "कोई in-progress ticket नहीं है",
+  completed: "कोई completed ticket नहीं है",
+  All: "अभी कोई ticket नहीं है",
+};
 
-const TicketCard = ({ ticket, onClick, index }) => {
+/* ── Ticket Card — memoized to prevent re-render when parent state changes ── */
+const TicketCard = React.memo(({ ticket, onClick, index }) => {
   const s = getStatusStyle(ticket.status);
   return (
     <Box
@@ -96,19 +97,9 @@ const TicketCard = ({ ticket, onClick, index }) => {
       position="relative"
       overflow="hidden"
     >
-      {/* left accent bar */}
-      <Box
-        position="absolute"
-        top={0}
-        left={0}
-        w="3px"
-        h="100%"
-        bg={s.color}
-        opacity={1}
-      />
+      <Box position="absolute" top={0} left={0} w="3px" h="100%" bg={s.color} />
 
       <Flex align="center" gap={3} pl={2}>
-        {/* ID + date col */}
         <VStack
           align="flex-start"
           spacing={0}
@@ -130,7 +121,6 @@ const TicketCard = ({ ticket, onClick, index }) => {
           )}
         </VStack>
 
-        {/* divider */}
         <Box
           w="1px"
           h="32px"
@@ -138,7 +128,6 @@ const TicketCard = ({ ticket, onClick, index }) => {
           display={{ base: "none", sm: "block" }}
         />
 
-        {/* title + description */}
         <Box flex={1} minW={0}>
           <Text
             fontSize="sm"
@@ -160,7 +149,6 @@ const TicketCard = ({ ticket, onClick, index }) => {
           </Text>
         </Box>
 
-        {/* badges */}
         <HStack
           spacing={2}
           flexShrink={0}
@@ -195,7 +183,6 @@ const TicketCard = ({ ticket, onClick, index }) => {
           </Box>
         </HStack>
 
-        {/* action */}
         <Button
           size="xs"
           variant="ghost"
@@ -217,18 +204,14 @@ const TicketCard = ({ ticket, onClick, index }) => {
         </Button>
       </Flex>
 
-      {/* mobile: badges row */}
       <Flex
         display={{ base: "flex", md: "none" }}
         gap={2}
         mt={2}
         pl={2}
         flexWrap="wrap"
-        justifyContent={"end"}
+        justifyContent="end"
       >
-        {/* <Text fontSize="10px" fontWeight="600" color="gray.300">
-          #{ticket._id?.slice(-8).toUpperCase()}
-        </Text> */}
         {ticket.assignedDept && (
           <Box
             px={2}
@@ -256,7 +239,29 @@ const TicketCard = ({ ticket, onClick, index }) => {
       </Flex>
     </Box>
   );
-};
+});
+TicketCard.displayName = "TicketCard";
+
+/* ── Skeleton loader ── */
+const SkeletonList = () => (
+  <VStack spacing={4} pt={8}>
+    {[...Array(4)].map((_, i) => (
+      <Box
+        key={i}
+        bg="white"
+        borderRadius="14px"
+        p={5}
+        w="100%"
+        border="1px solid"
+        borderColor="gray.100"
+      >
+        <SkeletonCircle size="8" mb={3} />
+        <SkeletonText noOfLines={3} spacing="3" />
+      </Box>
+    ))}
+  </VStack>
+);
+
 /* ─────────────────────────────────────────
    MAIN PAGE
 ───────────────────────────────────────── */
@@ -270,12 +275,23 @@ export default function Page() {
   const [isFetching, setIsFetching] = useState(false);
   const [search, setSearch] = useState("");
 
-  // Normalise the URL param to one of our Select option values
   const rawState = searchParams.get("state") || "All";
   const state = PARAM_TO_OPTION[rawState.toLowerCase()] || "All";
 
-  /* ── fetch tickets ── */
-  const fetchTickets = async () => {
+  // ✅ SMS link redirect — handle ?id= before anything else
+  useEffect(() => {
+    const id = searchParams.get("id");
+    if (!id || loading) return;
+
+    if (user) {
+      router.replace(`/tickets/${id}`); // logged in → ticket view
+    } else {
+      router.replace(`/ticket-status?id=${id}`); // not logged in → public status
+    }
+  }, [searchParams, user, loading]);
+
+  // ✅ Stable fetch function — won't re-create on every render
+  const fetchTickets = useCallback(async () => {
     if (!user) return;
     setIsFetching(true);
     try {
@@ -292,16 +308,26 @@ export default function Page() {
     } finally {
       setIsFetching(false);
     }
-  };
+  }, [user, state]); // ✅ only re-runs when user or state actually changes
 
   useEffect(() => {
+    // ✅ Skip fetch if this is an SMS redirect (?id= present)
+    if (searchParams.get("id")) return;
     fetchTickets();
-  }, [user, state]);
+  }, [fetchTickets]);
 
-  const handleFilterChange = (value) =>
-    router.replace(`/tickets?state=${value}`);
+  // ✅ Stable handler — won't re-create on every render
+  const handleFilterChange = useCallback(
+    (e) => router.replace(`/tickets?state=${e.target.value}`),
+    [router],
+  );
 
-  /* ── client-side search filter ── */
+  // ✅ Stable click handler factory
+  const handleCardClick = useCallback(
+    (id) => router.push(`/tickets/${id}`),
+    [router],
+  );
+
   const filtered = tickets.filter(
     (t) =>
       !search.trim() ||
@@ -316,40 +342,16 @@ export default function Page() {
         ? "Department Tickets"
         : "आपकी Tickets";
 
-  /* ── empty state label based on active filter ── */
-  const emptyLabel = (() => {
-    if (search.trim()) return `"${search}" से कोई ticket नहीं मिली`;
-    const labels = {
-      submitted: "कोई submitted ticket नहीं है",
-      assigned: "कोई assigned ticket नहीं है",
-      inprogress: "कोई in-progress ticket नहीं है",
-      completed: "कोई completed ticket नहीं है",
-      All: "अभी कोई ticket नहीं है",
-    };
-    return labels[state] || "कोई ticket नहीं मिली";
-  })();
+  const emptyLabel = search.trim()
+    ? `"${search}" से कोई ticket नहीं मिली`
+    : EMPTY_LABELS[state] || "कोई ticket नहीं मिली";
 
   /* ─────────────── RENDER ─────────────── */
   return (
     <Box minH="100vh" bg="#fafafa" py={10} px={{ base: 4, md: 8 }}>
       <Box maxW="860px" mx="auto">
         {loading || isFetching ? (
-          <VStack spacing={4} pt={8}>
-            {[...Array(4)].map((_, i) => (
-              <Box
-                key={i}
-                bg="white"
-                borderRadius="14px"
-                p={5}
-                w="100%"
-                border="1px solid"
-                borderColor="gray.100"
-              >
-                <SkeletonCircle size="8" mb={3} />
-                <SkeletonText noOfLines={3} spacing="3" />
-              </Box>
-            ))}
-          </VStack>
+          <SkeletonList />
         ) : (
           <>
             {/* ── HEADER ── */}
@@ -369,7 +371,6 @@ export default function Page() {
                   मिली
                 </Text>
               </Box>
-
               {user?.role === "User" && (
                 <Button
                   bg="#fa7602"
@@ -407,7 +408,6 @@ export default function Page() {
                   _placeholder={{ color: "gray.400" }}
                 />
               </InputGroup>
-
               <Select
                 w={{ base: "100%", sm: "180px" }}
                 h="42px"
@@ -416,7 +416,7 @@ export default function Page() {
                 bg="white"
                 fontSize="sm"
                 value={state}
-                onChange={(e) => handleFilterChange(e.target.value)}
+                onChange={handleFilterChange}
                 focusBorderColor="#fa7602"
                 icon={<MdFilterList />}
               >
@@ -454,7 +454,7 @@ export default function Page() {
                     key={ticket._id}
                     ticket={ticket}
                     index={i}
-                    onClick={() => router.push(`/tickets/${ticket._id}`)}
+                    onClick={() => handleCardClick(ticket._id)}
                   />
                 ))}
               </VStack>

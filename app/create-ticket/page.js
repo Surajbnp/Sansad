@@ -132,7 +132,7 @@ useTitle("Create Ticket");
         description: formData.description,
         complaintType: isOthers ? formData.otherType : formData.type,
         fileUrl: formData.fileUrl,
-        user: { name: user?.name, userId: user?._id },
+        user: { name: user?.name, userId: user?._id, phone : user?.phone },
       };
       const response = await fetch("/api/ticket/create", {
         method: "POST",
