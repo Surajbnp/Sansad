@@ -5,7 +5,7 @@ import database from "@/lib/database";
 import UserModel from "@/models/User.model";
 
 const API_KEY = process.env.TWO_FACTOR_API_KEY;
-const OTP_TEMPLATE = process.env.LOGIN_TEMPLATE_NAME;
+const OTP_TEMPLATE = process.env.DEPARTMENT_TEMPLATE_NAME || "dept";
 
 export async function POST(request) {
   try {
