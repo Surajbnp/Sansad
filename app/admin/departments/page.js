@@ -27,15 +27,17 @@ import {
   ModalCloseButton,
   InputGroup,
   InputLeftAddon,
+  Badge,
+  Icon,
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
-import { MdPerson, MdPhone } from "react-icons/md";
+import { MdPerson, MdPhone, MdAdminPanelSettings } from "react-icons/md";
 import { useAuth } from "@/context/AuthContext";
 
 const OTP_TIME = 60;
 
 /* ── dept card ── */
-const DeptCard = ({ dep, index }) => (
+const DeptCard = ({ dep, index, onPromote }) => (
   <Box
     bg="white"
     borderRadius="16px"
@@ -56,14 +58,14 @@ const DeptCard = ({ dep, index }) => (
     <Flex justify="space-between" align="flex-start" gap={4} wrap="wrap">
       <Box flex={1}>
         <HStack mb={2} spacing={3} flexWrap="wrap">
-          <Text
+          {/* <Text
             fontSize="lg"
             fontWeight="800"
             color="gray.800"
             textTransform="capitalize"
           >
             {dep.name}
-          </Text>
+          </Text> */}
           <Box
             px={2}
             py="1px"
@@ -76,6 +78,18 @@ const DeptCard = ({ dep, index }) => (
           >
             {dep.slug}
           </Box>
+          {/* role badge */}
+          {dep.assignedUser?.role === "Admin" && (
+            <Badge
+              colorScheme="green"
+              borderRadius="full"
+              fontSize="10px"
+              fontWeight="700"
+              px={2}
+            >
+              Admin
+            </Badge>
+          )}
         </HStack>
 
         <VStack align="flex-start" spacing={1}>
@@ -135,20 +149,34 @@ const DeptCard = ({ dep, index }) => (
         </HStack>
       </Box>
 
-      <Button
-        size="sm"
-        variant="outline"
-        borderColor="#fa7602"
-        color="#fa7602"
-        borderRadius="full"
-        px={4}
-        fontWeight="700"
-        fontSize="12px"
-        _hover={{ bg: "#fa7602", color: "white" }}
-        transition="all 0.2s"
-      >
-        Reassign
-      </Button>
+      <VStack spacing={2} align="flex-end">
+    
+        {/* promote button — only if assigned user is not already Admin */}
+        {dep.assignedUser && dep.assignedUser.role !== "Admin" && (
+          <Button
+            size="sm"
+            variant="solid"
+            bg="green.50"
+            color="green.700"
+            border="1px solid"
+            borderColor="green.200"
+            borderRadius="full"
+            px={4}
+            fontWeight="700"
+            fontSize="12px"
+            leftIcon={<MdAdminPanelSettings size={14} />}
+            _hover={{
+              bg: "green.600",
+              color: "white",
+              borderColor: "green.600",
+            }}
+            transition="all 0.2s"
+            onClick={() => onPromote(dep)}
+          >
+            Promote
+          </Button>
+        )}
+      </VStack>
     </Flex>
   </Box>
 );
@@ -174,32 +202,53 @@ const Field = ({ label, required, error, children }) => (
    MAIN PAGE
 ───────────────────────────────────────── */
 const DepartmentsPage = () => {
+  const { user } = useAuth(); // admin's profile (needs admin.phone)
+
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  /* ── create dept state ── */
   const [newDepName, setNewDepName] = useState("");
   const [assignedName, setAssignedName] = useState("");
   const [assignedPhone, setAssignedPhone] = useState("");
   const [assignedContact, setAssignedContact] = useState("");
   const [assignedDesignation, setAssignedDesignation] = useState("");
-
   const [errors, setErrors] = useState({});
-  const [error, setError] = useState(null); // ← 409 conflict error
+  const [error, setError] = useState(null);
   const [otp, setOtp] = useState("");
   const [otpStep, setOtpStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [progressText, setProgressText] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
 
+  /* ── promote state ── */
+  const [promoteDept, setPromoteDept] = useState(null); // the dept being promoted
+  const [promoteOtp, setPromoteOtp] = useState("");
+  const [promoteStep, setPromoteStep] = useState(1); // 1 = confirm, 2 = otp
+  const [promoteSubmitting, setPromoteSubmitting] = useState(false);
+  const [promoteResendTimer, setPromoteResendTimer] = useState(0);
+
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isPromoteOpen,
+    onOpen: onPromoteOpen,
+    onClose: onPromoteClose,
+  } = useDisclosure();
 
-  /* resend countdown */
+  /* resend countdown — create */
   useEffect(() => {
     if (resendTimer === 0) return;
     const t = setInterval(() => setResendTimer((s) => s - 1), 1000);
     return () => clearInterval(t);
   }, [resendTimer]);
+
+  /* resend countdown — promote */
+  useEffect(() => {
+    if (promoteResendTimer === 0) return;
+    const t = setInterval(() => setPromoteResendTimer((s) => s - 1), 1000);
+    return () => clearInterval(t);
+  }, [promoteResendTimer]);
 
   /* validation */
   const validateForm = () => {
@@ -229,7 +278,7 @@ const DepartmentsPage = () => {
     fetchDepartments();
   }, []);
 
-  /* ── STEP 1: send OTP to staff phone ── */
+  /* ── CREATE: STEP 1 send OTP to staff phone ── */
   const sendOtp = async () => {
     if (!validateForm()) return;
     setSubmitting(true);
@@ -258,7 +307,7 @@ const DepartmentsPage = () => {
     }
   };
 
-  /* resend OTP */
+  /* resend OTP — create */
   const resendOtp = async () => {
     setOtp("");
     setSubmitting(true);
@@ -279,7 +328,7 @@ const DepartmentsPage = () => {
     }
   };
 
-  /* ── STEP 2: verify OTP + create dept ── */
+  /* ── CREATE: STEP 2 verify OTP + create dept ── */
   const verifyOtpAndCreate = async () => {
     if (otp.length !== 6) {
       toast({ title: "कृपया 6 अंकों का OTP दर्ज करें", status: "warning" });
@@ -315,7 +364,7 @@ const DepartmentsPage = () => {
     }
   };
 
-  /* reset + close */
+  /* reset + close create modal */
   const handleClose = () => {
     onClose();
     setOtpStep(1);
@@ -328,13 +377,111 @@ const DepartmentsPage = () => {
     setAssignedContact("");
     setAssignedDesignation("");
     setErrors({});
-    setError(null); // ← clear conflict error on close
+    setError(null);
   };
 
   const goBack = () => {
     setOtpStep(1);
     setOtp("");
     setResendTimer(0);
+  };
+
+  /* ─────────────────────────────────────────
+     PROMOTE FLOW
+  ───────────────────────────────────────── */
+
+  /* open promote modal */
+  const handlePromoteOpen = (dept) => {
+    setPromoteDept(dept);
+    setPromoteStep(1);
+    setPromoteOtp("");
+    setPromoteResendTimer(0);
+    onPromoteOpen();
+  };
+
+  /* close + reset promote modal */
+  const handlePromoteClose = () => {
+    onPromoteClose();
+    setPromoteDept(null);
+    setPromoteStep(1);
+    setPromoteOtp("");
+    setPromoteResendTimer(0);
+  };
+
+  /* PROMOTE STEP 1: send OTP to admin's own phone */
+  const sendPromoteOtp = async () => {
+    setPromoteSubmitting(true);
+    try {
+      const res = await fetch("/api/departments/promote/send-otp", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      setPromoteStep(2);
+      setPromoteResendTimer(OTP_TIME);
+      toast({
+        title: "OTP sent to your registered number",
+        status: "success",
+      });
+    } catch (err) {
+      toast({ title: err.message || "OTP भेजने में असफल", status: "error" });
+    } finally {
+      setPromoteSubmitting(false);
+    }
+  };
+
+  /* resend OTP — promote */
+  const resendPromoteOtp = async () => {
+    setPromoteOtp("");
+    setPromoteSubmitting(true);
+    try {
+      const res = await fetch("/api/departments/promote/send-otp", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      setPromoteResendTimer(OTP_TIME);
+      toast({ title: "OTP पुनः भेजा गया", status: "info" });
+    } catch (err) {
+      toast({ title: err.message, status: "error" });
+    } finally {
+      setPromoteSubmitting(false);
+    }
+  };
+
+  /* PROMOTE STEP 2: verify OTP + promote */
+  const verifyAndPromote = async () => {
+    if (promoteOtp.length !== 6) {
+      toast({ title: "कृपया 6 अंकों का OTP दर्ज करें", status: "warning" });
+      return;
+    }
+    setPromoteSubmitting(true);
+    try {
+      const res = await fetch("/api/departments/promote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          departmentId: promoteDept._id,
+          otp: promoteOtp,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      toast({
+        title: data.message || "Promoted to Admin!",
+        status: "success",
+        duration: 4000,
+      });
+      handlePromoteClose();
+      fetchDepartments();
+    } catch (err) {
+      setPromoteOtp("");
+      toast({ title: err.message, status: "error" });
+    } finally {
+      setPromoteSubmitting(false);
+    }
   };
 
   return (
@@ -397,13 +544,20 @@ const DepartmentsPage = () => {
         ) : (
           <VStack spacing={3} align="stretch">
             {departments.map((dep, i) => (
-              <DeptCard key={dep._id} dep={dep} index={i} />
+              <DeptCard
+                key={dep._id}
+                dep={dep}
+                index={i}
+                onPromote={handlePromoteOpen}
+              />
             ))}
           </VStack>
         )}
       </Box>
 
-      {/* ── MODAL ── */}
+      {/* ══════════════════════════════════════
+          CREATE DEPT MODAL
+      ══════════════════════════════════════ */}
       <Modal
         isOpen={isOpen}
         onClose={handleClose}
@@ -420,7 +574,6 @@ const DepartmentsPage = () => {
           <ModalCloseButton />
 
           <ModalBody>
-            {/* ── STEP 1: form ── */}
             {otpStep === 1 && (
               <>
                 <Field
@@ -481,7 +634,7 @@ const DepartmentsPage = () => {
                       onChange={(e) => {
                         setAssignedPhone(e.target.value.replace(/\D/g, ""));
                         setErrors((er) => ({ ...er, assignedPhone: false }));
-                        setError(null); // clear conflict error on retype
+                        setError(null);
                       }}
                       borderRadius="0 10px 10px 0"
                       focusBorderColor="#fa7602"
@@ -489,7 +642,6 @@ const DepartmentsPage = () => {
                   </InputGroup>
                 </Field>
 
-                {/* ── 409 conflict error banner ── */}
                 {error && (
                   <Box
                     mt={-2}
@@ -541,7 +693,6 @@ const DepartmentsPage = () => {
                   </Box>
                 )}
 
-                {/* optional contact */}
                 <Field
                   label="Department Contact (optional)"
                   error={errors.assignedContact}
@@ -568,7 +719,6 @@ const DepartmentsPage = () => {
               </>
             )}
 
-            {/* ── STEP 2: OTP ── */}
             {otpStep === 2 && (
               <VStack spacing={5}>
                 <Box
@@ -667,6 +817,193 @@ const DepartmentsPage = () => {
                 onClick={verifyOtpAndCreate}
               >
                 Verify & Create Department ✓
+              </Button>
+            )}
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* ══════════════════════════════════════
+          PROMOTE MODAL
+      ══════════════════════════════════════ */}
+      <Modal
+        isOpen={isPromoteOpen}
+        onClose={handlePromoteClose}
+        isCentered
+        closeOnOverlayClick={false}
+        size="sm"
+      >
+        <ModalOverlay backdropFilter="blur(4px)" />
+        <ModalContent borderRadius="16px" overflow="hidden">
+          {/* green top bar for promote */}
+          <Box h="3px" bg="green.500" />
+          <ModalHeader fontWeight="800" fontSize="lg" pb={2}>
+            {promoteStep === 1 ? "Promote to Admin" : "Verify Your Identity"}
+          </ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody pb={2}>
+            {/* ── STEP 1: confirm ── */}
+            {promoteStep === 1 && promoteDept && (
+              <VStack spacing={4} align="stretch">
+                {/* dept summary card */}
+                <Box
+                  bg="green.50"
+                  border="1px solid"
+                  borderColor="green.200"
+                  borderRadius="12px"
+                  p={4}
+                >
+                  <HStack spacing={3} mb={2}>
+                    <Box
+                      bg="green.100"
+                      borderRadius="full"
+                      p={2}
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <MdAdminPanelSettings size={20} color="#276749" />
+                    </Box>
+                    <Box>
+                      <Text
+                        fontSize="sm"
+                        fontWeight="800"
+                        color="gray.800"
+                        textTransform="capitalize"
+                      >
+                        {promoteDept.name}
+                      </Text>
+                      <Text fontSize="xs" color="gray.500">
+                        {promoteDept.assignedUser?.name}
+                      </Text>
+                    </Box>
+                  </HStack>
+                  <Text fontSize="xs" color="green.700">
+                    This user will be granted full Admin access.
+                  </Text>
+                </Box>
+
+                {/* warning box */}
+                <Box
+                  bg="orange.50"
+                  border="1px solid"
+                  borderColor="orange.200"
+                  borderRadius="10px"
+                  px={4}
+                  py={3}
+                >
+                  <Text fontSize="xs" color="orange.800" lineHeight="1.6">
+                    ⚠️ An OTP will be sent to{" "}
+                    <Text as="span" fontWeight="700">
+                      your registered mobile number
+                    </Text>{" "}
+                    to confirm this action.
+                  </Text>
+                </Box>
+              </VStack>
+            )}
+
+            {/* ── STEP 2: OTP entry ── */}
+            {promoteStep === 2 && (
+              <VStack spacing={5}>
+                <Box
+                  bg="green.50"
+                  border="1px solid"
+                  borderColor="green.200"
+                  borderRadius="xl"
+                  px={5}
+                  py={3}
+                  textAlign="center"
+                  w="100%"
+                >
+                  <Text fontSize="sm" color="gray.600">
+                    OTP sent to your registered number
+                  </Text>
+                  <Text fontSize="xs" color="gray.400" mt={1}>
+                    Enter it below to confirm promotion
+                  </Text>
+                </Box>
+
+                <Text fontSize="sm" color="gray.500">
+                  6 अंकों का OTP दर्ज करें
+                </Text>
+
+                <HStack justify="center">
+                  <PinInput otp value={promoteOtp} onChange={setPromoteOtp}>
+                    {[...Array(6)].map((_, i) => (
+                      <PinInputField
+                        key={i}
+                        fontSize="xl"
+                        fontWeight="bold"
+                        borderColor="gray.300"
+                        _focus={{
+                          borderColor: "green.500",
+                          boxShadow: "0 0 0 1px #38a169",
+                        }}
+                      />
+                    ))}
+                  </PinInput>
+                </HStack>
+
+                <Flex justify="space-between" w="100%">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    borderRadius="full"
+                    onClick={() => {
+                      setPromoteStep(1);
+                      setPromoteOtp("");
+                      setPromoteResendTimer(0);
+                    }}
+                  >
+                    ← Back
+                  </Button>
+                  <Button
+                    variant="link"
+                    fontSize="sm"
+                    color={promoteResendTimer > 0 ? "gray.400" : "green.500"}
+                    isDisabled={promoteResendTimer > 0 || promoteSubmitting}
+                    onClick={resendPromoteOtp}
+                  >
+                    {promoteResendTimer > 0
+                      ? `Resend in ${promoteResendTimer}s`
+                      : "OTP पुनः भेजें"}
+                  </Button>
+                </Flex>
+              </VStack>
+            )}
+          </ModalBody>
+
+          <ModalFooter pt={3} pb={5}>
+            {promoteStep === 1 && (
+              <Button
+                w="100%"
+                bg="green.500"
+                color="white"
+                borderRadius="full"
+                fontWeight="700"
+                isLoading={promoteSubmitting}
+                loadingText="Sending OTP..."
+                _hover={{ bg: "green.600" }}
+                onClick={sendPromoteOtp}
+              >
+                Send OTP to My Number →
+              </Button>
+            )}
+            {promoteStep === 2 && (
+              <Button
+                w="100%"
+                bg="green.500"
+                color="white"
+                borderRadius="full"
+                fontWeight="700"
+                isLoading={promoteSubmitting}
+                loadingText="Promoting..."
+                _hover={{ bg: "green.600" }}
+                onClick={verifyAndPromote}
+              >
+                Verify & Promote to Admin ✓
               </Button>
             )}
           </ModalFooter>
