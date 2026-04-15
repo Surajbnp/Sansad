@@ -23,6 +23,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Link } from "@chakra-ui/react";
 import NextLink from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 const SAFFRON = "#FA7602";
 const SAFFRON_DARK = "#D96200";
@@ -244,6 +245,7 @@ const VIDHANSABHA_OPTIONS = [
 
 export default function RegistrationForm() {
   const [formData, setFormData] = useState(initialState);
+  const { login } = useAuth();
   const [errors, setErrors] = useState({});
   const [step, setStep] = useState("form");
   const [otp, setOtp] = useState("");
@@ -412,12 +414,15 @@ export default function RegistrationForm() {
         return;
       }
       if (!res.ok) throw new Error(data.message);
+
+      await login();
+      router.push("/profile");
+
       toast({
         title: "सफलतापूर्वक रजिस्टर किया गया!",
         status: "success",
         duration: 3000,
       });
-      router.push("/profile");
     } catch (err) {
       setOtp("");
       toast({
@@ -429,7 +434,6 @@ export default function RegistrationForm() {
       setIsLoading(false);
     }
   };
-
   const inputStyles = (key) => ({
     border: "2px solid",
     borderColor: errors[key]

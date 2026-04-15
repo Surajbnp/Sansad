@@ -1096,12 +1096,15 @@ const Page = () => {
   useTitle("Profile | सांसद सुविधा केंद्र – सतना-मैहर");
 
   const [stats, setStats] = useState(null);
-  const [statsLoading, setStatsLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(false);
   const [localUser, setLocalUser] = useState(null);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
+    if (!user) return;
+
+    setStatsLoading(true);
     const fetchStats = async () => {
       try {
         const res = await fetch("/api/user/stats");
@@ -1113,8 +1116,11 @@ const Page = () => {
         setStatsLoading(false);
       }
     };
+
     fetchStats();
-  }, []);
+  }, [user]);
+
+  console.log(user)
 
   // optimistic UI: use localUser after save, fall back to context user
   const displayUser = localUser ?? user;

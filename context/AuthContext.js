@@ -24,14 +24,15 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     window.location.href = "/";
   };
-
   /* ------------------ BOOTSTRAP AUTH ------------------ */
   useEffect(() => {
     const bootstrapAuth = async () => {
       setLoading(true);
       try {
-        // always call — if cookie exists backend returns user, if not returns 401
-        const res = await fetch("/api/user/get");
+        const res = await fetch("/api/user/get", {
+          cache: "no-store", // ← add this
+          credentials: "include", // ← add this
+        });
         const data = await res.json();
         setUser(res.ok ? data.user : null);
       } catch {
@@ -46,7 +47,10 @@ export const AuthProvider = ({ children }) => {
 
   /* ------------------ LOGIN ------------------ */
   const login = async () => {
-    const res = await fetch("/api/user/get");
+    const res = await fetch("/api/user/get", {
+      cache: "no-store", // ← add this
+      credentials: "include", // ← add this
+    });
     const data = await res.json();
     setUser(res.ok ? data.user : null);
   };

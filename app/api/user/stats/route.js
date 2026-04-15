@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // app/api/stats/route.js
 
 import { NextResponse } from "next/server";
@@ -10,7 +12,7 @@ import DepartmentModel from "@/models/Department.model";
 export async function GET() {
   try {
     /* ── 1. read & verify token from cookie ── */
-    const token = cookies().get("token")?.value;
+    const token = await cookies().get("token")?.value;
 
     if (!token) {
       return NextResponse.json(

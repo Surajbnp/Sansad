@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // app/api/signup/verify-otp/route.js
 
 import { NextResponse } from "next/server";
@@ -84,7 +86,9 @@ export async function POST(request) {
 
     /* ── 6. generate JWT ── */
     const token = jwt.sign(
-      { id: newUser._id, phone: newUser.phone },
+      { id: newUser._id, phone: newUser.phone,
+        role: newUser.role,
+        department: newUser.department, },
       JWT_SECRET,
       { expiresIn: "7d" },
     );
