@@ -34,7 +34,7 @@ const initialState = {
   name: "",
   address: "",
   sex: "",
-  voterId: null,
+  voterId: "",
   aadhar: "",
   phone: "",
   vidhansabha: "",

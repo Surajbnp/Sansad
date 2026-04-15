@@ -13,8 +13,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { phone, otp, name, address, sex, voterId, aadhar, vidhansabha } =
-      body;
+    let { phone, otp, name, address, sex, voterId, aadhar, vidhansabha } = body;
 
     /* ── 1. validate inputs ── */
     if (!phone || !/^\d{10}$/.test(phone)) {
@@ -41,75 +40,99 @@ export async function POST(request) {
         "OTP Expired": "OTP की समय सीमा समाप्त हो गई, पुनः भेजें",
         "OTP MisMatch": "गलत OTP दर्ज किया गया, पुनः प्रयास करें",
       };
+
       const reason =
         messageMap[verifyData.Details] ||
         verifyData.Details ||
         "OTP सत्यापन विफल";
+
       return NextResponse.json({ message: reason }, { status: 400 });
     }
 
-    /* ── 3. OTP verified → connect DB ── */
+    /* ── 3. connect DB ── */
     await database();
 
-    const aadharNum = aadhar ? Number(aadhar) : null;
+    /* ── 4. sanitize inputs ── */
+    let cleanVoterId =
+      voterId && voterId.trim() !== "" ? voterId.trim() : undefined;
 
-    /* ── 4. check for duplicate user ── */
-    const query = { $or: [{ phone }, { aadhar: aadharNum }] };
-    if (voterId) query.$or.push({ voterId });
+    let aadharNum =
+      aadhar && String(aadhar).trim() !== "" ? Number(aadhar) : undefined;
+
+    /* ── 5. check duplicates ── */
+    const query = { $or: [{ phone }] };
+
+    if (aadharNum) query.$or.push({ aadhar: aadharNum });
+    if (cleanVoterId) query.$or.push({ voterId: cleanVoterId });
 
     const existingUser = await UserModel.findOne(query);
 
     if (existingUser) {
       let message = "User already exists.";
+
       if (existingUser.phone === phone)
         message = "यह mobile number पहले से पंजीकृत है।";
-      else if (existingUser.aadhar === aadharNum)
+      else if (aadharNum && existingUser.aadhar === aadharNum)
         message = "यह आधार पहले से पंजीकृत है।";
-      else if (voterId && existingUser.voterId === voterId)
+      else if (cleanVoterId && existingUser.voterId === cleanVoterId)
         message = "यह वोटर ID पहले से पंजीकृत है।";
 
       return NextResponse.json({ message }, { status: 409 });
     }
 
-    /* ── 5. create user ── */
-    const newUser = new UserModel({
+    /* ── 6. create user object safely ── */
+    const userData = {
       name,
       address,
       sex,
       phone,
-      voterId,
-      aadhar: aadharNum,
       vidhansabha,
-    });
+    };
 
+    if (cleanVoterId) userData.voterId = cleanVoterId;
+    if (aadharNum) userData.aadhar = aadharNum;
+
+    const newUser = new UserModel(userData);
     await newUser.save();
 
-    /* ── 6. generate JWT ── */
+    /* ── 7. generate JWT ── */
     const token = jwt.sign(
-      { id: newUser._id, phone: newUser.phone,
+      {
+        id: newUser._id,
+        phone: newUser.phone,
         role: newUser.role,
-        department: newUser.department, },
+        department: newUser.department,
+      },
       JWT_SECRET,
       { expiresIn: "7d" },
     );
 
-    /* ── 7. set token in httpOnly cookie + return response ── */
+    /* ── 8. send response with cookie ── */
     const response = NextResponse.json(
       { message: "सफलतापूर्वक रजिस्टर किया गया!" },
       { status: 201 },
     );
 
     response.cookies.set("token", token, {
-      httpOnly: true, // not accessible via JS — safer
+      httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
+      maxAge: 60 * 60 * 24 * 7,
       path: "/",
     });
 
     return response;
   } catch (error) {
-    console.error("signup error:", error.message);
+    console.error("signup error:", error);
+
+    // handle duplicate key error cleanly
+    if (error.code === 11000) {
+      return NextResponse.json(
+        { message: "Duplicate field detected (voterId / phone / aadhar)." },
+        { status: 409 },
+      );
+    }
+
     return NextResponse.json(
       { message: "Server error", error: error.message },
       { status: 500 },
