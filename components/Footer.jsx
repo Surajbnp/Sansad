@@ -37,7 +37,7 @@ export default function Footer() {
               fontWeight="semibold"
               color="gray.500"
             >
-              SOCIYO COMMUNICATION PVT LTD
+              SOCIYO COMMUNICATIONS PVT LTD
             </Link>
           </Text>
 
