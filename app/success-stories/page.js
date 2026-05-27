@@ -364,8 +364,6 @@ export default function Page() {
                   <span className={styles.storyCardBenefit}>
                     लाभ: <strong>{item.benefit}</strong>
                   </span>
-
-                  <span className={styles.storyCardStars}>🇮🇳🇮🇳🇮🇳🇮🇳🇮🇳</span>
                 </div>
               </div>
             ))}
