@@ -85,6 +85,7 @@ const VIDHANSABHA_OPTIONS = [
   "Chandla",
   "Chhatarpur",
   "Chhindwara",
+  "Chitrakoot",
   "Chitrangi",
   "Churhat",
   "Daboh",
