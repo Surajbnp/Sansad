@@ -654,7 +654,7 @@ export default function GovtSchemesPage() {
         />
         <meta
           property="og:image"
-          content="https://ssksatna.com/Satna_SSK_MicroBanner.webp"
+          content="/Satna_SSK_MicroBanner.webp"
         />
         <meta property="og:locale" content="hi_IN" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -929,7 +929,7 @@ export default function GovtSchemesPage() {
       {/* ── Sansad Banner ── */}
       <section className="sansad-banner">
         <img
-          src="https://res.cloudinary.com/dxwwnettz/image/upload/v1773993978/Satna_SSK_MicroBanner_ciqocz.webp"
+          src="/Satna_SSK_MicroBanner.webp"
           alt="Sansad Suvidha Kendra Satna – Government Schemes Banner"
           fetchPriority="high"
           loading="eager"
