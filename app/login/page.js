@@ -289,7 +289,7 @@ export default function Login() {
       <div className={styles.pageWrapper}>
         <section className={styles.sansadBanner}>
           <img
-            src="https://res.cloudinary.com/dxwwnettz/image/upload/v1773993978/Satna_SSK_MicroBanner_ciqocz.webp"
+            src="/Satna_SSK_MicroBanner.webp"
             alt="Sansad Suvidha Kendra Satna – Government Schemes Banner"
             fetchPriority="high"
             loading="eager"

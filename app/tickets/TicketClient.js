@@ -274,6 +274,8 @@ export default function Page() {
   const [tickets, setTickets] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
   const [search, setSearch] = useState("");
+  const [fromDate, setFromDate] = useState("");
+const [toDate, setToDate] = useState("");
 
   const rawState = searchParams.get("state") || "All";
   const state = PARAM_TO_OPTION[rawState.toLowerCase()] || "All";
@@ -426,6 +428,7 @@ export default function Page() {
                 <option value="inprogress">In Progress</option>
                 <option value="completed">Completed</option>
               </Select>
+
             </Flex>
 
             {/* ── TICKET LIST ── */}
