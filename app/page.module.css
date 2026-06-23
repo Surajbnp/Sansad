@@ -31,7 +31,7 @@
 
 @media (max-width: 768px) {
   .hero {
-    background-image: url("/Satna_SSK_Homebanner_Mobile.webp");
+    background-image: url("/Satna_SSK_Homebanner_Mobile.png");
     background-size: contain;
     background-position: top center;
     aspect-ratio: auto;
