@@ -32,12 +32,12 @@ export default function Footer() {
           >
             Powered By —{" "}
             <Link
-              href="https://sociyo.in"
+              href="https://www.thesociyo.com"
               isExternal
               fontWeight="semibold"
               color="gray.500"
             >
-              SOCIYO COMMUNICATIONS PVT LTD
+              SOCIYO COMMUNICATIONS
             </Link>
           </Text>
 

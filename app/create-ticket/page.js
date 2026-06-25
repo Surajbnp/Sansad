@@ -193,7 +193,7 @@ useTitle("Create Ticket");
         resourceType: "image",
         multiple: false,
         clientAllowedFormats: ["jpg", "jpeg", "png"],
-        maxFileSize: 1000000,
+        maxFileSize: 5000000,
         transformation: [
           {
             width: 1280,
@@ -398,7 +398,7 @@ useTitle("Create Ticket");
           {/* IMAGE UPLOAD */}
           <FormControl>
             <FieldLabel optional>
-              समर्थन दस्तावेज़ — JPG / PNG, max 1 MB
+              समर्थन दस्तावेज़ — JPG / PNG, max 5 MB
             </FieldLabel>
             <HStack spacing={4} align="center">
               <Button

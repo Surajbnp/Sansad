@@ -18,7 +18,7 @@ export default function Home() {
     <Box className={styles.page} minH={{ base: "fit-content", md: "100vh" }}>
       <Box className={styles.heroWrapper} w="100%">
         <Image
-          src="/Satna_SSK_Homebanner_Mobile.webp"
+          src="/Satna_SSK_Homebanner_Mobile.png"
           display={{ base: "block", md: "none" }} 
           w="100%"
           alt="Hero Mobile"
