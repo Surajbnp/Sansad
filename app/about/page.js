@@ -109,24 +109,130 @@ export default function AboutPage() {
 
       <main className={styles.page}>
 
-        {/* ══ 1. INTRO ══ */}
-        <div className={styles.intro}>
-          <div className={`${styles.intro__body} ${styles["fade-up"]}`}>
-            <div className={styles.pill} >परिचय</div>
+{/* ══ 1. INTRO ══ */}
 
-            <h2>
-              सांसद सुविधा केंद्र -<br />
-              <em>क्यों और किसके लिए?</em>
-            </h2>
+<div className={styles.intro}>
+  {/* Heading */}
+  <Box textAlign="center" mb={{ base: 10, md: 14 }}>
+    <Text
+      display="inline-block"
+      bg="#FFF1E5"
+      color="#ff7800"
+      px={5}
+      py={2}
+      borderRadius="full"
+      fontWeight="700"
+      className="hindiText"
+    >
+      ✦ परिचय
+    </Text>
 
-            <p>
-              सांसद सुविधा केंद्र, आप सभी <strong className={styles["text-orange"]}>सतना-मैहर लोकसभा क्षेत्र</strong> के
-              क्षेत्रीय जनों तक <strong className={styles["text-orange"]}>मूलभूत सुविधाएं पहुंचाने</strong> एवं किसी भी
-              प्रकार की व्यक्तिगत अथवा सामूहिक समस्या के <strong className={styles["text-orange"]}>त्वरित निराकरण</strong>
-              के उद्देश्य से शुरू किया गया है।
-            </p>
-          </div>
-        </div>
+    <Heading
+      mt={5}
+      fontSize={{ base: "34px", md: "52px" }}
+      lineHeight="1.3"
+      className="headingHindi"
+    >
+      सांसद सुविधा केंद्र -
+      <Text
+        as="span"
+        color="#ff7800"
+        display="block"
+        mt={2}
+      >
+        क्यों और किसके लिए?
+      </Text>
+    </Heading>
+
+    <Box
+      w="90px"
+      h="5px"
+      bg="#ff7800"
+      mx="auto"
+      mt={5}
+      borderRadius="full"
+    />
+  </Box>
+
+  {/* Content */}
+  <Flex
+    direction={{ base: "column", lg: "row" }}
+    align="center"
+    gap={{ base: 10, lg: 16 }}
+  >
+    {/* Image */}
+    <Box
+      flexShrink={0}
+      textAlign="center"
+    >
+      <Box
+        w={{ base: "250px", md: "320px" }}
+        bg="white"
+        p={3}
+        borderRadius="24px"
+        border="1px solid #eee"
+        boxShadow="0 15px 45px rgba(0,0,0,.12)"
+      >
+        <img
+          src="/gs.jpeg"
+          alt="माननीय सांसद श्री गणेश सिंह जी"
+          style={{
+            width: "100%",
+            display: "block",
+            borderRadius: "18px",
+          }}
+        />
+      </Box>
+
+      <Text
+        mt={5}
+        color="#ff7800"
+        fontWeight="700"
+        fontSize="xl"
+        className="hindiText"
+      >
+        माननीय सांसद श्री गणेश सिंह जी
+      </Text>
+
+      <Text
+        color="gray.600"
+        fontSize="sm"
+      >
+        सांसद, सतना-मैहर लोकसभा क्षेत्र
+      </Text>
+    </Box>
+
+    {/* Text */}
+    <Box flex={1}>
+      <Text
+        className="hindiText"
+        fontSize={{ base: "18px", md: "21px" }}
+        color="#333"
+        lineHeight="1.8"
+        textAlign="justify"
+        sx={{
+          textJustify: "inter-word",
+        }}
+      >
+        सांसद सुविधा केंद्र,
+        <Text as="span" color="#ff7800" fontWeight="700">
+          {" "}माननीय सांसद श्री गणेश सिंह जी{" "}
+        </Text>
+        द्वारा सतना-मैहर लोकसभा क्षेत्र के समस्त क्षेत्रीय जनों तक
+        <Text as="span" color="#ff7800" fontWeight="700">
+          {" "}मूलभूत सुविधाएं पहुंचाने{" "}
+        </Text>
+        एवं किसी भी प्रकार की व्यक्तिगत अथवा सामूहिक समस्याओं के
+        <Text as="span" color="#ff7800" fontWeight="700">
+          {" "}त्वरित निराकरण{" "}
+        </Text>
+        के उद्देश्य से प्रारंभ किया गया है। इसका उद्देश्य प्रत्येक नागरिक तक
+        सरकारी योजनाओं, आवश्यक सेवाओं एवं जनकल्याणकारी सुविधाओं की पहुँच
+        सुनिश्चित करना तथा उनकी समस्याओं का समयबद्ध समाधान उपलब्ध कराना है।
+      </Text>
+    </Box>
+  </Flex>
+</div>
 
         {/* ══ 2. THREE CARDS ══ */}
         <div className={styles["cards-row"]}>
