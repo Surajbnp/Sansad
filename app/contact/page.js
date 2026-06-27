@@ -134,10 +134,23 @@ export default function Contact() {
           <div className={styles.addressBlockText}>
             <div className={styles.addressBlockLabel}>🏛️ कार्यालय का पता</div>
 
-            <h2 className={styles.addressBlockName}>
-              सांसद सुविधा केंद्र<br />
-              संसदीय कार्यालय, सतना
-            </h2>
+          <h2 className={styles.addressBlockName}>
+  सांसद सुविधा केंद्र
+  <br />
+  <span
+    style={{
+      fontSize: "1.0em",
+      fontWeight: 500,
+      color: "#fffff",
+      display: "block",
+      margin: "8px 0",
+      lineHeight: 1.5,
+    }}
+  >
+    माननीय सांसद श्री गणेश सिंह जी का संसदीय कार्यालय
+  </span>
+  सतना
+</h2>
 
             <div className={styles.addressBlockLines}>
 
@@ -163,8 +176,8 @@ export default function Contact() {
                 <div className={styles.addressLineIcon}>✉️</div>
                 <div className={styles.addressLineText}>
                   <strong>Email</strong><br />
-                  <a href="mailto:sansadSuvidha@satna.com">
-                    sansadSuvidha@satna.com
+                  <a href="mailto:satnassk@gmail.com">
+                    satnassk@gmail.com
                   </a>
                 </div>
               </div>
@@ -245,10 +258,10 @@ export default function Contact() {
             </a>
 
             <a
-              href="mailto:sansadSuvidha@satna.com"
+              href="mailto:satnassk@gmail.com"
               className={`${styles.reachBtn} ${styles.reachBtnMail}`}
             >
-              ✉️ sansadSuvidha@satna.com
+              ✉️ satnassk@gmail.com
             </a>
 
           </div>
