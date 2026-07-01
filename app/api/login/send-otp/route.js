@@ -1,11 +1,15 @@
 // app/api/login/send-otp/route.js
 
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import database from "@/lib/database";
 import UserModel from "@/models/User.model";
+import Otp from "@/models/Otp.model";
 
-const API_KEY = process.env.TWO_FACTOR_API_KEY;
-const OTP_TEMPLATE = process.env.LOGIN_TEMPLATE_NAME;
+const SMS_API_KEY = process.env.SMS_API_KEY;
+const SMS_SENDER_ID = process.env.SMS_SENDER_ID;
+const SMS_BASE_URL = process.env.SMS_BASE_URL || "http://sms.mishtel.net/api/mt/SendSMS";
+const LOGIN_TEMPLATE_ID = process.env.SMS_LOGIN_TEMPLATE_ID || process.env.SMS_TEMPLATE_ID;
 
 export async function POST(request) {
   try {
@@ -31,25 +35,65 @@ export async function POST(request) {
       );
     }
 
-    /* ── 3. send OTP via 2factor ── */
-    const url = `https://2factor.in/API/V1/${API_KEY}/SMS/${phone}/AUTOGEN/${OTP_TEMPLATE}`;
+    /* ── legacy 2factor flow kept commented below for reference ── */
+    // const API_KEY = process.env.TWO_FACTOR_API_KEY;
+    // const OTP_TEMPLATE = process.env.LOGIN_TEMPLATE_NAME;
+    // const url = `https://2factor.in/API/V1/${API_KEY}/SMS/${phone}/AUTOGEN/${OTP_TEMPLATE}`;
+    // const res = await fetch(url);
+    // const data = await res.json();
+    // if (data.Status !== "Success") {
+    //   console.error("2factor error:", data);
+    //   return NextResponse.json(
+    //     { message: "OTP भेजने में असफल, कृपया पुनः प्रयास करें" },
+    //     { status: 502 },
+    //   );
+    // }
+
+    /* ── 3. generate OTP and save it for later verification ── */
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+
+    await Otp.deleteMany({ email: phone });
+    await Otp.create({
+      email: phone,
+      otp: hashedOtp,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+    });
+
+    /* ── 4. send OTP via STPL SMS API ── */
+    const message = `Dear Customer,
+
+Your OTP for logging in to your Sansad Suvidha Kendra account is ${otp}. It is valid for 5 minutes.
+
+Website - https://www.ssksatna.com
+
+- Ganesh Singh`;
+    const url = `${SMS_BASE_URL}?apikey=${SMS_API_KEY}&senderid=${SMS_SENDER_ID}&channel=Trans&DCS=0&flashsms=0&number=${phone}&text=${encodeURIComponent(message)}&route=1&DLTTemplateId=${LOGIN_TEMPLATE_ID}`;
+
     const res = await fetch(url);
-    const data = await res.json();
+const responseText = await res.text();
 
-    if (data.Status !== "Success") {
-      console.error("2factor error:", data);
-      return NextResponse.json(
-        { message: "OTP भेजने में असफल, कृपया पुनः प्रयास करें" },
-        { status: 502 },
-      );
-    }
+if (!res.ok) {
+  await Otp.deleteMany({ email: phone });
 
-    return NextResponse.json(
-      { message: "OTP सफलतापूर्वक भेजा गया" },
-      { status: 200 },
-    );
+  return NextResponse.json(
+    {
+      message: "OTP भेजने में असफल",
+      response: responseText,
+    },
+    { status: 502 },
+  );
+}
+
+return NextResponse.json(
+  {
+    message: "OTP सफलतापूर्वक भेजा गया",
+  },
+  { status: 200 },
+);
   } catch (err) {
-    console.error("send-otp error:", err);
+    console.error("Error in send-otp route:", err);
+    
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }
