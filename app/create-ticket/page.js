@@ -513,10 +513,10 @@ useTitle("Create Ticket");
             </GuidelineItem>
           </VStack>
 
-          <Divider borderColor="orange.200" mb={4} />
+          {/* <Divider borderColor="orange.200" mb={4} /> */}
 
           {/* Medical CTA */}
-          <Box
+          {/* <Box
             bg="white"
             border="1px solid"
             borderColor="red.200"
@@ -555,7 +555,7 @@ useTitle("Create Ticket");
                 </Link>
               </Box>
             </Flex>
-          </Box>
+          </Box> */}
         </Box>
       </Box>
     </Box>
