@@ -68,10 +68,28 @@ export async function GET(req) {
       query.status = { $in: statuses };
     }
 
-    /* ── 5. fetch ── */
-    const tickets = await TicketModel.find(query)
-      .sort({ createdAt: -1 })
-      .lean();
+    /* ── 5. date range filter (optional) ── */
+    const start = searchParams.get("start");
+    const end = searchParams.get("end");
+
+    if (start || end) {
+      query.createdAt = {};
+      if (start) {
+        const sdate = new Date(start);
+        if (!isNaN(sdate)) query.createdAt.$gte = sdate;
+      }
+      if (end) {
+        // include the whole end day
+        const ed = new Date(end);
+        if (!isNaN(ed)) {
+          ed.setHours(23, 59, 59, 999);
+          query.createdAt.$lte = ed;
+        }
+      }
+    }
+
+    /* ── 6. fetch ── */
+    const tickets = await TicketModel.find(query).sort({ createdAt: -1 }).lean();
 
     return NextResponse.json({
       success: true,

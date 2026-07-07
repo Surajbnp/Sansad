@@ -297,7 +297,12 @@ const [toDate, setToDate] = useState("");
     if (!user) return;
     setIsFetching(true);
     try {
-      const res = await fetch(`/api/ticket/tickets?state=${state}`);
+      const params = new URLSearchParams();
+      params.set("state", state);
+      if (fromDate) params.set("start", fromDate);
+      if (toDate) params.set("end", toDate);
+
+      const res = await fetch(`/api/ticket/tickets?${params.toString()}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setTickets(data.tickets || []);
@@ -310,7 +315,7 @@ const [toDate, setToDate] = useState("");
     } finally {
       setIsFetching(false);
     }
-  }, [user, state]); // ✅ only re-runs when user or state actually changes
+  }, [user, state, fromDate, toDate]); // include date filters so fetch sees latest values
 
   useEffect(() => {
     // ✅ Skip fetch if this is an SMS redirect (?id= present)
@@ -320,8 +325,15 @@ const [toDate, setToDate] = useState("");
 
   // ✅ Stable handler — won't re-create on every render
   const handleFilterChange = useCallback(
-    (e) => router.replace(`/tickets?state=${e.target.value}`),
-    [router],
+    (e) => {
+      const value = e.target.value;
+      const params = new URLSearchParams();
+      params.set("state", value);
+      if (fromDate) params.set("start", fromDate);
+      if (toDate) params.set("end", toDate);
+      router.replace(`/tickets?${params.toString()}`);
+    },
+    [router, fromDate, toDate],
   );
 
   // ✅ Stable click handler factory
@@ -392,44 +404,131 @@ const [toDate, setToDate] = useState("");
             </Flex>
 
             {/* ── FILTERS ── */}
-            <Flex gap={3} mb={6} wrap="wrap">
-              <InputGroup flex={1} minW="200px">
-                <InputLeftElement pointerEvents="none" h="42px">
-                  <MdSearch color="#a0aec0" size={18} />
-                </InputLeftElement>
-                <Input
-                  h="42px"
-                  borderRadius="10px"
-                  borderColor="gray.200"
-                  bg="white"
-                  fontSize="sm"
-                  placeholder="Title या ID से खोजें..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  focusBorderColor="#fa7602"
-                  _placeholder={{ color: "gray.400" }}
-                />
-              </InputGroup>
-              <Select
-                w={{ base: "100%", sm: "180px" }}
-                h="42px"
-                borderRadius="10px"
-                borderColor="gray.200"
-                bg="white"
-                fontSize="sm"
-                value={state}
-                onChange={handleFilterChange}
-                focusBorderColor="#fa7602"
-                icon={<MdFilterList />}
-              >
-                <option value="All">All Status</option>
-                <option value="submitted">Submitted</option>
-                <option value="assigned">Assigned</option>
-                <option value="inprogress">In Progress</option>
-                <option value="completed">Completed</option>
-              </Select>
+<Box
+  bg="white"
+  p={4}
+  borderRadius="14px"
+  border="1px solid"
+  borderColor="gray.200"
+  mb={6}
+  boxShadow="sm"
+>
+  {/* First Row */}
+  <Flex gap={3} wrap="wrap" mb={3}>
+    <InputGroup flex={1} minW={{ base: "100%", md: "300px" }}>
+      <InputLeftElement pointerEvents="none" h="42px">
+        <MdSearch color="#a0aec0" size={18} />
+      </InputLeftElement>
 
-            </Flex>
+      <Input
+        h="42px"
+        bg="white"
+        borderRadius="10px"
+        placeholder="Search by Ticket ID or Title..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        focusBorderColor="#fa7602"
+      />
+    </InputGroup>
+
+    <Select
+      w={{ base: "100%", md: "220px" }}
+      h="42px"
+      borderRadius="10px"
+      value={state}
+      onChange={handleFilterChange}
+      focusBorderColor="#fa7602"
+      icon={<MdFilterList />}
+    >
+      <option value="All">All Status</option>
+      <option value="submitted">Submitted</option>
+      <option value="assigned">Assigned</option>
+      <option value="inprogress">In Progress</option>
+      <option value="completed">Completed</option>
+    </Select>
+  </Flex>
+
+  {/* Second Row */}
+  <Flex gap={3} wrap="wrap" align="center">
+    <Input
+      type="date"
+      w={{ base: "100%", sm: "180px" }}
+      h="42px"
+      borderRadius="10px"
+      value={fromDate}
+      onChange={(e) => setFromDate(e.target.value)}
+      focusBorderColor="#fa7602"
+    />
+
+    <Input
+      type="date"
+      w={{ base: "100%", sm: "180px" }}
+      h="42px"
+      borderRadius="10px"
+      value={toDate}
+      onChange={(e) => setToDate(e.target.value)}
+      focusBorderColor="#fa7602"
+    />
+
+    <Button
+      h="42px"
+      colorScheme="orange"
+      px={8}
+      onClick={() => {
+        // update URL with current state and dates so filters are shareable
+        const params = new URLSearchParams();
+        params.set("state", state);
+        if (fromDate) params.set("start", fromDate);
+        if (toDate) params.set("end", toDate);
+        router.replace(`/tickets?${params.toString()}`);
+        fetchTickets();
+      }}
+    >
+      Apply Filters
+    </Button>
+
+    <Button
+      h="42px"
+      variant="outline"
+      colorScheme="orange"
+      px={8}
+      onClick={async () => {
+        try {
+          const params = new URLSearchParams();
+
+          if (fromDate) params.set("start", fromDate);
+          if (toDate) params.set("end", toDate);
+
+          const url = `/api/export-tickets${
+            params.toString() ? `?${params.toString()}` : ""
+          }`;
+
+          const res = await fetch(url);
+
+          if (!res.ok) throw new Error("Export failed");
+
+          const blob = await res.blob();
+
+          const a = document.createElement("a");
+          a.href = window.URL.createObjectURL(blob);
+          a.download = `Tickets_Report_${fromDate || "all"}_${toDate || "all"}.xlsx`;
+
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        } catch (err) {
+          toast({
+            title: "Export failed",
+            description: err.message,
+            status: "error",
+          });
+        }
+      }}
+    >
+      Export Excel
+    </Button>
+  </Flex>
+</Box>
 
             {/* ── TICKET LIST ── */}
             {filtered.length === 0 ? (
