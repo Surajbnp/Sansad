@@ -1231,34 +1231,55 @@ const Page = () => {
               </Flex>
 
               {/* info rows */}
-              <Box px={{ base: 5, md: 7 }} py={4}>
-                <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} spacing={0}>
-                  <InfoRow
-                    icon={<MdPhone />}
-                    label="Phone"
-                    value={
-                      displayUser?.phone ? `+91 ${displayUser.phone}` : null
-                    }
-                  />
-                  <InfoRow
-                    icon={<MdLocationOn />}
-                    label="Vidhan Sabha"
-                    value={displayUser?.vidhansabha}
-                  />
-                  <InfoRow
-                    icon={<MdAccountCircle />}
-                    label="Address"
-                    value={displayUser?.address}
-                  />
-                  {displayUser?.voterId && (
-                    <InfoRow
-                      icon={<MdBadge />}
-                      label="Voter ID"
-                      value={displayUser?.voterId}
-                    />
-                  )}
-                </SimpleGrid>
-              </Box>
+          {/* info rows */}
+<Box px={{ base: 5, md: 7 }} py={4}>
+  <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} spacing={0}>
+    <InfoRow
+      icon={<MdPhone />}
+      label="Phone"
+      value={displayUser?.phone ? `+91 ${displayUser.phone}` : null}
+    />
+    <InfoRow
+      icon={<MdLocationOn />}
+      label="District"
+      value={displayUser?.district}
+    />
+    <InfoRow
+      icon={<MdLocationOn />}
+      label="Tehsil"
+      value={displayUser?.tehsil}
+    />
+    {/* ✅ ADDED: Janpad */}
+    <InfoRow
+      icon={<MdLocationOn />}
+      label="Janpad"
+      value={displayUser?.janpad || "—"}
+    />
+    {/* ✅ ADDED: Police Station */}
+    <InfoRow
+      icon={<MdLocationOn />}
+      label="Police Station"
+      value={displayUser?.policeStation || "—"}
+    />
+    <InfoRow
+      icon={<MdLocationOn />}
+      label="Vidhan Sabha"
+      value={displayUser?.vidhansabha}
+    />
+    <InfoRow
+      icon={<MdAccountCircle />}
+      label="Address"
+      value={displayUser?.address}
+    />
+    {displayUser?.voterId && (
+      <InfoRow
+        icon={<MdBadge />}
+        label="Voter ID"
+        value={displayUser?.voterId}
+      />
+    )}
+  </SimpleGrid>
+</Box>
             </Box>
 
             {/* ── SECTION LABEL ── */}

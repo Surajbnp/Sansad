@@ -8,6 +8,7 @@ import database from "@/lib/database";
 import UserModel from "@/models/User.model";
 import Otp from "@/models/Otp.model";
 import jwt from "jsonwebtoken";
+import LOCATION_DATA from "@/data/location";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -25,7 +26,17 @@ export async function POST(request) {
       vidhansabha,
       district,
       tehsil,
+           janpad,           // ✅ Add this
+      policeStation
     } = body;
+        console.log("📝 Received body:", {
+      phone,
+      name,
+      district,
+      tehsil,
+      janpad,           // Check if this is coming
+      policeStation,    // Check if this is coming
+    });
 
     /* ── 1. validate inputs ── */
     if (!phone || !/^\d{10}$/.test(phone)) {
@@ -45,6 +56,33 @@ export async function POST(request) {
     if (!district || !tehsil) {
       return NextResponse.json(
         { message: "कृपया जिला और तहसील चुनें" },
+        { status: 400 },
+      );
+    }
+
+    const districtData = LOCATION_DATA[district];
+    if (!districtData) {
+      return NextResponse.json(
+        { message: "अमान्य जिला चयन किया गया है" },
+        { status: 400 },
+      );
+    }
+
+    const tehsilData = districtData.tehsils?.[tehsil];
+    if (!tehsilData) {
+      return NextResponse.json(
+        { message: "अमान्य तहसील चयन किया गया है" },
+        { status: 400 },
+      );
+    }
+
+    const expectedVidhansabha = tehsilData.vidhansabha;
+    if (vidhansabha !== expectedVidhansabha) {
+      return NextResponse.json(
+        {
+          message:
+            "विधानसभा चयन जिले और तहसील के अनुसार मेल नहीं खाती, कृपया सही विकल्प चुनें",
+        },
         { status: 400 },
       );
     }
@@ -129,6 +167,9 @@ export async function POST(request) {
       vidhansabha,
       district,
       tehsil,
+      janpad,           // ✅ Add this
+      policeStation,    // ✅ Add this
+    role: "User",
     };
 
     if (cleanVoterId) userData.voterId = cleanVoterId;

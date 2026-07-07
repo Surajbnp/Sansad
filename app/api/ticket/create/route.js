@@ -10,10 +10,10 @@ const SMS_SENDER_ID =
 const SMS_BASE_URL =
   process.env.SMS_BASE_URL || "http://sms.mishtel.net/api/mt/SendSMS";
 const SMS_TICKET_DLT_TEMPLATE_ID =
-  process.env.SMS_TICKET_DLT_TEMPLATE_ID || "1707178281736546440";
+  process.env.SMS_TICKET_DLT_TEMPLATE_ID || "1707178333748164911";
 
 async function sendTicketSMS({ phone, userName, ticketId }) {
-  const trackingUrl = `https://www.ssksatna.com/tickets/${ticketId}`;
+  const trackingUrl = `https://www.ssksatna.com/tickets?id=${ticketId}`;
 
   const text = `Dear ${userName},
 
@@ -39,7 +39,6 @@ Our team will get back to you shortly.
 
   const url = `${SMS_BASE_URL}?${params.toString()}`;
 
-  console.log("📱 Sending SMS to:", phone);
   console.log("📱 SMS URL:", url);
 
   const res = await fetch(url);
@@ -54,11 +53,8 @@ Our team will get back to you shortly.
   const result = JSON.parse(responseText);
 
   if (result.ErrorCode !== "000") {
-    console.error("❌ SMS sending failed:", result);
     throw new Error(result.ErrorMessage || "SMS sending failed");
   }
-
-  console.log("✅ SMS sent successfully:", result);
 
   return result;
 }
