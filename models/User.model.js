@@ -63,6 +63,22 @@ const userSchema = new mongoose.Schema(
       },
     },
 
+    janpad: {
+      type: String,
+      required: function () {
+        return this.role === "User";
+      },
+    },
+
+    // ✅ NEW FIELD - Police Station
+    policeStation: {
+      type: String,
+      required: function () {
+        return this.role === "User";
+      },
+    },
+
+
     whatsapp: {
       type: Number,
     },

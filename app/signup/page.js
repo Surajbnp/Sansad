@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { Link } from "@chakra-ui/react";
 import NextLink from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import LOCATION_DATA from "@/data/location";
 
 const SAFFRON = "#FA7602";
 const SAFFRON_DARK = "#D96200";
@@ -40,39 +41,46 @@ const initialState = {
   district: "",
   tehsil: "",
   vidhansabha: "",
+  janpad: "",
+  policeStation: "",
 };
 
-// Vidhansabha options are mapped per district so selecting a district
-// filters the assembly constituencies shown to the user.
-const VIDHANSABHA_BY_DISTRICT = {
-  Satna: [
-    "Satna",
-    "Nagod",
-    "Chitrakoot",
-    "Raigaon",
-    "Rampur Baghelan",
-  ], // 5 constituencies for Satna district
-  Maihar: ["Maihar", "Amarpatan"], // 2 constituencies for Maihar district
+const DISTRICT_OPTIONS = Object.keys(LOCATION_DATA);
+
+const getTehsilOptions = (district) =>
+  district && LOCATION_DATA[district]
+    ? Object.keys(LOCATION_DATA[district].tehsils)
+    : [];
+
+const getVidhansabhaOptions = (district) => {
+  if (!district || !LOCATION_DATA[district]) return [];
+  return Array.from(
+    new Set(
+      Object.values(LOCATION_DATA[district].tehsils).map(
+        (tehsil) => tehsil.vidhansabha,
+      ),
+    ),
+  );
 };
 
-// fallback flat list (used when needed)
-const VIDHANSABHA_OPTIONS = Array.from(
-  new Set(Object.values(VIDHANSABHA_BY_DISTRICT).flat()),
-);
+const getVidhansabhaForTehsil = (district, tehsil) => {
+  if (!district || !tehsil) return "";
+  return LOCATION_DATA[district]?.tehsils?.[tehsil]?.vidhansabha || "";
+};
 
-const DISTRICT_OPTIONS = ["Satna", "Maihar"];
-const TEHSIL_OPTIONS = {
-  Satna: [
-    "Nagod",
-    "Unchehara",
-    "Raghuraj Nagar",
-    "Majhgawan",
-    "Kotar",
-    "Birsinghpur",
-    "Rampur Baghelan",
-    "Kothi",
-  ],
-  Maihar: ["Maihar", "Amarpatan", "Ramnagar"],
+// ✅ Janpad options fetch karne ke liye - COMPONENT KE BAHAR
+const getJanpadOptions = (district, tehsil) => {
+  if (!district || !tehsil || !LOCATION_DATA[district]) return [];
+  const tehsilData = LOCATION_DATA[district].tehsils?.[tehsil];
+  return tehsilData?.janpad ? [tehsilData.janpad] : [];
+};
+
+// ✅ Police Station options fetch karne ke liye - COMPONENT KE BAHAR
+const getPoliceStationOptions = (district, tehsil, janpad) => {
+  if (!district || !tehsil || !janpad || !LOCATION_DATA[district]) return [];
+  const tehsilData = LOCATION_DATA[district].tehsils?.[tehsil];
+  if (!tehsilData || tehsilData.janpad !== janpad) return [];
+  return tehsilData.policeStations || [];
 };
 
 export default function RegistrationForm() {
@@ -134,7 +142,7 @@ export default function RegistrationForm() {
       required: true,
       type: "select",
       icon: "🏞️",
-      options: formData.district ? TEHSIL_OPTIONS[formData.district] || [] : [],
+      options: getTehsilOptions(formData.district),
     },
     {
       key: "vidhansabha",
@@ -143,9 +151,25 @@ export default function RegistrationForm() {
       required: true,
       type: "select",
       icon: "🏛️",
-      options: formData.district
-        ? VIDHANSABHA_BY_DISTRICT[formData.district] || []
-        : [],
+      options: getVidhansabhaOptions(formData.district),
+    },
+    {
+      key: "janpad",
+      label: "जनपद",
+      sublabel: "Janpad",
+      required: true,
+      type: "select",
+      icon: "🏘️",
+      options: getJanpadOptions(formData.district, formData.tehsil),
+    },
+    {
+      key: "policeStation",
+      label: "थाना",
+      sublabel: "Police Station",
+      required: true,
+      type: "select",
+      icon: "👮",
+      options: getPoliceStationOptions(formData.district, formData.tehsil, formData.janpad),
     },
     {
       key: "voterId",
@@ -174,14 +198,54 @@ export default function RegistrationForm() {
   const handleChange = (key, value) => {
     setFormData((prev) => {
       if (key === "district") {
-        return { ...prev, district: value, tehsil: "" };
+        return {
+          ...prev,
+          district: value,
+          tehsil: "",
+          vidhansabha: "",
+          janpad: "",
+          policeStation: "",
+        };
       }
+
+      if (key === "tehsil") {
+        const janpad = getJanpadOptions(prev.district, value)[0] || "";
+        return {
+          ...prev,
+          tehsil: value,
+          vidhansabha: getVidhansabhaForTehsil(prev.district, value),
+          janpad: janpad,
+          policeStation: "",
+        };
+      }
+
+      if (key === "janpad") {
+        return {
+          ...prev,
+          janpad: value,
+          policeStation: "",
+        };
+      }
+
       return { ...prev, [key]: value };
     });
+    
     setErrors((prev) => ({
       ...prev,
       [key]: false,
-      ...(key === "district" ? { tehsil: false } : {}),
+      ...(key === "district" ? { 
+        tehsil: false, 
+        vidhansabha: false, 
+        janpad: false, 
+        policeStation: false 
+      } : {}),
+      ...(key === "tehsil" ? { 
+        janpad: false, 
+        policeStation: false 
+      } : {}),
+      ...(key === "janpad" ? { 
+        policeStation: false 
+      } : {}),
     }));
   };
 
@@ -253,7 +317,9 @@ export default function RegistrationForm() {
   };
 
   const verifyOtpAndSignup = async () => {
+      console.log("🚀 verifyOtpAndSignup called!"); 
     if (!otp || otp.length !== 6) {
+      console.log("❌ OTP validation failed:", otp);
       toast({
         title: "कृपया 6 अंकों का OTP दर्ज करें",
         status: "error",
@@ -261,13 +327,20 @@ export default function RegistrationForm() {
       });
       return;
     }
+      console.log("✅ OTP is valid:", otp);
+
+  console.log("🔍 Full formData:", JSON.stringify(formData, null, 2));
     setIsLoading(true);
     try {
+        const payload = { ...formData, otp };
+    console.log("📤 Sending to API:", JSON.stringify(payload, null, 2));
       const res = await fetch("/api/signup/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...formData, otp }),
       });
+
+      
       const data = await res.json();
       if (res.status === 409) {
         toast({ title: data.message, status: "warning", duration: 3000 });
@@ -295,6 +368,7 @@ export default function RegistrationForm() {
       setIsLoading(false);
     }
   };
+  
   const inputStyles = (key) => ({
     border: "2px solid",
     borderColor: errors[key]
@@ -605,10 +679,18 @@ export default function RegistrationForm() {
                               placeholder={
                                 field.key === "tehsil" && !formData.district
                                   ? "पहले जिला चुनें"
+                                  : field.key === "janpad" && !formData.tehsil
+                                  ? "पहले तहसील चुनें"
+                                  : field.key === "policeStation" && !formData.janpad
+                                  ? "पहले जनपद चुनें"
                                   : "चुनें / Select"
                               }
                               value={formData[field.key]}
-                              isDisabled={field.key === "tehsil" && !formData.district}
+                              isDisabled={
+                                (field.key === "tehsil" && !formData.district) ||
+                                (field.key === "janpad" && !formData.tehsil) ||
+                                (field.key === "policeStation" && !formData.janpad)
+                              }
                               onChange={(e) =>
                                 handleChange(field.key, e.target.value)
                               }
