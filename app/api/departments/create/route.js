@@ -2,11 +2,13 @@ export const dynamic = "force-dynamic";
 
 // app/api/departments/create/route.js
 
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import database from "@/lib/database";
 import DepartmentModel from "@/models/Department.model";
+import Otp from "@/models/Otp.model";
 import UserModel from "@/models/User.model";
 
 /* ── slug generator ── */
@@ -73,73 +75,111 @@ export async function POST(req) {
         { status: 400 },
       );
 
-    /* ── 3. verify OTP before doing anything ── */
-    const verifyUrl = `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/VERIFY3/${assignedPhone}/${otp}`;
-    const verifyRes = await fetch(verifyUrl);
-    const verifyData = await verifyRes.json();
+/* ── 3. verify OTP before doing anything ── */
+const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
 
-    if (verifyData.Status !== "Success") {
-      const messageMap = {
-        "OTP Expired": "OTP की समय सीमा समाप्त हो गई, पुनः भेजें",
-        "OTP MisMatch": "गलत OTP दर्ज किया गया, पुनः प्रयास करें",
-      };
-      const reason =
-        messageMap[verifyData.Details] ||
-        verifyData.Details ||
-        "OTP verification failed";
-      return NextResponse.json(
-        { success: false, message: reason },
-        { status: 400 },
-      );
-    }
+const otpRecord = await Otp.findOne({ email: assignedPhone });
 
-    /* ── 3. check duplicates ── */
-    const existingDept = await DepartmentModel.findOne({ name });
-    if (existingDept)
-      return NextResponse.json(
-        { success: false, message: "Department already exists" },
-        { status: 409 },
-      );
+if (!otpRecord) {
+  return NextResponse.json(
+    { success: false, message: "Invalid or expired OTP" },
+    { status: 400 },
+  );
+}
 
-    const existingUser = await UserModel.findOne({ phone: assignedPhone });
-    if (existingUser)
-      return NextResponse.json(
-        {
-          success: false,
-          message: "A user with this phone number already exists",
-        },
-        { status: 409 },
-      );
+if (otpRecord.expiresAt < new Date()) {
+  await Otp.deleteOne({ email: assignedPhone });
 
-    /* ── 4. create dept user ── */
-    const deptUser = await UserModel.create({
-      name: assignedName,
-      phone: assignedPhone,
-      role: "Department",
-      department: name,
-    });
+  return NextResponse.json(
+    { success: false, message: "OTP expired" },
+    { status: 400 },
+  );
+}
 
-    /* ── 5. create department ── */
-    const slug = await generateSlug(name);
+if (otpRecord.otp !== hashedOtp) {
+  return NextResponse.json(
+    { success: false, message: "Invalid OTP" },
+    { status: 400 },
+  );
+}
 
-    const department = await DepartmentModel.create({
-      name,
-      slug,
-      designation: assignedDesignation,
-      phone: assignedContact || assignedPhone,
-      createdBy: { userId: admin._id, name: admin.name },
-      assignedUser: deptUser._id,
-    });
+/* ── check duplicates ── */
 
-    return NextResponse.json({ success: true, department }, { status: 201 });
-  } catch (err) {
-    if (err.name === "TokenExpiredError")
-      return NextResponse.json({ message: "Session expired" }, { status: 401 });
+const existingDept = await DepartmentModel.findOne({ name });
 
-    console.error("Error creating department:", err);
+if (existingDept) {
+  return NextResponse.json(
+    { success: false, message: "Department already exists" },
+    { status: 409 }
+  );
+}
+
+const existingUser = await UserModel.findOne({
+  phone: assignedPhone,
+});
+
+if (existingUser) {
+  return NextResponse.json(
+    {
+      success: false,
+      message: "A user with this phone number already exists",
+    },
+    { status: 409 }
+  );
+}
+
+/* ── create user ── */
+
+const deptUser = await UserModel.create({
+  name: assignedName,
+  phone: assignedPhone,
+  role: "Department",
+  department: name,
+});
+
+/* ── create department ── */
+
+const slug = await generateSlug(name);
+
+const department = await DepartmentModel.create({
+  name,
+  slug,
+  designation: assignedDesignation,
+  phone: assignedContact || assignedPhone,
+  createdBy: {
+    userId: admin._id,
+    name: admin.name,
+  },
+  assignedUser: deptUser._id,
+});
+
+// Delete OTP after successful creation
+await Otp.deleteOne({ email: assignedPhone });
+
+return NextResponse.json(
+  {
+    success: true,
+    department,
+  },
+  { status: 201 }
+);
+
+} catch (err) {
+  if (err.name === "TokenExpiredError") {
     return NextResponse.json(
-      { success: false, message: "Server error" },
-      { status: 500 },
+      { message: "Session expired" },
+      { status: 401 }
     );
   }
+
+  console.error("Error creating department:", err);
+
+  return NextResponse.json(
+    {
+      success: false,
+      message: "Server error",
+    },
+    { status: 500 }
+  );
+}
 }

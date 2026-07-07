@@ -71,12 +71,22 @@ Your OTP for Sansad Suvidha Kendra registration is ${otp}. Use this OTP to compl
 Website - https://www.ssksatna.com/
 
 - Ganesh Singh`;
-    const url = `${SMS_BASE_URL}?apikey=${SMS_API_KEY}&senderid=${SMS_SENDER_ID}&channel=Trans&DCS=0&flashsms=0&number=${phone}&text=${encodeURIComponent(message)}&route=1&DLTTemplateId=${REGISTRATION_TEMPLATE_ID}`;
-    const res = await fetch(url);
+   
+
+
+const url = `${SMS_BASE_URL}?apikey=${SMS_API_KEY}&senderid=${SMS_SENDER_ID}&channel=Trans&DCS=0&flashsms=0&number=${phone}&text=${encodeURIComponent(message)}&route=1&DLTTemplateId=${REGISTRATION_TEMPLATE_ID}`;
+console.log("API KEY:", SMS_API_KEY ? "Loaded" : "Missing");
+console.log("Sender:", SMS_SENDER_ID);
+console.log("Template:", REGISTRATION_TEMPLATE_ID); // login route me LOGIN_TEMPLATE_ID
+console.log("URL:", url);
+
+
+const res = await fetch(url);
 
 const responseText = await res.text();
 
-
+console.log("Status:", res.status);
+console.log("Response:", responseText);
 if (!res.ok) {
   await Otp.deleteMany({ email: phone });
 
