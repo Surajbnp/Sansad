@@ -49,6 +49,20 @@ const userSchema = new mongoose.Schema(
       },
     },
 
+    district: {
+      type: String,
+      required: function () {
+        return this.role === "User";
+      },
+    },
+
+    tehsil: {
+      type: String,
+      required: function () {
+        return this.role === "User";
+      },
+    },
+
     whatsapp: {
       type: Number,
     },

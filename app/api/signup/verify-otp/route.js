@@ -14,7 +14,18 @@ const JWT_SECRET = process.env.JWT_SECRET;
 export async function POST(request) {
   try {
     const body = await request.json();
-    let { phone, otp, name, address, sex, voterId, aadhar, vidhansabha } = body;
+    let {
+      phone,
+      otp,
+      name,
+      address,
+      sex,
+      voterId,
+      aadhar,
+      vidhansabha,
+      district,
+      tehsil,
+    } = body;
 
     /* ── 1. validate inputs ── */
     if (!phone || !/^\d{10}$/.test(phone)) {
@@ -27,6 +38,13 @@ export async function POST(request) {
     if (!otp || !/^\d{6}$/.test(otp)) {
       return NextResponse.json(
         { message: "कृपया सही 6 अंकों का OTP दर्ज करें" },
+        { status: 400 },
+      );
+    }
+
+    if (!district || !tehsil) {
+      return NextResponse.json(
+        { message: "कृपया जिला और तहसील चुनें" },
         { status: 400 },
       );
     }
@@ -109,6 +127,8 @@ export async function POST(request) {
       sex,
       phone,
       vidhansabha,
+      district,
+      tehsil,
     };
 
     if (cleanVoterId) userData.voterId = cleanVoterId;

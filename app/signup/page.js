@@ -37,19 +37,43 @@ const initialState = {
   voterId: "",
   aadhar: "",
   phone: "",
+  district: "",
+  tehsil: "",
   vidhansabha: "",
 };
 
+// Vidhansabha options are mapped per district so selecting a district
+// filters the assembly constituencies shown to the user.
+const VIDHANSABHA_BY_DISTRICT = {
+  Satna: [
+    "Satna",
+    "Nagod",
+    "Chitrakoot",
+    "Raigaon",
+    "Rampur Baghelan",
+  ], // 5 constituencies for Satna district
+  Maihar: ["Maihar", "Amarpatan"], // 2 constituencies for Maihar district
+};
 
-const VIDHANSABHA_OPTIONS = [
-  "Chitrakoot",
-  "Raigaon",
-  "Satna",
-  "Nagod",
-  "Maihar",
-  "Amarpatan",
-  "Rampur Baghelan",
-];
+// fallback flat list (used when needed)
+const VIDHANSABHA_OPTIONS = Array.from(
+  new Set(Object.values(VIDHANSABHA_BY_DISTRICT).flat()),
+);
+
+const DISTRICT_OPTIONS = ["Satna", "Maihar"];
+const TEHSIL_OPTIONS = {
+  Satna: [
+    "Nagod",
+    "Unchehara",
+    "Raghuraj Nagar",
+    "Majhgawan",
+    "Kotar",
+    "Birsinghpur",
+    "Rampur Baghelan",
+    "Kothi",
+  ],
+  Maihar: ["Maihar", "Amarpatan", "Ramnagar"],
+};
 
 export default function RegistrationForm() {
   const [formData, setFormData] = useState(initialState);
@@ -95,13 +119,33 @@ export default function RegistrationForm() {
       options: ["Male", "Female", "Other"],
     },
     {
+      key: "district",
+      label: "जिला",
+      sublabel: "District",
+      required: true,
+      type: "select",
+      icon: "🗺️",
+      options: DISTRICT_OPTIONS,
+    },
+    {
+      key: "tehsil",
+      label: "तहसील",
+      sublabel: "Tehsil",
+      required: true,
+      type: "select",
+      icon: "🏞️",
+      options: formData.district ? TEHSIL_OPTIONS[formData.district] || [] : [],
+    },
+    {
       key: "vidhansabha",
       label: "विधान सभा",
       sublabel: "Constituency",
       required: true,
       type: "select",
       icon: "🏛️",
-      options: VIDHANSABHA_OPTIONS,
+      options: formData.district
+        ? VIDHANSABHA_BY_DISTRICT[formData.district] || []
+        : [],
     },
     {
       key: "voterId",
@@ -128,8 +172,17 @@ export default function RegistrationForm() {
   ];
 
   const handleChange = (key, value) => {
-    setFormData({ ...formData, [key]: value });
-    setErrors({ ...errors, [key]: false });
+    setFormData((prev) => {
+      if (key === "district") {
+        return { ...prev, district: value, tehsil: "" };
+      }
+      return { ...prev, [key]: value };
+    });
+    setErrors((prev) => ({
+      ...prev,
+      [key]: false,
+      ...(key === "district" ? { tehsil: false } : {}),
+    }));
   };
 
   const validate = () => {
@@ -549,8 +602,13 @@ export default function RegistrationForm() {
 
                           {field.type === "select" ? (
                             <Select
-                              placeholder="चुनें / Select"
+                              placeholder={
+                                field.key === "tehsil" && !formData.district
+                                  ? "पहले जिला चुनें"
+                                  : "चुनें / Select"
+                              }
                               value={formData[field.key]}
+                              isDisabled={field.key === "tehsil" && !formData.district}
                               onChange={(e) =>
                                 handleChange(field.key, e.target.value)
                               }
