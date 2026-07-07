@@ -26,20 +26,66 @@ import { useRouter } from "next/navigation";
 import { useTitle } from "@/hooks/useTitle";
 
 const TICKET_TYPES = [
-  "राजस्व",
+  "जिला पंचायत / जनपद पंचायत",
+  "तहसील से संबंधित कार्य",
   "पुलिस",
-  "शिक्षा",
-  "स्वास्थ्य",
-  "रोजगार",
+  "सड़क / PWD / प्रधानमंत्री ग्रामीण सड़क योजना एवं अन्य सड़क",
+  "पुल / ब्रिज संबंधी कार्य",
+  "नगर निगम / नगर पालिका / नगर परिषद",
+  "कृषि विभाग",
+  "खनिज विभाग",
+  "महिला एवं बाल विकास विभाग",
+  "शिक्षा विभाग",
+  "आदिम जाति कल्याण विभाग",
+  "सामाजिक न्याय एवं दिव्यांगजन सशक्तिकरण विभाग",
+  "स्वास्थ्य विभाग",
+  "आबकारी विभाग",
+  "खाद्य विभाग",
+  "वन विभाग",
+  "जल विभाग (PHE)",
+  "विद्युत विभाग",
   "रेलवे विभाग",
-  "नगर निगम / जिला पंचायत",
-  "पब्लिक हेल्थ इंजीनियरिंग (PHE)",
-  "MPEB",
+  "रोजगार",
   "अन्य (Others)",
 ];
-
+const TITLE_OPTIONS = [
+  "प्रधानमंत्री राहत कोष से सहायता प्रदान करने हेतु आवेदन",
+  "सांसद सहायता निधि से आर्थिक सहायता हेतु आवेदन",
+  "स्वेच्छानुदान मद से आर्थिक सहायता प्रदान करने हेतु आवेदन",
+  "आकस्मिक मृत्यु होने पर आर्थिक सहायता हेतु आवेदन",
+  "बिजली का खंभा लगवाने हेतु आवेदन",
+  "बिजली ट्रांसफार्मर लगवाने हेतु आवेदन",
+  "बिजली बिल संबंधी समस्या के निराकरण हेतु आवेदन",
+  "पेयजल समस्या के निराकरण हेतु आवेदन",
+  "हैंडपंप स्थापना / मरम्मत हेतु आवेदन",
+  "नाली निर्माण हेतु आवेदन",
+  "सड़क निर्माण / मरम्मत हेतु आवेदन",
+  "सीसी रोड निर्माण हेतु आवेदन",
+  "स्टॉप डैम निर्माण हेतु आवेदन",
+  "पुल / पुलिया निर्माण हेतु आवेदन",
+  "स्ट्रीट लाइट लगवाने / मरम्मत हेतु आवेदन",
+  "प्रधानमंत्री आवास योजना संबंधी आवेदन",
+  "राशन कार्ड बनवाने / संशोधन हेतु आवेदन",
+  "बीपीएल (BPL) कार्ड बनवाने हेतु आवेदन",
+  "खाद्यान्न पात्रता पर्ची में नाम जोड़ने / संशोधन हेतु आवेदन",
+  "आयुष्मान कार्ड बनवाने / सुधार हेतु आवेदन",
+  "आधार कार्ड संबंधी समस्या के निराकरण हेतु आवेदन",
+  "संबल कार्ड बनवाने / सुधार हेतु आवेदन",
+  "वृद्धा पेंशन बनवाने हेतु आवेदन",
+  "विधवा पेंशन बनवाने हेतु आवेदन",
+  "दिव्यांग पेंशन बनवाने हेतु आवेदन",
+  "दिव्यांग उपकरण उपलब्ध कराने हेतु आवेदन",
+  "किसान सम्मान निधि संबंधी आवेदन",
+  "स्कूल भवन निर्माण / मरम्मत हेतु आवेदन",
+  "छात्रवृत्ति संबंधी आवेदन",
+  "चिकित्सा सहायता / स्वास्थ्य संबंधी आवेदन",
+  "शौचालय निर्माण संबंधी आवेदन",
+  "भूमि / राजस्व संबंधी आवेदन",
+  "अन्य (Others)",
+];
 const initialState = {
   title: "",
+  otherTitle: "",
   description: "",
   type: "",
   otherType: "",
@@ -101,6 +147,7 @@ export default function TicketCreatePage() {
 useTitle("Create Ticket");
 
   const isOthers = formData.type === "अन्य (Others)";
+  const isOtherTitle = formData.title === "अन्य (Others)";
 
   const handleChange = (key, value) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -110,7 +157,14 @@ useTitle("Create Ticket");
   /* ================= VALIDATION ================= */
   const validate = () => {
     const newErrors = {};
-    if (!formData.title.trim()) newErrors.title = "शीर्षक आवश्यक है";
+  if (!formData.title)
+  newErrors.title = "विषय चुनें";
+
+if (
+  isOtherTitle &&
+  !formData.otherTitle.trim()
+)
+  newErrors.otherTitle = "कृपया विषय लिखें";
     if (!formData.description.trim()) newErrors.description = "विवरण आवश्यक है";
     if (!formData.type) newErrors.type = "शिकायत का प्रकार चुनें";
     if (isOthers && !formData.otherType.trim())
@@ -128,7 +182,9 @@ useTitle("Create Ticket");
     setIsLoading(true);
     try {
       const payload = {
-        title: formData.title,
+     title: isOtherTitle
+  ? formData.otherTitle
+  : formData.title,
         description: formData.description,
         complaintType: isOthers ? formData.otherType : formData.type,
         fileUrl: formData.fileUrl,
@@ -278,23 +334,63 @@ useTitle("Create Ticket");
         p={{ base: 5, md: 7 }}
         shadow="sm"
         mb={6}
+
       >
         <VStack spacing={5} align="stretch">
           {/* TITLE */}
-          <FormControl isInvalid={!!errors.title}>
-            <FieldLabel>शीर्षक (Title)</FieldLabel>
-            <Input
-              value={formData.title}
-              onChange={(e) => handleChange("title", e.target.value)}
-              placeholder="शिकायत का संक्षिप्त शीर्षक लिखें"
-              bg="gray.50"
-              borderColor="gray.200"
-              rounded="lg"
-              _focus={focusStyle}
-              fontSize="sm"
-            />
-            <FormErrorMessage fontSize="xs">{errors.title}</FormErrorMessage>
-          </FormControl>
+        <FormControl isInvalid={!!errors.title}>
+  <FieldLabel>आवेदन / शिकायत का विषय</FieldLabel>
+
+  <Select
+    value={formData.title}
+    placeholder="— विषय चुनें —"
+    onChange={(e) => {
+      handleChange("title", e.target.value);
+
+      if (e.target.value !== "अन्य (Others)") {
+        setFormData((prev) => ({
+          ...prev,
+          title: e.target.value,
+          otherTitle: "",
+        }));
+      }
+    }}
+    bg="gray.50"
+    rounded="lg"
+    _focus={focusStyle}
+  >
+    {TITLE_OPTIONS.map((item) => (
+      <option key={item} value={item}>
+        {item}
+      </option>
+    ))}
+  </Select>
+
+  <FormErrorMessage>
+    {errors.title}
+  </FormErrorMessage>
+</FormControl>
+
+{isOtherTitle && (
+  <FormControl isInvalid={!!errors.otherTitle}>
+    <FieldLabel>अन्य विषय</FieldLabel>
+
+    <Input
+      value={formData.otherTitle}
+      onChange={(e) =>
+        handleChange("otherTitle", e.target.value)
+      }
+      placeholder="विषय लिखें"
+      bg="gray.50"
+      rounded="lg"
+      _focus={focusStyle}
+    />
+
+    <FormErrorMessage>
+      {errors.otherTitle}
+    </FormErrorMessage>
+  </FormControl>
+)}
 
           {/* TYPE DROPDOWN */}
           <FormControl isInvalid={!!errors.type}>
@@ -350,13 +446,13 @@ useTitle("Create Ticket");
               <Input
                 value={formData.otherType}
                 onChange={(e) => handleChange("otherType", e.target.value)}
-                placeholder="अधिकतम 12 अक्षर"
+                placeholder="अधिकतम 25 अक्षर"
                 bg="orange.50"
                 borderColor="orange.200"
                 rounded="lg"
                 _focus={focusStyle}
                 fontSize="sm"
-                maxLength={12}
+                maxLength={25}
               />
               <Flex justify="space-between" align="center" mt={1}>
                 <FormErrorMessage fontSize="xs" mt={0}>
