@@ -1,30 +1,64 @@
 // app/api/ticket/create/route.js
+
 import database from "@/lib/database";
 import TicketModel from "@/models/Ticket.model";
 import { NextResponse } from "next/server";
-import verifyUser from "../../authMiddleware";
 
-// ✅ Helper to send SMS via 2Factor
-async function sendTicketSMS({ phone, userName, ticketId, trackingUrl }) {
-  const API_KEY = process.env.TWO_FACTOR_API_KEY;
-  const SENDER_ID = process.env.TWOFACTOR_SENDER_ID;
-  const TEMPLATE_NAME = process.env.TICKET_CREATION_TEMPLATE_NAME;
+const SMS_API_KEY = process.env.SMS_API_KEY;
+const SMS_SENDER_ID =
+  process.env.SMS_SENDER_ID || process.env.TWOFACTOR_SENDER_ID;
+const SMS_BASE_URL =
+  process.env.SMS_BASE_URL || "http://sms.mishtel.net/api/mt/SendSMS";
+const SMS_TICKET_DLT_TEMPLATE_ID =
+  process.env.SMS_TICKET_DLT_TEMPLATE_ID || "1707178281736546440";
 
-  console.log("📱 Sending SMS to:", phone, userName, ticketId, trackingUrl);
-  const response = await fetch(
-    `https://2factor.in/API/R1/?module=TRANS_SMS&apikey=${API_KEY}&to=${phone}&from=${SENDER_ID}&templatename=${TEMPLATE_NAME}&var1=${userName}&var2=${ticketId}&var3=${trackingUrl}`,
-    {
-      method: "POST",
-    },
-  );
+async function sendTicketSMS({ phone, userName, ticketId }) {
+  const trackingUrl = `https://www.ssksatna.com/tickets/${ticketId}`;
 
-  const result = await response.json();
+  const text = `Dear ${userName},
 
-  if (result.Status !== "Success") {
-    console.error("❌ SMS sending failed:", result);
-  } else {
-    console.log("✅ SMS sent successfully. Session ID:", result.Details);
+Your request has been registered successfully on Sansad Suvidha Kendra. Your Ticket ID is ${ticketId}.
+
+Track your ticket here: ${trackingUrl}
+
+Our team will get back to you shortly.
+
+- Ganesh Singh`;
+
+  const params = new URLSearchParams({
+    apikey: SMS_API_KEY,
+    senderid: SMS_SENDER_ID,
+    channel: "Trans",
+    DCS: "0",
+    flashsms: "0",
+    number: phone,
+    text,
+    route: "1",
+    DLTTemplateId: SMS_TICKET_DLT_TEMPLATE_ID,
+  });
+
+  const url = `${SMS_BASE_URL}?${params.toString()}`;
+
+  console.log("📱 Sending SMS to:", phone);
+  console.log("📱 SMS URL:", url);
+
+  const res = await fetch(url);
+  const responseText = await res.text();
+
+  console.log("📩 STPL Response:", responseText);
+
+  if (!res.ok) {
+    throw new Error("HTTP Error while sending SMS");
   }
+
+  const result = JSON.parse(responseText);
+
+  if (result.ErrorCode !== "000") {
+    console.error("❌ SMS sending failed:", result);
+    throw new Error(result.ErrorMessage || "SMS sending failed");
+  }
+
+  console.log("✅ SMS sent successfully:", result);
 
   return result;
 }
@@ -34,10 +68,16 @@ export async function POST(req) {
     await database();
 
     const token = req.headers.get("authorization");
+
     if (!token) {
       return NextResponse.json(
-        { success: false, message: "No token provided" },
-        { status: 401 },
+        {
+          success: false,
+          message: "No token provided",
+        },
+        {
+          status: 401,
+        }
       );
     }
 
@@ -48,8 +88,6 @@ export async function POST(req) {
       complaintType,
       fileUrl,
       assignedDept,
-      phone,
-      userName,
     } = await req.json();
 
     const newTicket = new TicketModel({
@@ -63,27 +101,36 @@ export async function POST(req) {
 
     await newTicket.save();
 
-    // ✅ Send SMS after ticket is saved
+    // Send SMS
     if (user?.phone) {
-      const shortId = newTicket._id.toString().slice(-8);
-      const trackingUrl = `https://www.ssksatna.com/tickets?id=${shortId}`;
       await sendTicketSMS({
         phone: user.phone,
-        userName: user?.name || "User",
+        userName: user.name || "User",
         ticketId: newTicket._id.toString(),
-        trackingUrl,
       });
     }
-    return NextResponse.json({
-      success: true,
-      message: "Ticket created successfully",
-      ticket: newTicket,
-    });
-  } catch (error) {
-    console.error("❌ Error creating ticket:", error.message);
+
     return NextResponse.json(
-      { success: false, message: error.message },
-      { status: 400 },
+      {
+        success: true,
+        message: "Ticket created successfully",
+        ticket: newTicket,
+      },
+      {
+        status: 200,
+      }
+    );
+  } catch (error) {
+    console.error("❌ Error creating ticket:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: error.message,
+      },
+      {
+        status: 400,
+      }
     );
   }
 }
