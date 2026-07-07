@@ -18,6 +18,7 @@ const maihar = {
       ],
     },
 
+    
     Ramnagar: {
       vidhansabha: "Amarpatan",
       janpad: "Ramnagar",

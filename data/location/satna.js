@@ -12,6 +12,7 @@ const satna = {
         "Jaitwara",
       ],
     },
+    
 
     "Rampur Baghelan": {
       vidhansabha: "Rampur Baghelan",
