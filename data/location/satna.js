@@ -32,7 +32,7 @@ const satna = {
     },
 
     Unchehara: {
-      vidhansabha: "Unchehara",
+      vidhansabha: "Nagod",
       janpad: "Unchehara",
       policeStations: [
         "Unchehara",
