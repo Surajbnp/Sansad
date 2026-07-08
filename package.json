@@ -23,6 +23,8 @@
     "framer-motion": "^12.23.9",
     "i18next": "^25.3.4",
     "jsonwebtoken": "^9.0.2",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "mongoose": "^8.16.5",
     "next": "15.4.8",
     "next-i18next": "^15.4.2",

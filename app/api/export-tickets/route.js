@@ -1,6 +1,9 @@
+// app/api/export-tickets/route.js - Sirf Excel aur CSV return karo, PDF frontend se generate karo
+
 import { NextResponse } from "next/server";
 import * as XLSX from "xlsx";
-
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 import database from "@/lib/database";
 import TicketModel from "@/models/Ticket.model";
 import UserModel from "@/models/User.model";
@@ -9,14 +12,46 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request) {
   try {
+    /* ── 1. Auth check ── */
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     await database();
 
-    // optional date range filters
+    /* ── 2. Get all filters from URL ── */
     const { searchParams } = new URL(request.url);
+    const format = searchParams.get("format") || "excel";
     const start = searchParams.get("start");
     const end = searchParams.get("end");
+    const district = searchParams.get("district");
+    const tehsil = searchParams.get("tehsil");
+    const upTehsil = searchParams.get("upTehsil");
+    const janpad = searchParams.get("janpad");
+    const vidhansabha = searchParams.get("vidhansabha");
+    const policeStation = searchParams.get("policeStation");
+    const department = searchParams.get("department");
 
+    /* ── 3. Build ticket query ── */
     const q = {};
+
+    if (decoded.role === "User") {
+      q["user.userId"] = decoded.id;
+    }
+
+    if (decoded.role === "Department") {
+      if (!decoded.department) {
+        return NextResponse.json(
+          { success: false, message: "Department not assigned" },
+          { status: 403 }
+        );
+      }
+      q.assignedDept = decoded.department;
+    }
+
     if (start || end) {
       q.createdAt = {};
       if (start) {
@@ -32,14 +67,45 @@ export async function GET(request) {
       }
     }
 
-    const tickets = await TicketModel.find(q).lean();
+    /* ── 4. Location filters ── */
+    if (decoded.role === "Admin") {
+      let userFilter = {};
+      
+      if (district) userFilter.district = district;
+      if (tehsil) userFilter.tehsil = tehsil;
+      if (upTehsil) userFilter.upTehsil = upTehsil;
+      if (janpad) userFilter.janpad = janpad;
+      if (vidhansabha) userFilter.vidhansabha = vidhansabha;
+      if (policeStation) userFilter.policeStation = policeStation;
+      
+      if (Object.keys(userFilter).length > 0) {
+        const matchingUsers = await UserModel.find(userFilter, { _id: 1 }).lean();
+        const userIds = matchingUsers.map(u => u._id);
+        
+        if (userIds.length > 0) {
+          q["user.userId"] = { $in: userIds };
+        } else {
+          return NextResponse.json(
+            { success: true, total: 0, tickets: [] },
+            { status: 200 }
+          );
+        }
+      }
+      
+      if (department) {
+        q.assignedDept = department;
+      }
+    }
 
+    /* ── 5. Fetch tickets ── */
+    const tickets = await TicketModel.find(q).sort({ createdAt: -1 }).lean();
+
+    /* ── 6. Prepare data ── */
     const data = await Promise.all(
       tickets.map(async (ticket, index) => {
-        // User details fetch
-      const user = ticket.user?.userId
-  ? await UserModel.findById(ticket.user.userId).lean()
-  : null;
+        const user = ticket.user?.userId
+          ? await UserModel.findById(ticket.user.userId).lean()
+          : null;
         return {
           "S.No": index + 1,
           "Ticket ID": ticket._id.toString(),
@@ -51,8 +117,8 @@ export async function GET(request) {
           District: user?.district || "",
           Tehsil: user?.tehsil || "",
           "Up Tehsil": user?.upTehsil || "",
-          "Janpad": user?.janpad || "",                    // ✅ ADDED
-          "Police Station": user?.policeStation || "",     // ✅ ADDED
+          Janpad: user?.janpad || "",
+          "Police Station": user?.policeStation || "",
           Gender: user?.sex || "",
           "Voter ID": user?.voterId || "",
           Aadhaar: user?.aadhar || "",
@@ -73,63 +139,68 @@ export async function GET(request) {
       })
     );
 
+    /* ── 7. Export based on format ── */
+    
+    // ── EXCEL (.xlsx) ──
+    if (format === "excel" || format === "xlsx") {
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      worksheet["!cols"] = [
+        { wch: 8 }, { wch: 28 }, { wch: 25 }, { wch: 15 }, { wch: 28 },
+        { wch: 35 }, { wch: 25 }, { wch: 22 }, { wch: 22 }, { wch: 22 },
+        { wch: 20 }, { wch: 22 }, { wch: 10 }, { wch: 20 }, { wch: 18 },
+        { wch: 18 }, { wch: 35 }, { wch: 60 }, { wch: 20 }, { wch: 15 },
+        { wch: 22 }, { wch: 40 }, { wch: 22 }, { wch: 22 }
+      ];
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Tickets");
+      const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+      return new NextResponse(buffer, {
+        headers: {
+          "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "Content-Disposition": 'attachment; filename="Tickets_Report.xlsx"',
+        },
+      });
+    }
+
+    // ── CSV ──
+    if (format === "csv") {
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const csv = XLSX.utils.sheet_to_csv(worksheet);
+      return new NextResponse(csv, {
+        headers: {
+          "Content-Type": "text/csv",
+          "Content-Disposition": 'attachment; filename="Tickets_Report.csv"',
+        },
+      });
+    }
+
+    // ── PDF ── Return JSON data so frontend can generate PDF
+    if (format === "pdf") {
+      return NextResponse.json({
+        success: true,
+        data: data,
+        total: data.length,
+        message: "PDF data ready"
+      });
+    }
+
+    // Default: Excel
     const worksheet = XLSX.utils.json_to_sheet(data);
-
-    // Auto column width - Updated with new columns
-    worksheet["!cols"] = [
-      { wch: 8 },   // S.No
-      { wch: 28 },  // Ticket ID
-      { wch: 25 },  // Name
-      { wch: 15 },  // Phone
-      { wch: 28 },  // User ID
-      { wch: 35 },  // Address
-      { wch: 25 },  // Vidhansabha
-      { wch: 22 },  // District
-      { wch: 22 },  // Tehsil
-      { wch: 22 },  // Up Tehsil   // ✅ ADDED
-      { wch: 20 },  // Janpad        // ✅ ADDED
-      { wch: 22 },  // Police Station // ✅ ADDED
-      { wch: 10 },  // Gender
-      { wch: 20 },  // Voter ID
-      { wch: 18 },  // Aadhaar
-      { wch: 18 },  // WhatsApp
-      { wch: 35 },  // Title
-      { wch: 60 },  // Description
-      { wch: 20 },  // Complaint Type
-      { wch: 15 },  // Status
-      { wch: 22 },  // Assigned Department
-      { wch: 40 },  // File URL
-      { wch: 22 },  // Created At
-      { wch: 22 },  // Updated At
-    ];
-
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Tickets");
-
-    const buffer = XLSX.write(workbook, {
-      type: "buffer",
-      bookType: "xlsx",
-    });
-
+    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
     return new NextResponse(buffer, {
       headers: {
-        "Content-Type":
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "Content-Disposition":
-          'attachment; filename="Tickets_Report.xlsx"',
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Disposition": 'attachment; filename="Tickets_Report.xlsx"',
       },
     });
+
   } catch (error) {
     console.error("Export Error:", error);
-
     return NextResponse.json(
-      {
-        success: false,
-        message: error.message,
-      },
-      {
-        status: 500,
-      }
+      { success: false, message: error.message },
+      { status: 500 }
     );
   }
 }

@@ -16,7 +16,10 @@ const satna = {
     "Unchehara",
     "Majhgawan",
     "Birsinghpur",
+    "Rampur",
+    "Nagod",
   ],
+
 upTehsils: [
     "Ramsthan",      // रामस्थान (वृत्त)
     "Sohawal",       // सोहावल

@@ -114,36 +114,33 @@ const EMPTY_LABELS = {
   All: "अभी कोई ticket नहीं है",
 };
 
-// ✅ Location helper functions
+// ✅ FIXED: Location helper functions
 const DISTRICT_OPTIONS = Object.keys(LOCATION_DATA);
 
-const getTehsilOptions = (district) =>
-  district && LOCATION_DATA[district]
-    ? Object.keys(LOCATION_DATA[district].tehsils)
-    : [];
+
+const getTehsilOptions = (district) => {
+  if (!district || !LOCATION_DATA[district]) return [];
+  return LOCATION_DATA[district].tehsils || [];
+};
+
+const getUpTehsilOptions = (district) => {
+  if (!district || !LOCATION_DATA[district]) return [];
+  return LOCATION_DATA[district].upTehsils || [];
+};
 
 const getVidhansabhaOptions = (district) => {
   if (!district || !LOCATION_DATA[district]) return [];
-  return Array.from(
-    new Set(
-      Object.values(LOCATION_DATA[district].tehsils).map(
-        (tehsil) => tehsil.vidhansabha,
-      ),
-    ),
-  );
+  return LOCATION_DATA[district].vidhansabhas || [];
 };
 
-const getJanpadOptions = (district, tehsil) => {
-  if (!district || !tehsil || !LOCATION_DATA[district]) return [];
-  const tehsilData = LOCATION_DATA[district].tehsils?.[tehsil];
-  return tehsilData?.janpad ? [tehsilData.janpad] : [];
+const getJanpadOptions = (district) => {
+  if (!district || !LOCATION_DATA[district]) return [];
+  return LOCATION_DATA[district].janpads || [];
 };
 
-const getPoliceStationOptions = (district, tehsil, janpad) => {
-  if (!district || !tehsil || !janpad || !LOCATION_DATA[district]) return [];
-  const tehsilData = LOCATION_DATA[district].tehsils?.[tehsil];
-  if (!tehsilData || tehsilData.janpad !== janpad) return [];
-  return tehsilData.policeStations || [];
+const getPoliceStationOptions = (district) => {
+  if (!district || !LOCATION_DATA[district]) return [];
+  return LOCATION_DATA[district].policeStations || [];
 };
 
 // ✅ Department Options
@@ -387,6 +384,7 @@ export default function Page() {
   const [filters, setFilters] = useState({
     district: "",
     tehsil: "",
+    upTehsil: "",
     janpad: "",
     vidhansabha: "",
     policeStation: "",
@@ -408,41 +406,13 @@ export default function Page() {
     }
   }, [searchParams, user, loading]);
 
-  // ✅ Handle filter change - Proper reset of dependent fields
-  const handleFilterChange = (key, value) => {
-    setFilters((prev) => {
-      if (key === "district") {
-        return {
-          district: value,
-          tehsil: "",
-          janpad: "",
-          policeStation: "",
-          vidhansabha: "",
-          department: prev.department,
-        };
-      }
-      if (key === "tehsil") {
-        const janpad = getJanpadOptions(prev.district, value)[0] || "";
-        const vidhansabha = getVidhansabhaOptions(prev.district)[0] || "";
-        return {
-          ...prev,
-          tehsil: value,
-          janpad: janpad,
-          policeStation: "",
-          vidhansabha: vidhansabha,
-        };
-      }
-      if (key === "janpad") {
-        return {
-          ...prev,
-          janpad: value,
-          policeStation: "",
-        };
-      }
-      return { ...prev, [key]: value };
-    });
-  };
-
+// ✅ FIXED: Handle filter change - NO DEPENDENCIES
+const handleFilterChange = (key, value) => {
+  setFilters((prev) => ({
+    ...prev,
+    [key]: value,
+  }));
+};
   // ✅ Fetch tickets with filters
   const fetchTickets = useCallback(async () => {
     if (!user) return;
@@ -512,6 +482,7 @@ export default function Page() {
     setFilters({
       district: "",
       tehsil: "",
+      upTehsil: "",
       janpad: "",
       vidhansabha: "",
       policeStation: "",
@@ -552,109 +523,185 @@ export default function Page() {
     return [...new Set(depts)].sort();
   }, [tickets]);
 
-  // ✅ Filter fields - Only for Admin
-  const filterFields = useMemo(() => {
-    // Admin ke liye hi filter fields available hain
-    if (user?.role !== "Admin") return [];
+
+// ✅ FIXED: Filter fields - NO DEPENDENCIES, sab independent
+const filterFields = useMemo(() => {
+  if (user?.role !== "Admin") return [];
+  
+  return [
+    {
+      key: "district",
+      label: "जिला",
+      sublabel: "District",
+      icon: "🗺️",
+      options: DISTRICT_OPTIONS,
+    },
+    {
+      key: "tehsil",
+      label: "तहसील",
+      sublabel: "Tehsil",
+      icon: "🏞️",
+      options: getTehsilOptions(filters.district),
+      // ✅ NO dependsOn
+    },
+    {
+      key: "upTehsil",
+      label: "उप तहसील",
+      sublabel: "UP Tehsil",
+      icon: "🏘️",
+      options: getUpTehsilOptions(filters.district),
+      // ✅ NO dependsOn
+    },
+    {
+      key: "vidhansabha",
+      label: "विधान सभा",
+      sublabel: "Constituency",
+      icon: "🏛️",
+      options: getVidhansabhaOptions(filters.district),
+      // ✅ NO dependsOn
+    },
+    {
+      key: "janpad",
+      label: "जनपद",
+      sublabel: "Janpad",
+      icon: "🏘️",
+      options: getJanpadOptions(filters.district),
+      // ✅ NO dependsOn
+    },
+    {
+      key: "policeStation",
+      label: "थाना",
+      sublabel: "Police Station",
+      icon: "👮",
+      options: getPoliceStationOptions(filters.district),
+      // ✅ NO dependsOn
+    },
+    {
+      key: "department",
+      label: "विभाग",
+      sublabel: "Department",
+      icon: "🏢",
+      options: TICKET_TYPES,
+    },
+  ];
+}, [user, filters.district]);
+
+// ✅ Export functions - proper download with format
+// ✅ Export functions - proper download
+const exportData = async (format) => {
+  setExportLoading(true);
+  try {
+    const params = new URLSearchParams();
+    params.set("format", format);
+    params.set("state", state);
+    if (fromDate) params.set("start", fromDate);
+    if (toDate) params.set("end", toDate);
     
-    return [
-      {
-        key: "district",
-        label: "जिला",
-        sublabel: "District",
-        icon: "🗺️",
-        options: DISTRICT_OPTIONS,
-      },
-      {
-        key: "tehsil",
-        label: "तहसील",
-        sublabel: "Tehsil",
-        icon: "🏞️",
-        options: getTehsilOptions(filters.district),
-        dependsOn: "district",
-      },
-      {
-        key: "vidhansabha",
-        label: "विधान सभा",
-        sublabel: "Constituency",
-        icon: "🏛️",
-        options: getVidhansabhaOptions(filters.district),
-        dependsOn: "district",
-      },
-      {
-        key: "janpad",
-        label: "जनपद",
-        sublabel: "Janpad",
-        icon: "🏘️",
-        options: getJanpadOptions(filters.district, filters.tehsil),
-        dependsOn: "tehsil",
-      },
-      {
-        key: "policeStation",
-        label: "थाना",
-        sublabel: "Police Station",
-        icon: "👮",
-        options: getPoliceStationOptions(filters.district, filters.tehsil, filters.janpad),
-        dependsOn: "janpad",
-      },
-      {
-        key: "department",
-        label: "विभाग",
-        sublabel: "Department",
-        icon: "🏢",
-        options: TICKET_TYPES,
-      },
-    ];
-  }, [user, filters.district, filters.tehsil, filters.janpad, departmentOptions]);
+    if (user?.role === "Admin") {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value && value.trim() !== "") {
+          params.set(key, value);
+        }
+      });
+    }
 
-  // ✅ Export functions
-  const exportData = async (format) => {
-    setExportLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (fromDate) params.set("start", fromDate);
-      if (toDate) params.set("end", toDate);
+    const url = `/api/export-tickets${params.toString() ? `?${params.toString()}` : ""}`;
+    console.log("📤 Exporting with params:", params.toString());
+    
+    const res = await fetch(url);
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || "Export failed");
+    }
+
+    // ✅ PDF - special handling
+    if (format === "pdf") {
+      const data = await res.json();
+      if (!data.success) throw new Error("Failed to get PDF data");
       
-      // ✅ Only add filters for Admin users
-      if (user?.role === "Admin") {
-        Object.entries(filters).forEach(([key, value]) => {
-          if (value && value.trim() !== "") {
-            params.set(key, value);
-          }
-        });
-      }
-
-      const url = `/api/export-tickets${params.toString() ? `?${params.toString()}` : ""}`;
-      console.log("📤 Exporting with params:", params.toString());
+      // Generate PDF using html2pdf or jsPDF
+      const { jsPDF } = await import('jspdf');
+      const autoTable = await import('jspdf-autotable');
       
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Export failed");
-
-      const blob = await res.blob();
-      const extension = format === "pdf" ? "pdf" : format === "csv" ? "csv" : "xlsx";
-      const a = document.createElement("a");
-      a.href = window.URL.createObjectURL(blob);
-      a.download = `Tickets_Report_${new Date().toISOString().split('T')[0]}.${extension}`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
+      const doc = new jsPDF('landscape', 'mm', 'a4');
+      
+      // Title
+      doc.setFontSize(16);
+      doc.text('Tickets Report', 14, 20);
+      doc.setFontSize(10);
+      doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 28);
+      doc.text(`Total Tickets: ${data.total}`, 14, 34);
+      
+      // Table
+      const headers = ['S.No', 'Ticket ID', 'Name', 'Phone', 'District', 'Tehsil', 'Janpad', 'Status', 'Department'];
+      const rows = data.data.map(row => [
+        row['S.No'],
+        row['Ticket ID'].slice(-8).toUpperCase(),
+        row['Name'].substring(0, 20),
+        row['Phone'],
+        row['District'].substring(0, 15),
+        row['Tehsil'].substring(0, 15),
+        row['Janpad'].substring(0, 15),
+        row['Status'].substring(0, 15),
+        row['Assigned Department'].substring(0, 20)
+      ]);
+      
+      autoTable.default(doc, {
+        head: [headers],
+        body: rows,
+        startY: 40,
+        styles: { fontSize: 7 },
+        headStyles: { fillColor: [250, 118, 2] },
+        columnStyles: {
+          0: { cellWidth: 15 },
+          1: { cellWidth: 30 },
+          2: { cellWidth: 35 },
+          3: { cellWidth: 25 },
+          4: { cellWidth: 30 },
+          5: { cellWidth: 30 },
+          6: { cellWidth: 30 },
+          7: { cellWidth: 30 },
+          8: { cellWidth: 35 }
+        }
+      });
+      
+      doc.save(`Tickets_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+      
       toast({
-        title: `Report exported successfully!`,
+        title: `PDF exported successfully!`,
         status: "success",
         duration: 3000,
       });
-    } catch (err) {
-      console.error("Export error:", err);
-      toast({
-        title: "Export failed",
-        description: err.message,
-        status: "error",
-      });
-    } finally {
-      setExportLoading(false);
+      return;
     }
-  };
+
+    // Excel and CSV - blob download
+    const blob = await res.blob();
+    const extension = format === "csv" ? "csv" : "xlsx";
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.download = `Tickets_Report_${new Date().toISOString().split('T')[0]}.${extension}`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(link.href);
+
+    toast({
+      title: `Report exported successfully!`,
+      status: "success",
+      duration: 3000,
+    });
+  } catch (err) {
+    console.error("Export error:", err);
+    toast({
+      title: "Export failed",
+      description: err.message,
+      status: "error",
+    });
+  } finally {
+    setExportLoading(false);
+  }
+};
 
   const pageTitle =
     user?.role === "Admin"
@@ -864,48 +911,45 @@ export default function Page() {
 
                 {/* Row 2: Location Filters */}
                 <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 6 }} spacing={3} mb={4}>
-                  {filterFields.map((field) => {
-                    const isDisabled = field.dependsOn && !filters[field.dependsOn];
-                    const placeholder = isDisabled
-                      ? `पहले ${filterFields.find(f => f.key === field.dependsOn)?.label || ''} चुनें`
-                      : field.key === "vidhansabha" && !filters.district
-                      ? "पहले जिला चुनें"
-                      : "चुनें / Select";
-
-                    return (
-                      <FormControl key={field.key}>
-                        <FormLabel
-                          fontSize="10px"
-                          fontWeight="600"
-                          color="gray.400"
-                          letterSpacing="0.06em"
-                          textTransform="uppercase"
-                          mb={1}
-                        >
-                          {field.icon} {field.label}
-                        </FormLabel>
-                        <Select
-                          placeholder={placeholder}
-                          value={filters[field.key]}
-                          isDisabled={isDisabled}
-                          onChange={(e) => handleFilterChange(field.key, e.target.value)}
-                          focusBorderColor="#fa7602"
-                          size="sm"
-                          h="38px"
-                          borderRadius="8px"
-                          bg={filters[field.key] ? "#fff9f5" : "white"}
-                          borderColor={filters[field.key] ? "#fa7602" : "gray.200"}
-                        >
-                          <option value="">All</option>
-                          {field.options.map((opt) => (
-                            <option key={opt} value={opt}>
-                              {opt}
-                            </option>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    );
-                  })}
+               {filterFields.map((field) => {
+  // ✅ NO isDisabled, sab independent
+  return (
+    <FormControl key={field.key}>
+      <FormLabel
+        fontSize="10px"
+        fontWeight="600"
+        color="gray.400"
+        letterSpacing="0.06em"
+        textTransform="uppercase"
+        mb={1}
+      >
+        {field.icon} {field.label}
+      </FormLabel>
+      <Select
+        placeholder="चुनें / Select"
+        value={filters[field.key]}
+        onChange={(e) => handleFilterChange(field.key, e.target.value)}
+        focusBorderColor="#fa7602"
+        size="sm"
+        h="38px"
+        borderRadius="8px"
+        bg={filters[field.key] ? "#fff9f5" : "white"}
+        borderColor={filters[field.key] ? "#fa7602" : "gray.200"}
+      >
+        <option value="">All</option>
+        {field.options && field.options.length > 0 ? (
+          field.options.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))
+        ) : (
+          <option value="">No options available</option>
+        )}
+      </Select>
+    </FormControl>
+  );
+})}
                 </SimpleGrid>
 
                 {/* Row 3: Date Filters + Action Buttons */}
