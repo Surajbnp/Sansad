@@ -871,7 +871,7 @@ const exportData = async (format) => {
                       <MenuItem icon={<FaFileCsv color="#217346" />} onClick={() => exportData("csv")}>
                         CSV (.csv)
                       </MenuItem>
-                      <MenuItem icon={<FaFilePdf color="#ff0000" />} onClick={() => exportData("pdf")}>
+                      <MenuItem icon={<FaFilePdf color="#ff0000" />} onClick={() => exportData("pdf")}  isDisabled={true} >
                         PDF (.pdf)
                       </MenuItem>
                     </MenuList>
