@@ -123,7 +123,8 @@ import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import database from "@/lib/database";
 import TicketModel from "@/models/Ticket.model";
-import UserModel from "@/models/User.model"; // ✅ ADDED
+import UserModel from "@/models/User.model";
+import { PREDEFINED_TYPES } from "@/constants/ticketTypes";
 
 const STATE_STATUS_MAP = {
   submitted: ["Submitted"],
@@ -205,7 +206,7 @@ export async function GET(req) {
       }
     }
 
-    /* ── 6. location filters (only for Admin) ── ✅ ADDED */
+    /* ── 6. location filters (only for Admin) ── */
     const district = searchParams.get("district");
     const tehsil = searchParams.get("tehsil");
     const janpad = searchParams.get("janpad");
@@ -213,6 +214,7 @@ export async function GET(req) {
     const policeStation = searchParams.get("policeStation");
     const upTehsil = searchParams.get("upTehsil");
     const department = searchParams.get("department");
+    const complaintType = searchParams.get("complaintType");
 
     // Only apply location filters for Admin
     if (decoded.role === "Admin") {
@@ -243,21 +245,104 @@ export async function GET(req) {
         }
       }
       
-      // Department filter
+      // Department filter - assignedDept par lagega
       if (department) {
         query.assignedDept = department;
       }
+      
+      // ✅ Complaint Type filter - complaintType par lagega
+       if (complaintType) {
+        if (complaintType === "अन्य (Others)") {
+          // Show tickets that are NOT in predefined types
+          query.complaintType = { $nin: PREDEFINED_TYPES };
+        } else {
+          // Show tickets matching specific type
+          query.complaintType = complaintType;
+        }
+      }
     }
 
-    /* ── 7. fetch ── */
+    /* ── 7. fetch tickets ── */
     const tickets = await TicketModel.find(query).sort({ createdAt: -1 }).lean();
+
+    /* ── 8. ✅ Fetch user details for all tickets ── */
+    const userIds = tickets
+      .map(t => t.user?.userId)
+      .filter(Boolean);
+    
+    let userMap = {};
+    if (userIds.length > 0) {
+      const users = await UserModel.find(
+        { _id: { $in: userIds } },
+        { 
+          _id: 1, 
+          name: 1, 
+          phone: 1, 
+          address: 1, 
+          district: 1, 
+          tehsil: 1, 
+          upTehsil: 1,
+          janpad: 1, 
+          vidhansabha: 1, 
+          policeStation: 1, 
+          sex: 1,
+          voterId: 1,
+          aadhar: 1,
+          whatsapp: 1
+        }
+      ).lean();
+
+      // Create user map for quick lookup
+      userMap = {};
+      users.forEach(u => {
+        userMap[u._id.toString()] = u;
+      });
+    }
+
+    /* ── 9. ✅ Attach userDetails to each ticket ── */
+    const ticketsWithUser = tickets.map(ticket => {
+      const userObj = ticket.user?.userId ? userMap[ticket.user.userId.toString()] : null;
+      return {
+        ...ticket,
+        userDetails: userObj ? {
+          name: userObj.name || ticket.user?.name || '',
+          phone: userObj.phone || ticket.user?.phone || '',
+          address: userObj.address || '',
+          district: userObj.district || '',
+          tehsil: userObj.tehsil || '',
+          upTehsil: userObj.upTehsil || '',
+          janpad: userObj.janpad || '',
+          vidhansabha: userObj.vidhansabha || '',
+          policeStation: userObj.policeStation || '',
+          sex: userObj.sex || '',
+          voterId: userObj.voterId || '',
+          aadhar: userObj.aadhar || '',
+          whatsapp: userObj.whatsapp || '',
+        } : {
+          name: ticket.user?.name || '',
+          phone: ticket.user?.phone || '',
+          address: '',
+          district: '',
+          tehsil: '',
+          upTehsil: '',
+          janpad: '',
+          vidhansabha: '',
+          policeStation: '',
+          sex: '',
+          voterId: '',
+          aadhar: '',
+          whatsapp: '',
+        }
+      };
+    });
 
     return NextResponse.json({
       success: true,
-      total: tickets.length,
+      total: ticketsWithUser.length,
       state: state || "all",
-      tickets,
+      tickets: ticketsWithUser,
     });
+    
   } catch (err) {
     if (err.name === "TokenExpiredError") {
       return NextResponse.json(

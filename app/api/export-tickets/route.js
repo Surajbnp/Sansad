@@ -34,6 +34,7 @@ export async function GET(request) {
     const vidhansabha = searchParams.get("vidhansabha");
     const policeStation = searchParams.get("policeStation");
     const department = searchParams.get("department");
+    const complaintType = searchParams.get("complaintType");
 
     /* ── 3. Build ticket query ── */
     const q = {};
@@ -95,6 +96,9 @@ export async function GET(request) {
       if (department) {
         q.assignedDept = department;
       }
+      if (complaintType) {
+        q.complaintType = complaintType;
+      } 
     }
 
     /* ── 5. Fetch tickets ── */

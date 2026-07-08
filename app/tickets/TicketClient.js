@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import styles from "./tickets.module.css";
-import { TICKET_TYPES } from "@/constants/ticketTypes";
+import { TICKET_TYPES, getDisplayComplaintType, PREDEFINED_TYPES } from "@/constants/ticketTypes";
 import {
   Box,
   Button,
@@ -150,6 +150,32 @@ const getDepartmentOptions = (tickets) => {
     .filter(Boolean);
   return [...new Set(depts)].sort();
 };
+
+// ✅ Get unique complaint types from tickets
+const getComplaintTypeOptions = (tickets) => {
+  // Get unique complaint types from tickets
+  const types = tickets
+    .map(t => t.complaintType)
+    .filter(Boolean);
+  
+  // Get unique display types (convert to "अन्य (Others)" where needed)
+  const uniqueTypes = [...new Set(types)];
+  const displayTypes = uniqueTypes.map(type => getDisplayComplaintType(type));
+  
+  // Remove duplicates after mapping
+  const finalTypes = [...new Set(displayTypes)];
+  
+  // Sort: "अन्य (Others)" ko last mein rakho
+  const sorted = finalTypes.sort((a, b) => {
+    if (a === "अन्य (Others)") return 1;
+    if (b === "अन्य (Others)") return -1;
+    return a.localeCompare(b, 'hi');
+  });
+  
+  // Agar koi type nahi hai toh default TICKET_TYPES use karo
+  return sorted.length > 0 ? sorted : TICKET_TYPES;
+};
+
 
 /* ── Ticket Card ── */
 const TicketCard = React.memo(({ ticket, onClick, index }) => {
@@ -389,6 +415,7 @@ export default function Page() {
     vidhansabha: "",
     policeStation: "",
     department: "",
+    complaintType: "",
   });
 
   const rawState = searchParams.get("state") || "All";
@@ -458,24 +485,23 @@ const handleFilterChange = (key, value) => {
   }, [fetchTickets]);
 
   // ✅ Apply filters
-  const applyFilters = useCallback(() => {
-    const params = new URLSearchParams();
-    params.set("state", state);
-    if (fromDate) params.set("start", fromDate);
-    if (toDate) params.set("end", toDate);
-    
-    // ✅ Only add filters for Admin users
-    if (user?.role === "Admin") {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value && value.trim() !== "") {
-          params.set(key, value);
-        }
-      });
-    }
-    
-    router.replace(`/tickets?${params.toString()}`);
-    fetchTickets();
-  }, [router, state, fromDate, toDate, filters, fetchTickets, user]);
+const applyFilters = useCallback(() => {
+  const params = new URLSearchParams();
+  params.set("state", state);
+  if (fromDate) params.set("start", fromDate);
+  if (toDate) params.set("end", toDate);
+  
+  if (user?.role === "Admin") {
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && value.trim() !== "") {
+        params.set(key, value);
+      }
+    });
+  }
+  
+  router.replace(`/tickets?${params.toString()}`);
+  fetchTickets();
+}, [router, state, fromDate, toDate, filters, fetchTickets, user]);
 
   // ✅ Clear all filters
   const clearFilters = useCallback(() => {
@@ -487,6 +513,7 @@ const handleFilterChange = (key, value) => {
       vidhansabha: "",
       policeStation: "",
       department: "",
+      complaintType: "",
     });
     setFromDate("");
     setToDate("");
@@ -515,18 +542,19 @@ const handleFilterChange = (key, value) => {
     );
   }, [tickets, search]);
 
-  // ✅ Get department options from all tickets
-  const departmentOptions = useMemo(() => {
-    const depts = tickets
-      .map(t => t.assignedDept)
-      .filter(Boolean);
-    return [...new Set(depts)].sort();
-  }, [tickets]);
+const getAssignedDepartmentOptions = (tickets) => {
+  const depts = tickets
+    .map(t => t.assignedDept)
+    .filter(Boolean);
+  return [...new Set(depts)].sort();
+};
 
 
 // ✅ FIXED: Filter fields - NO DEPENDENCIES, sab independent
 const filterFields = useMemo(() => {
   if (user?.role !== "Admin") return [];
+
+    const assignedDepts = getAssignedDepartmentOptions(tickets);
   
   return [
     {
@@ -579,10 +607,19 @@ const filterFields = useMemo(() => {
     {
       key: "department",
       label: "विभाग",
-      sublabel: "Department",
+      sublabel: "Assigned Department",
       icon: "🏢",
-      options: TICKET_TYPES,
+      options: assignedDepts,  
+      placeholder: "Select Assigned Department"
     },
+    {
+      key: "complaintType", 
+      label: "शिकायत प्रकार",
+      sublabel: "Complaint Type",
+      icon: "📋",
+      options:getComplaintTypeOptions(tickets), 
+      placeholder: "Select Complaint Type"
+    }
   ];
 }, [user, filters.district]);
 
@@ -729,6 +766,7 @@ const exportData = async (format) => {
     const byJanpad = {};
     const byVidhansabha = {};
     const byPoliceStation = {};
+    const byComplaintType = {};
 
     filtered.forEach(t => {
       const status = t.status || "Unknown";
@@ -751,6 +789,9 @@ const exportData = async (format) => {
 
       const dept = t.assignedDept || "Unassigned";
       byDepartment[dept] = (byDepartment[dept] || 0) + 1;
+
+      const complaintType = getDisplayComplaintType(t.complaintType);
+      byComplaintType[complaintType] = (byComplaintType[complaintType] || 0) + 1;
     });
 
     return { 
@@ -761,7 +802,9 @@ const exportData = async (format) => {
       byTehsil,
       byJanpad,
       byVidhansabha,
-      byPoliceStation
+      byPoliceStation,
+      byComplaintType
+
     };
   }, [filtered]);
 
@@ -1041,6 +1084,15 @@ const exportData = async (format) => {
                         <TagCloseButton onClick={() => setFilters(prev => ({ ...prev, department: "" }))} />
                       </Tag>
                     )}
+                    {filters.complaintType && (
+  <Tag size="sm" colorScheme="cyan" borderRadius="full">
+    <TagLabel>Complaint: {filters.complaintType}</TagLabel>
+    <TagCloseButton onClick={() => {
+      setFilters(prev => ({ ...prev, complaintType: "" }));
+      applyFilters();
+    }} />
+  </Tag>
+)}
                     {fromDate && (
                       <Tag size="sm" colorScheme="gray" borderRadius="full">
                         <TagLabel>From: {fromDate}</TagLabel>
@@ -1255,6 +1307,47 @@ const exportData = async (format) => {
                     </SimpleGrid>
                   </Box>
                 )}
+
+                <Divider />
+                {/* Complaint Type Wise */}
+              <Divider />
+
+{/* ✅ Complaint Type Wise - ADD THIS SECTION */}
+{Object.keys(stats.byComplaintType).length > 0 && (
+  <Box>
+    <Text fontSize="sm" fontWeight="700" color="gray.700" mb={3}>
+      📋 शिकायत प्रकार वार वितरण
+    </Text>
+    <SimpleGrid columns={2} spacing={2}>
+      {Object.entries(stats.byComplaintType)
+        .sort((a, b) => {
+          // "अन्य (Others)" ko last mein rakho
+          if (a[0] === "अन्य (Others)") return 1;
+          if (b[0] === "अन्य (Others)") return -1;
+          return b[1] - a[1]; // Sort by count descending
+        })
+        .map(([type, count]) => (
+          <Box 
+            key={type} 
+            bg={type === "अन्य (Others)" ? "gray.50" : "cyan.50"} 
+            p={3} 
+            borderRadius="8px" 
+            borderLeft="3px solid" 
+            borderColor={type === "अन्य (Others)" ? "gray.500" : "cyan.500"}
+          >
+            <Text fontSize="xs" color="gray.500" noOfLines={2}>
+              {type}
+            </Text>
+            <Text fontSize="lg" fontWeight="700" color={type === "अन्य (Others)" ? "gray.600" : "cyan.600"}>
+              {count}
+            </Text>
+          </Box>
+        ))}
+    </SimpleGrid>
+  </Box>
+)}
+
+                <Divider />
               </VStack>
             </DrawerBody>
           </DrawerContent>

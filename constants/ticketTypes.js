@@ -21,3 +21,19 @@ export const TICKET_TYPES = [
   "रोजगार",
   "अन्य (Others)",
 ];
+
+// ✅ Get predefined types (excluding "अन्य (Others)")
+export const PREDEFINED_TYPES = TICKET_TYPES.filter(type => type !== "अन्य (Others)");
+
+// ✅ Helper: Check if type is "अन्य (Others)"
+export const isOtherType = (type) => {
+  if (!type) return true;
+  return !PREDEFINED_TYPES.includes(type);
+};
+
+// ✅ Helper: Get display type
+export const getDisplayComplaintType = (type) => {
+  if (!type) return "अन्य (Others)";
+  if (PREDEFINED_TYPES.includes(type)) return type;
+  return "अन्य (Others)";
+};
