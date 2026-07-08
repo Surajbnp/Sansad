@@ -62,6 +62,12 @@ const userSchema = new mongoose.Schema(
         return this.role === "User";
       },
     },
+    upTehsil: {
+      type: String,
+      required: function () {
+        return this.role === "User";
+      },
+    },
 
     janpad: {
       type: String,

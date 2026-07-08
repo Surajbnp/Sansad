@@ -26,6 +26,7 @@ export async function POST(request) {
       vidhansabha,
       district,
       tehsil,
+      upTehsil,
            janpad,           // ✅ Add this
       policeStation
     } = body;
@@ -34,6 +35,7 @@ export async function POST(request) {
       name,
       district,
       tehsil,
+      upTehsil,
       janpad,           // Check if this is coming
       policeStation,    // Check if this is coming
     });
@@ -68,25 +70,46 @@ export async function POST(request) {
       );
     }
 
-    const tehsilData = districtData.tehsils?.[tehsil];
-    if (!tehsilData) {
-      return NextResponse.json(
-        { message: "अमान्य तहसील चयन किया गया है" },
-        { status: 400 },
-      );
-    }
+    // Validate selected values
 
-    const expectedVidhansabha = tehsilData.vidhansabha;
-    if (vidhansabha !== expectedVidhansabha) {
-      return NextResponse.json(
-        {
-          message:
-            "विधानसभा चयन जिले और तहसील के अनुसार मेल नहीं खाती, कृपया सही विकल्प चुनें",
-        },
-        { status: 400 },
-      );
-    }
+if (!districtData.tehsils.includes(tehsil)) {
+  return NextResponse.json(
+    { message: "अमान्य तहसील चयन किया गया है" },
+    { status: 400 }
+  );
+}
 
+// Up Tehsil is optional
+if (
+  upTehsil &&
+  !districtData.upTehsils.includes(upTehsil)
+) {
+  return NextResponse.json(
+    { message: "अमान्य उप तहसील चयन किया गया है" },
+    { status: 400 }
+  );
+}
+
+if (!districtData.vidhansabhas.includes(vidhansabha)) {
+  return NextResponse.json(
+    { message: "अमान्य विधानसभा चयन किया गया है" },
+    { status: 400 }
+  );
+}
+
+if (!districtData.janpads.includes(janpad)) {
+  return NextResponse.json(
+    { message: "अमान्य जनपद चयन किया गया है" },
+    { status: 400 }
+  );
+}
+
+if (!districtData.policeStations.includes(policeStation)) {
+  return NextResponse.json(
+    { message: "अमान्य थाना चयन किया गया है" },
+    { status: 400 }
+  );
+}
     /* ── legacy 2factor flow kept commented below for reference ── */
     // const API_KEY = process.env.TWO_FACTOR_API_KEY;
     // const verifyUrl = `https://2factor.in/API/V1/${API_KEY}/SMS/VERIFY3/${phone}/${otp}`;
@@ -167,6 +190,7 @@ export async function POST(request) {
       vidhansabha,
       district,
       tehsil,
+      upTehsil,          // ✅ Add this
       janpad,           // ✅ Add this
       policeStation,    // ✅ Add this
     role: "User",

@@ -20,6 +20,7 @@ import {
   ModalFooter,
   ModalCloseButton,
   Input,
+  Select,
   FormControl,
   FormLabel,
   useDisclosure,
@@ -47,6 +48,7 @@ import {
   MdArrowBack,
 } from "react-icons/md";
 import { CheckCircleIcon, EditIcon } from "@chakra-ui/icons";
+import  LOCATION_DATA  from "@/data/location";
 
 /* ─────────────────────────────────────────
    STAT CARD
@@ -252,6 +254,12 @@ const EditProfileModal = ({ isOpen, onClose, user, onSaved }) => {
   const [name, setName] = useState(user?.name ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
   const [address, setAddress] = useState(user?.address ?? "");
+  const [district, setDistrict] = useState(user?.district ?? "");
+  const [tehsil, setTehsil] = useState(user?.tehsil ?? "");
+  const [vidhansabha, setVidhansabha] = useState(user?.vidhansabha ?? "");
+  const [janpad, setJanpad] = useState(user?.janpad ?? "");
+  const [policeStation, setPoliceStation] = useState(user?.policeStation ?? "");
+  const [upTehsil, setUpTehsil] = useState(user?.upTehsil ?? "");
 
   // phone verification state
   const [phoneOtp, setPhoneOtp] = useState("");
@@ -284,12 +292,24 @@ const EditProfileModal = ({ isOpen, onClose, user, onSaved }) => {
     name: user?.name ?? "",
     phone: user?.phone ?? "",
     address: user?.address ?? "",
+    district: user?.district ?? "",
+    tehsil: user?.tehsil ?? "",
+    vidhansabha: user?.vidhansabha ?? "",
+    janpad: user?.janpad ?? "",
+    policeStation: user?.policeStation ?? "",
+    upTehsil: user?.upTehsil ?? "",
   };
 
   const changed = {};
   if (name !== original.name) changed.name = name;
   if (phone !== original.phone) changed.phone = phone;
   if (address !== original.address) changed.address = address;
+  if (district !== original.district) changed.district = district;
+  if (tehsil !== original.tehsil) changed.tehsil = tehsil;
+  if (vidhansabha !== original.vidhansabha) changed.vidhansabha = vidhansabha;
+  if (janpad !== original.janpad) changed.janpad = janpad;
+  if (policeStation !== original.policeStation) changed.policeStation = policeStation;
+  if (upTehsil !== original.upTehsil) changed.upTehsil = upTehsil;
 
   const hasChanges = Object.keys(changed).length > 0;
   const isPhoneChanging = phone !== original.phone;
@@ -300,12 +320,46 @@ const EditProfileModal = ({ isOpen, onClose, user, onSaved }) => {
   // phone is partially entered → block save too
   const phoneIncomplete = isPhoneChanging && phone.length < 10;
 
+   // ── Helper functions for location data ──
+  const getDistrictOptions = () => Object.keys(LOCATION_DATA);
+  
+  const getTehsilOptions = (district) => {
+    if (!district || !LOCATION_DATA[district]) return [];
+    return LOCATION_DATA[district].tehsils || [];
+  };
+
+  const getVidhansabhaOptions = (district) => {
+    if (!district || !LOCATION_DATA[district]) return [];
+    return LOCATION_DATA[district].vidhansabhas || [];
+  };
+
+  const getJanpadOptions = (district) => {
+    if (!district || !LOCATION_DATA[district]) return [];
+    return LOCATION_DATA[district].janpads || [];
+  };
+
+  const getPoliceStationOptions = (district) => {
+    if (!district || !LOCATION_DATA[district]) return [];
+    return LOCATION_DATA[district].policeStations || [];
+  };
+
+  const getUpTehsilOptions = (district) => {
+    if (!district || !LOCATION_DATA[district]) return [];
+    return LOCATION_DATA[district].upTehsils || [];
+  };
+
   // ── reset when modal opens ──
   useEffect(() => {
     if (isOpen) {
-      setName(user?.name ?? "");
+       setName(user?.name ?? "");
       setPhone(user?.phone ?? "");
       setAddress(user?.address ?? "");
+      setDistrict(user?.district ?? "");
+      setTehsil(user?.tehsil ?? "");
+      setVidhansabha(user?.vidhansabha ?? "");
+      setJanpad(user?.janpad ?? "");
+      setPoliceStation(user?.policeStation ?? "");
+      setUpTehsil(user?.upTehsil ?? "");
       setStep("form");
       setPhoneOtp("");
       setPhoneOtpError("");
@@ -476,36 +530,48 @@ const EditProfileModal = ({ isOpen, onClose, user, onSaved }) => {
   // ─────────────────────────────────────────
   //  STEP 2b — VERIFY OTP + SAVE
   // ─────────────────────────────────────────
-  const handleVerifyAndSave = async () => {
-    setVerifyingSubmit(true);
-    setSubmitOtpError("");
-    try {
-      const res = await fetch("/api/user/edit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          otp: submitOtp,
-          sessionId: submitSessionId,
-          changes: changed,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setSubmitOtpError(data?.message ?? "Incorrect OTP. Please try again.");
-        return;
-      }
-      clearInterval(submitTimerRef.current);
-      setStep("success");
-      onSaved?.({ ...user, ...changed });
-      autoCloseTimerRef.current = setTimeout(() => {
-        handleClose();
-      }, 3000);
-    } catch {
-      setSubmitOtpError("Verification failed. Please try again.");
-    } finally {
-      setVerifyingSubmit(false);
+// ─────────────────────────────────────────
+//  STEP 2b — VERIFY OTP + SAVE
+// ─────────────────────────────────────────
+const handleVerifyAndSave = async () => {
+  setVerifyingSubmit(true);
+  setSubmitOtpError("");
+  try {
+    const res = await fetch("/api/user/edit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        otp: submitOtp,
+        sessionId: submitSessionId,
+        changes: changed,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setSubmitOtpError(data?.message ?? "Incorrect OTP. Please try again.");
+      return;
     }
-  };
+    clearInterval(submitTimerRef.current);
+    setStep("success");
+    
+    // ✅ Update local user data
+    if (onSaved) {
+      const updatedUser = { ...user, ...changed };
+      onSaved(updatedUser);
+    }
+    
+    // ✅ Auto close after 3 seconds
+    autoCloseTimerRef.current = setTimeout(() => {
+      handleClose(); // ✅ This will close the modal
+    }, 3000);
+    
+  } catch (err) {
+    console.error("Save error:", err);
+    setSubmitOtpError("Verification failed. Please try again.");
+  } finally {
+    setVerifyingSubmit(false);
+  }
+};
 
   // ── back navigation ──
   const handleBack = () => {
@@ -522,12 +588,23 @@ const EditProfileModal = ({ isOpen, onClose, user, onSaved }) => {
     }
   };
 
-  const handleClose = () => {
-    clearInterval(phoneTimerRef.current);
-    clearInterval(submitTimerRef.current);
-    clearTimeout(autoCloseTimerRef.current);
-    onClose();
-  };
+const handleClose = () => {
+  // ✅ Clear all timers
+  clearInterval(phoneTimerRef.current);
+  clearInterval(submitTimerRef.current);
+  clearTimeout(autoCloseTimerRef.current);
+  
+  // ✅ Reset step to form for next time
+  setStep("form");
+  setPhoneOtp("");
+  setPhoneOtpError("");
+  setSubmitOtp("");
+  setSubmitOtpError("");
+  setPhoneVerified(false);
+  
+  // ✅ Call the parent onClose
+  onClose();
+};
 
   // ── masked phone helpers ──
   const maskedCurrentPhone = String(user?.phone ?? "").slice(0, 5) + "XXXXX";
@@ -787,8 +864,240 @@ const EditProfileModal = ({ isOpen, onClose, user, onSaved }) => {
                   }}
                 />
               </FormControl>
+              {/* District */}
+              <FormControl>
+                <FormLabel
+                  fontSize="11px"
+                  fontWeight="600"
+                  color="gray.400"
+                  letterSpacing="0.06em"
+                  textTransform="uppercase"
+                  mb={1}
+                >
+                  District
+                </FormLabel>
+                <Select
+                  value={district}
+                  onChange={(e) => {
+                    setDistrict(e.target.value);
+                    setTehsil("");
+                    setVidhansabha("");
+                    setJanpad("");
+                    setPoliceStation("");
+                    setUpTehsil("");
+                  }}
+                  placeholder="Select district"
+                  fontSize="13px"
+                  h="38px"
+                  borderRadius="8px"
+                  borderColor={
+                    district !== original.district ? "#fa7602" : "gray.200"
+                  }
+                  bg={district !== original.district ? "#fff9f5" : "white"}
+                  _focus={{
+                    borderColor: "#fa7602",
+                    boxShadow: "0 0 0 1px #fa7602",
+                  }}
+                >
+                  {getDistrictOptions().map((dist) => (
+                    <option key={dist} value={dist}>
+                      {dist}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Tehsil */}
+              <FormControl>
+                <FormLabel
+                  fontSize="11px"
+                  fontWeight="600"
+                  color="gray.400"
+                  letterSpacing="0.06em"
+                  textTransform="uppercase"
+                  mb={1}
+                >
+                  Tehsil
+                </FormLabel>
+                <Select
+                  value={tehsil}
+                  onChange={(e) => {
+                    setTehsil(e.target.value);
+                  }}
+                  placeholder={district ? "Select tehsil" : "Select district first"}
+                  isDisabled={!district}
+                  fontSize="13px"
+                  h="38px"
+                  borderRadius="8px"
+                  borderColor={
+                    tehsil !== original.tehsil ? "#fa7602" : "gray.200"
+                  }
+                  bg={tehsil !== original.tehsil ? "#fff9f5" : "white"}
+                  _focus={{
+                    borderColor: "#fa7602",
+                    boxShadow: "0 0 0 1px #fa7602",
+                  }}
+                >
+                  {getTehsilOptions(district).map((teh) => (
+                    <option key={teh} value={teh}>
+                      {teh}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              
+              {/* UP Tehsil */}
+              <FormControl>
+                <FormLabel
+                  fontSize="11px"
+                  fontWeight="600"
+                  color="gray.400"
+                  letterSpacing="0.06em"
+                  textTransform="uppercase"
+                  mb={1}
+                >
+                  UP Tehsil 
+                </FormLabel>
+                <Select
+                  value={upTehsil}
+                  onChange={(e) => setUpTehsil(e.target.value)}
+                  placeholder={district ? "Select UP tehsil" : "Select district first"}
+                  isDisabled={!district}
+                  fontSize="13px"
+                  h="38px"
+                  borderRadius="8px"
+                  borderColor={
+                    upTehsil !== original.upTehsil ? "#fa7602" : "gray.200"
+                  }
+                  bg={upTehsil !== original.upTehsil ? "#fff9f5" : "white"}
+                  _focus={{
+                    borderColor: "#fa7602",
+                    boxShadow: "0 0 0 1px #fa7602",
+                  }}
+                >
+                  {getUpTehsilOptions(district).map((ut) => (
+                    <option key={ut} value={ut}>
+                      {ut}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Vidhan Sabha */}
+              <FormControl>
+                <FormLabel
+                  fontSize="11px"
+                  fontWeight="600"
+                  color="gray.400"
+                  letterSpacing="0.06em"
+                  textTransform="uppercase"
+                  mb={1}
+                >
+                  Vidhan Sabha
+                </FormLabel>
+                <Select
+                  value={vidhansabha}
+                  onChange={(e) => setVidhansabha(e.target.value)}
+                  placeholder={district ? "Select vidhan sabha" : "Select district first"}
+                  isDisabled={!district}
+                  fontSize="13px"
+                  h="38px"
+                  borderRadius="8px"
+                  borderColor={
+                    vidhansabha !== original.vidhansabha ? "#fa7602" : "gray.200"
+                  }
+                  bg={vidhansabha !== original.vidhansabha ? "#fff9f5" : "white"}
+                  _focus={{
+                    borderColor: "#fa7602",
+                    boxShadow: "0 0 0 1px #fa7602",
+                  }}
+                >
+                  {getVidhansabhaOptions(district).map((vid) => (
+                    <option key={vid} value={vid}>
+                      {vid}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Janpad */}
+              <FormControl>
+                <FormLabel
+                  fontSize="11px"
+                  fontWeight="600"
+                  color="gray.400"
+                  letterSpacing="0.06em"
+                  textTransform="uppercase"
+                  mb={1}
+                >
+                  Janpad
+                </FormLabel>
+                <Select
+                  value={janpad}
+                  onChange={(e) => setJanpad(e.target.value)}
+                  placeholder={district ? "Select janpad" : "Select district first"}
+                  isDisabled={!district}
+                  fontSize="13px"
+                  h="38px"
+                  borderRadius="8px"
+                  borderColor={
+                    janpad !== original.janpad ? "#fa7602" : "gray.200"
+                  }
+                  bg={janpad !== original.janpad ? "#fff9f5" : "white"}
+                  _focus={{
+                    borderColor: "#fa7602",
+                    boxShadow: "0 0 0 1px #fa7602",
+                  }}
+                >
+                  {getJanpadOptions(district).map((jp) => (
+                    <option key={jp} value={jp}>
+                      {jp}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Police Station */}
+              <FormControl>
+                <FormLabel
+                  fontSize="11px"
+                  fontWeight="600"
+                  color="gray.400"
+                  letterSpacing="0.06em"
+                  textTransform="uppercase"
+                  mb={1}
+                >
+                  Police Station
+                </FormLabel>
+                <Select
+                  value={policeStation}
+                  onChange={(e) => setPoliceStation(e.target.value)}
+                  placeholder={district ? "Select police station" : "Select district first"}
+                  isDisabled={!district}
+                  fontSize="13px"
+                  h="38px"
+                  borderRadius="8px"
+                  borderColor={
+                    policeStation !== original.policeStation ? "#fa7602" : "gray.200"
+                  }
+                  bg={policeStation !== original.policeStation ? "#fff9f5" : "white"}
+                  _focus={{
+                    borderColor: "#fa7602",
+                    boxShadow: "0 0 0 1px #fa7602",
+                  }}
+                >
+                  {getPoliceStationOptions(district).map((ps) => (
+                    <option key={ps} value={ps}>
+                      {ps}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
             </VStack>
           )}
+       
 
           {/* ══ STEP: verify-phone ══ */}
           {step === "verify-phone" && (
@@ -824,7 +1133,7 @@ const EditProfileModal = ({ isOpen, onClose, user, onSaved }) => {
           {step === "otp" && (
             <VStack spacing={4} align="stretch">
               {/* diff preview */}
-              <Box bg="gray.50" borderRadius="8px" px={3} py={2}>
+         <Box bg="gray.50" borderRadius="8px" px={3} py={2} maxH="200px" overflowY="auto">
                 {changed.name && (
                   <DiffRow
                     label="Name"
@@ -844,6 +1153,48 @@ const EditProfileModal = ({ isOpen, onClose, user, onSaved }) => {
                     label="Address"
                     oldVal={original.address}
                     newVal={changed.address}
+                  />
+                )}
+                {changed.district && (
+                  <DiffRow
+                    label="District"
+                    oldVal={original.district}
+                    newVal={changed.district}
+                  />
+                )}
+                {changed.tehsil && (
+                  <DiffRow
+                    label="Tehsil"
+                    oldVal={original.tehsil}
+                    newVal={changed.tehsil}
+                  />
+                )}
+                {changed.vidhansabha && (
+                  <DiffRow
+                    label="Vidhan Sabha"
+                    oldVal={original.vidhansabha}
+                    newVal={changed.vidhansabha}
+                  />
+                )}
+                {changed.janpad && (
+                  <DiffRow
+                    label="Janpad"
+                    oldVal={original.janpad}
+                    newVal={changed.janpad}
+                  />
+                )}
+                {changed.policeStation && (
+                  <DiffRow
+                    label="Police Station"
+                    oldVal={original.policeStation}
+                    newVal={changed.policeStation}
+                  />
+                )}
+                {changed.upTehsil && (
+                  <DiffRow
+                    label="UP Tehsil"
+                    oldVal={original.upTehsil}
+                    newVal={changed.upTehsil}
                   />
                 )}
               </Box>
@@ -1248,6 +1599,11 @@ const Page = () => {
       icon={<MdLocationOn />}
       label="Tehsil"
       value={displayUser?.tehsil}
+    />
+      <InfoRow
+      icon={<MdLocationOn />}
+      label="Up Tehsil"
+      value={displayUser?.upTehsil}
     />
     {/* ✅ ADDED: Janpad */}
     <InfoRow

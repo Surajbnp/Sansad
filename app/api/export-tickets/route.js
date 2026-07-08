@@ -37,7 +37,9 @@ export async function GET(request) {
     const data = await Promise.all(
       tickets.map(async (ticket, index) => {
         // User details fetch
-        const user = await UserModel.findById(ticket.user?.userId).lean();
+      const user = ticket.user?.userId
+  ? await UserModel.findById(ticket.user.userId).lean()
+  : null;
         return {
           "S.No": index + 1,
           "Ticket ID": ticket._id.toString(),
@@ -48,6 +50,7 @@ export async function GET(request) {
           Vidhansabha: user?.vidhansabha || "",
           District: user?.district || "",
           Tehsil: user?.tehsil || "",
+          "Up Tehsil": user?.upTehsil || "",
           "Janpad": user?.janpad || "",                    // ✅ ADDED
           "Police Station": user?.policeStation || "",     // ✅ ADDED
           Gender: user?.sex || "",
@@ -83,6 +86,7 @@ export async function GET(request) {
       { wch: 25 },  // Vidhansabha
       { wch: 22 },  // District
       { wch: 22 },  // Tehsil
+      { wch: 22 },  // Up Tehsil   // ✅ ADDED
       { wch: 20 },  // Janpad        // ✅ ADDED
       { wch: 22 },  // Police Station // ✅ ADDED
       { wch: 10 },  // Gender

@@ -1,78 +1,90 @@
 const satna = {
   district: "Satna",
 
-  tehsils: {
-    "Raghuraj Nagar": {
-      vidhansabha: "Satna",
-      janpad: "Satna",
-      policeStations: [
-        "Kotwali Satna",
-        "Civil Lines",
-        "Kolgawan",
-        "Jaitwara",
-      ],
-    },
-    
+  vidhansabhas: [
+    "Satna",
+    "Raigaon",
+    "Rampur Baghelan",
+    "Nagod",
+    "Chitrakoot",
+  ],
 
-    "Rampur Baghelan": {
-      vidhansabha: "Rampur Baghelan",
-      janpad: "Rampur Baghelan",
-      policeStations: [
-        "Rampur Baghelan",
-        "Nadan Dehat",
-      ],
-    },
+  tehsils: [
+    "Raghuraj Nagar",
+    "Kothi",
+    "Kotar",
+    "Unchehara",
+    "Majhgawan",
+    "Birsinghpur",
+  ],
+upTehsils: [
+    "Ramsthan",      // रामस्थान (वृत्त)
+    "Sohawal",       // सोहावल
+    "Hati",         // हाटी
+    "Chhibaura",         // छिबौरा / वृत्त
+    "Chorhata",      // चोरहटा
+    "Sajjanpur",     // सज्जनपुर
+    "Jaso",          // जसो
+    "Singhpur",      // सिंहपुर 
+    "Shivrajpur",    // शिवराजपुर
+    "Parsamaniya",   // परसमनिया
+    "Atra",          // अटरा
+    "Lagargawan",    // लगरगंवा
+    "Chitrakoot",    // चित्रकूट
+    "Jaitwara",      // जैतवारा
+    "Baroundha",     // बरौंधा
+]
+,
 
-    Nagod: {
-      vidhansabha: "Nagod",
-      janpad: "Nagod",
-      policeStations: [
-        "Nagod",
-        "Kothi",
-      ],
-    },
+  janpads: [
+    "Sohawal",
+    "Nagod",
+    "Unchehara",
+    "Majhgawan",
+    "Rampur Baghelan",
+  ],
 
-    Unchehara: {
-      vidhansabha: "Nagod",
-      janpad: "Unchehara",
-      policeStations: [
-        "Unchehara",
-      ],
-    },
+policeStations: [
+    // ① सतना क्षेत्र (Satna Area)
+    "Kolgawan",            // कोलगंवा
+    "City Kotwali",        // सिटी कोतवाली (City Kotwali)
+    "Civil Line",          // सिविल लाइन
+"Yatayat thana",       // यातायात थाना
+"Mahila thana",        // महिला थाना
+"Harijan thana", // हरिजन थाना
+    "Babupur Chowki",      // बाबूपुर चौकी (नोट में 'बापूपुर' या 'बाबूपुर' लिखा है.. बाबूपुर लिखा है)
 
-    Majhgawan: {
-      vidhansabha: "Chitrakoot",
-      janpad: "Majhgawan",
-      policeStations: [
-        "Majhgawan",
-        "Baroundha",
-      ],
-    },
+    // ② रामपुर क्षेत्र (Rampur Area)
+    "Rampur",              // रामपुर
+    "Kotar",               // कोटर
+    "Chhiboura Chowki",    // छिबौरा चौकी (नोट में 'छिबॉश' या 'छिबौरा' लिखा ही है)
+    "Mankahari Chowki",    // मनकहरी चौकी
+    "Sajjanpur Chowki",    // सज्जनपुर चौकी
+    "Bela Chowki",         // बेला चौकी
 
-    Kotar: {
-      vidhansabha: "Raigaon",
-      janpad: "Majhgawan",
-      policeStations: [
-        "Kotar",
-      ],
-    },
+    // ③ चित्रकूट क्षेत्र (Chitrakoot Area)
+    "Majhgawan",           // मझगंवा
+    "Nayagaon",            // नयागांव (चित्रकूट)
+    "Sabhapur",            // सभापुर (बिरसिंहपुर)
+    "Jaitwara",            // जैतवारा
+    "Dharkundi",           // धारकुण्डी
+    "Baroundha",           // बरौधा
 
-    Birsinghpur: {
-      vidhansabha: "Raigaon",
-      janpad: "Majhgawan",
-      policeStations: [
-        "Birsinghpur",
-      ],
-    },
+    // ④ नागोद क्षेत्र (Nagod Area)
+    "Nagod",               //  नागौद 
+    "Jaso",                // जसो
+    "Unchehara",           // उचेहरा
+    "Podi Chowki",         // पोडी चौकी
+    "Parsamaniya Chowki",  // परसमनिया  चौकी
 
-    Kothi: {
-      vidhansabha: "Nagod",
-      janpad: "Nagod",
-      policeStations: [
-        "Kothi",
-      ],
-    },
-  },
+    // ⑤ रैगांव क्षेत्र (Raigaon Area)
+    "Raigaon",             // रैगांव
+    "Signpur",            // सिंहपुर
+    "Sohawal Chowki",      // सोहावल चौकी
+    "Kothi Thana",         // कोठी थाना
+]
+
 };
 
 export default satna;
+

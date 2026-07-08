@@ -43,45 +43,27 @@ const initialState = {
   vidhansabha: "",
   janpad: "",
   policeStation: "",
+  upTehsil: "",
 };
 
 const DISTRICT_OPTIONS = Object.keys(LOCATION_DATA);
 
+// ✅ Helper functions - always return an array
 const getTehsilOptions = (district) =>
-  district && LOCATION_DATA[district]
-    ? Object.keys(LOCATION_DATA[district].tehsils)
-    : [];
+  LOCATION_DATA[district]?.tehsils || [];
 
-const getVidhansabhaOptions = (district) => {
-  if (!district || !LOCATION_DATA[district]) return [];
-  return Array.from(
-    new Set(
-      Object.values(LOCATION_DATA[district].tehsils).map(
-        (tehsil) => tehsil.vidhansabha,
-      ),
-    ),
-  );
-};
+const getUpTehsilOptions = (district) =>
+  LOCATION_DATA[district]?.upTehsils || [];
 
-const getVidhansabhaForTehsil = (district, tehsil) => {
-  if (!district || !tehsil) return "";
-  return LOCATION_DATA[district]?.tehsils?.[tehsil]?.vidhansabha || "";
-};
+const getVidhansabhaOptions = (district) =>
+  LOCATION_DATA[district]?.vidhansabhas || [];
 
-// ✅ Janpad options fetch karne ke liye - COMPONENT KE BAHAR
-const getJanpadOptions = (district, tehsil) => {
-  if (!district || !tehsil || !LOCATION_DATA[district]) return [];
-  const tehsilData = LOCATION_DATA[district].tehsils?.[tehsil];
-  return tehsilData?.janpad ? [tehsilData.janpad] : [];
-};
+const getJanpadOptions = (district) =>
+  LOCATION_DATA[district]?.janpads || [];
 
-// ✅ Police Station options fetch karne ke liye - COMPONENT KE BAHAR
-const getPoliceStationOptions = (district, tehsil, janpad) => {
-  if (!district || !tehsil || !janpad || !LOCATION_DATA[district]) return [];
-  const tehsilData = LOCATION_DATA[district].tehsils?.[tehsil];
-  if (!tehsilData || tehsilData.janpad !== janpad) return [];
-  return tehsilData.policeStations || [];
-};
+const getPoliceStationOptions = (district) =>
+  LOCATION_DATA[district]?.policeStations || [];
+
 
 export default function RegistrationForm() {
   const [formData, setFormData] = useState(initialState);
@@ -144,6 +126,15 @@ export default function RegistrationForm() {
       icon: "🏞️",
       options: getTehsilOptions(formData.district),
     },
+      {
+      key: "upTehsil", // ✅ New UP Tehsil field
+      label: "उप तहसील",
+      sublabel: "UP Tehsil (Optional)",
+      required: false,
+      type: "select",
+      icon: "🏘️",
+      options: getUpTehsilOptions(formData.district),
+    },
     {
       key: "vidhansabha",
       label: "विधान सभा",
@@ -160,7 +151,7 @@ export default function RegistrationForm() {
       required: true,
       type: "select",
       icon: "🏘️",
-      options: getJanpadOptions(formData.district, formData.tehsil),
+  options: getJanpadOptions(formData.district),
     },
     {
       key: "policeStation",
@@ -169,7 +160,7 @@ export default function RegistrationForm() {
       required: true,
       type: "select",
       icon: "👮",
-      options: getPoliceStationOptions(formData.district, formData.tehsil, formData.janpad),
+    options: getPoliceStationOptions(formData.district),
     },
     {
       key: "voterId",
@@ -194,60 +185,17 @@ export default function RegistrationForm() {
       icon: "📱",
     },
   ];
+const handleChange = (key, value) => {
+  setFormData((prev) => ({
+    ...prev,
+    [key]: value,
+  }));
 
-  const handleChange = (key, value) => {
-    setFormData((prev) => {
-      if (key === "district") {
-        return {
-          ...prev,
-          district: value,
-          tehsil: "",
-          vidhansabha: "",
-          janpad: "",
-          policeStation: "",
-        };
-      }
-
-      if (key === "tehsil") {
-        const janpad = getJanpadOptions(prev.district, value)[0] || "";
-        return {
-          ...prev,
-          tehsil: value,
-          vidhansabha: getVidhansabhaForTehsil(prev.district, value),
-          janpad: janpad,
-          policeStation: "",
-        };
-      }
-
-      if (key === "janpad") {
-        return {
-          ...prev,
-          janpad: value,
-          policeStation: "",
-        };
-      }
-
-      return { ...prev, [key]: value };
-    });
-    
-    setErrors((prev) => ({
-      ...prev,
-      [key]: false,
-      ...(key === "district" ? { 
-        tehsil: false, 
-        vidhansabha: false, 
-        janpad: false, 
-        policeStation: false 
-      } : {}),
-      ...(key === "tehsil" ? { 
-        janpad: false, 
-        policeStation: false 
-      } : {}),
-      ...(key === "janpad" ? { 
-        policeStation: false 
-      } : {}),
-    }));
-  };
+  setErrors((prev) => ({
+    ...prev,
+    [key]: false,
+  }));
+};
 
   const validate = () => {
     const newErrors = {};
@@ -675,35 +623,20 @@ export default function RegistrationForm() {
                           <div className="field-sublabel">{field.sublabel}</div>
 
                           {field.type === "select" ? (
-                            <Select
-                              placeholder={
-                                field.key === "tehsil" && !formData.district
-                                  ? "पहले जिला चुनें"
-                                  : field.key === "janpad" && !formData.tehsil
-                                  ? "पहले तहसील चुनें"
-                                  : field.key === "policeStation" && !formData.janpad
-                                  ? "पहले जनपद चुनें"
-                                  : "चुनें / Select"
-                              }
-                              value={formData[field.key]}
-                              isDisabled={
-                                (field.key === "tehsil" && !formData.district) ||
-                                (field.key === "janpad" && !formData.tehsil) ||
-                                (field.key === "policeStation" && !formData.janpad)
-                              }
-                              onChange={(e) =>
-                                handleChange(field.key, e.target.value)
-                              }
-                              onFocus={() => setFocusedField(field.key)}
-                              onBlur={() => setFocusedField(null)}
-                              sx={selectStyles(field.key)}
-                            >
-                              {field.options.map((opt) => (
-                                <option key={opt} value={opt}>
-                                  {opt}
-                                </option>
-                              ))}
-                            </Select>
+                        <Select
+  placeholder="चुनें / Select"
+  value={formData[field.key]}
+  onChange={(e) => handleChange(field.key, e.target.value)}
+  onFocus={() => setFocusedField(field.key)}
+  onBlur={() => setFocusedField(null)}
+  sx={selectStyles(field.key)}
+>
+  {field.options.map((opt) => (
+    <option key={opt} value={opt}>
+      {opt}
+    </option>
+  ))}
+</Select>
                           ) : field.type === "phone" ? (
                             <InputGroup>
                               <InputLeftAddon

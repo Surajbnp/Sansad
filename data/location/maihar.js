@@ -1,32 +1,43 @@
 const maihar = {
   district: "Maihar",
 
-  tehsils: {
-    Maihar: {
-      vidhansabha: "Maihar",
-      janpad: "Maihar",
-      policeStations: [
-        "Maihar",
-      ],
-    },
+  vidhansabhas: [
+    "Maihar",
+    "Amarpatan",
+  ],
 
-    Amarpatan: {
-      vidhansabha: "Amarpatan",
-      janpad: "Amarpatan",
-      policeStations: [
-        "Amarpatan",
-      ],
-    },
+  tehsils: [
+    "Maihar",       // मैहर
+    "Amarpatan",    // अमरपाटन
+    "Ramnagar",     // रामनगर
+  ],
 
-    
-    Ramnagar: {
-      vidhansabha: "Amarpatan",
-      janpad: "Ramnagar",
-      policeStations: [
-        "Ramnagar",
-      ],
-    },
-  },
+  upTehsils: [
+    "Amdara",       // अमदरा उप तहसील
+    "Badera",       // बदेरा उप तहसील
+    "Nadan",        // नादन उप तहसील
+    "Tala",         // ताला उप तहसील
+    "Mapiyadpur",   // मर्यादपुर उप तहसील
+    "Badwar",       // बड़वार
+  ],
+
+  janpads: [
+    "Maihar",       // मैहर
+    "Amarpatan",    // अमरपाटन
+    "Ramnagar",     // रामनगर
+  ],
+
+  policeStations: [
+    "Maihar",       // मैहर
+    "Amdara",       // अमदरा 
+    "Badera",       // वदेरा
+    "Nadan Dehat",  // नादन देहात
+    "Amarpatan",    // अमरपाटन
+    "Tala",         // ताला
+    "Ramnagar",     // रामनगर
+    "Mukundpur Chowki",    // मुकुंदपुर 
+    "Mapiyadpur Chowki",   // मर्यादपुर 
+  ],
 };
 
 export default maihar;

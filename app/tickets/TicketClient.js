@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import styles from "./tickets.module.css";
+import { TICKET_TYPES } from "@/constants/ticketTypes";
 import {
   Box,
   Button,
@@ -601,7 +602,7 @@ export default function Page() {
         label: "विभाग",
         sublabel: "Department",
         icon: "🏢",
-        options: departmentOptions,
+        options: TICKET_TYPES,
       },
     ];
   }, [user, filters.district, filters.tehsil, filters.janpad, departmentOptions]);

@@ -33,7 +33,19 @@ export async function POST(req) {
     }
 
     /* ── 2. strip to only allowed fields ── */
-    const ALLOWED = ["name", "phone", "address"];
+    // ✅ Added all new fields here
+    const ALLOWED = [
+      "name", 
+      "phone", 
+      "address",
+      "district",
+      "tehsil",
+      "upTehsil",
+      "vidhansabha",
+      "janpad",
+      "policeStation",
+      "voterId"
+    ];
 
     const sanitized = {};
     for (const key of ALLOWED) {
@@ -77,6 +89,22 @@ export async function POST(req) {
           { status: 400 },
         );
       }
+    }
+
+    // ✅ Optional: Validate district if provided
+    if (sanitized.district !== undefined && sanitized.district.length < 2) {
+      return NextResponse.json(
+        { success: false, message: "Invalid district" },
+        { status: 400 },
+      );
+    }
+
+    // ✅ Optional: Validate tehsil if provided
+    if (sanitized.tehsil !== undefined && sanitized.tehsil.length < 2) {
+      return NextResponse.json(
+        { success: false, message: "Invalid tehsil" },
+        { status: 400 },
+      );
     }
 
     /* ── 4. auth check ── */
@@ -143,10 +171,14 @@ export async function POST(req) {
     }
 
     /* ── 8. apply update ── */
+    // ✅ Include all fields in the update
     const updated = await UserModel.findByIdAndUpdate(
       decoded.id,
       { $set: sanitized },
-      { new: true, select: "name phone address role vidhansabha voterId" },
+      { 
+        new: true, 
+        select: "name phone address role district tehsil upTehsil vidhansabha janpad policeStation voterId" 
+      }
     ).lean();
 
     if (!updated) {
