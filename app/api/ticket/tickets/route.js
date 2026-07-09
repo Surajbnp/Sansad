@@ -172,6 +172,7 @@ export async function GET(req) {
     /* ── 4. state filter ── */
     const { searchParams } = new URL(req.url);
     const state = searchParams.get("state");
+    const searchQuery = searchParams.get("search");
 
     if (state && state.toLowerCase() !== "all") {
       const statuses = STATE_STATUS_MAP[state.toLowerCase()];

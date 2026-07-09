@@ -341,14 +341,14 @@ export default function Navbar() {
                       >
                         View Departments
                       </MenuItem>
-                      <MenuItem
+                      {/* <MenuItem
                         icon={<MdAdminPanelSettings />}
                         _hover={{ bg: "#fa7602", color: "white" }}
                         as={Link}
                         href="/admin/sub-admin/create"
                       >
                         Manage Sub-Admins
-                      </MenuItem>
+                      </MenuItem> */}
                       <MenuItem
                         icon={<MdConfirmationNumber />}
                         _hover={{ bg: "#fa7602", color: "white" }}
