@@ -39,6 +39,8 @@ import {
   MdAutoGraph,
   MdBook,
   MdContactPhone,
+  MdAdminPanelSettings,
+  MdPeople,
 } from "react-icons/md";
 import { IoMdCreate } from "react-icons/io";
 import { GrUserWorker } from "react-icons/gr";
@@ -58,6 +60,13 @@ const BOTTOM_NAV = {
     { name: "Home", href: "/", icon: MdHome },
     { name: "Tickets", href: "/tickets", icon: MdConfirmationNumber },
     { name: "Departments", href: "/admin/departments", icon: GrUserWorker },
+    { name: "Sub-Admins", href: "/admin/sub-admin", icon: MdAdminPanelSettings },
+    { name: "Dashboard", href: "/profile", icon: MdDashboard },
+  ],
+  SubAdmin: [
+    { name: "Home", href: "/", icon: MdHome },
+    { name: "Tickets", href: "/tickets", icon: MdConfirmationNumber },
+    { name: "Users", href: "/admin/users", icon: MdPeople },
     { name: "Dashboard", href: "/profile", icon: MdDashboard },
   ],
   User: [
@@ -82,6 +91,18 @@ const DRAWER_LINKS = {
     { name: "Success Stories", href: "/success-stories", icon: MdAutoGraph },
     { name: "Blog & News", href: "/blog", icon: MdBook },
     { name: "Contact", href: "/contact", icon: MdContactPhone },
+    { name: "Departments", href: "/admin/departments", icon: GrUserWorker },
+    { name: "Sub-Admins", href: "/admin/sub-admin", icon: MdAdminPanelSettings },
+  ],
+  SubAdmin: [
+    { name: "Home", href: "/", icon: MdHome },
+    { name: "About", href: "/about", icon: MdInfo },
+    { name: "Govt Schemes", href: "/govt-schemes", icon: FaHandHoldingUsd },
+    { name: "Success Stories", href: "/success-stories", icon: MdAutoGraph },
+    { name: "Blog & News", href: "/blog", icon: MdBook },
+    { name: "Contact", href: "/contact", icon: MdContactPhone },
+    { name: "Users", href: "/admin/users", icon: MdPeople },
+    { name: "Tickets", href: "/tickets", icon: MdConfirmationNumber },
   ],
   User: [
     { name: "Home", href: "/", icon: MdHome },
@@ -97,6 +118,7 @@ const DRAWER_LINKS = {
     { name: "Govt Schemes", href: "/govt-schemes", icon: FaHandHoldingUsd },
     { name: "Success Stories", href: "/success-stories", icon: MdAutoGraph },
     { name: "Contact", href: "/contact", icon: MdContactPhone },
+    { name: "Tickets", href: "/tickets", icon: MdConfirmationNumber },
   ],
   guest: Links,
 };
@@ -320,12 +342,48 @@ export default function Navbar() {
                         View Departments
                       </MenuItem>
                       <MenuItem
+                        icon={<MdAdminPanelSettings />}
+                        _hover={{ bg: "#fa7602", color: "white" }}
+                        as={Link}
+                        href="/admin/sub-admin/create"
+                      >
+                        Manage Sub-Admins
+                      </MenuItem>
+                      <MenuItem
                         icon={<MdConfirmationNumber />}
                         _hover={{ bg: "#fa7602", color: "white" }}
                         as={Link}
                         href="/tickets"
                       >
                         View Tickets
+                      </MenuItem>
+                    </>
+                  )}
+                  {role === "SubAdmin" && (
+                    <>
+                      <MenuItem
+                        icon={<MdPeople />}
+                        _hover={{ bg: "#fa7602", color: "white" }}
+                        as={Link}
+                        href="/admin/users"
+                      >
+                        View Users
+                      </MenuItem>
+                      <MenuItem
+                        icon={<MdConfirmationNumber />}
+                        _hover={{ bg: "#fa7602", color: "white" }}
+                        as={Link}
+                        href="/tickets"
+                      >
+                        Manage Tickets
+                      </MenuItem>
+                      <MenuItem
+                        icon={<MdDashboard />}
+                        _hover={{ bg: "#fa7602", color: "white" }}
+                        as={Link}
+                        href="/profile"
+                      >
+                        Dashboard
                       </MenuItem>
                     </>
                   )}
@@ -448,7 +506,7 @@ export default function Navbar() {
                     {user.name}
                   </Text>
                   <Text fontSize="12px" color="#fa7602" fontWeight="600">
-                    {user.role}
+                    {user.role === "SubAdmin" ? "Sub-Admin" : user.role}
                   </Text>
                 </Box>
               )}

@@ -82,7 +82,7 @@ policeStations: [
 
     // ⑤ रैगांव क्षेत्र (Raigaon Area)
     "Raigaon",             // रैगांव
-    "Signpur",            // सिंहपुर
+    "Singhpur",            // सिंहपुर
     "Sohawal Chowki",      // सोहावल चौकी
     "Kothi Thana",         // कोठी थाना
 ]

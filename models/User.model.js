@@ -64,9 +64,6 @@ const userSchema = new mongoose.Schema(
     },
     upTehsil: {
       type: String,
-      required: function () {
-        return this.role === "User";
-      },
     },
 
     janpad: {
@@ -93,10 +90,14 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["User", "Admin", "Department"],
+      enum: ["User", "Admin", "SubAdmin", "Department"],
       default: "User",
       index: true,
     },
+permissions: {
+  type: [String],
+  default: [],
+},
 
     // Only meaningful for Department role
     department: {

@@ -441,43 +441,49 @@ const handleFilterChange = (key, value) => {
   }));
 };
   // ✅ Fetch tickets with filters
-  const fetchTickets = useCallback(async () => {
-    if (!user) return;
-    setIsFetching(true);
-    try {
-      const params = new URLSearchParams();
-      params.set("state", state);
-      if (fromDate) params.set("start", fromDate);
-      if (toDate) params.set("end", toDate);
-
-      // ✅ Only add filters for Admin users
-      if (user?.role === "Admin") {
-        Object.entries(filters).forEach(([key, value]) => {
-          if (value && value.trim() !== "") {
-            params.set(key, value);
-          }
-        });
-      }
-
-      console.log("📤 Fetching tickets with params:", params.toString());
-
-      const res = await fetch(`/api/ticket/tickets?${params.toString()}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-      
-      console.log("📥 Received tickets:", data.tickets?.length || 0);
-      setTickets(data.tickets || []);
-    } catch (err) {
-      console.error("Fetch error:", err);
-      toast({
-        title: "Tickets लोड नहीं हो सके",
-        description: err.message,
-        status: "error",
-      });
-    } finally {
-      setIsFetching(false);
+// ✅ Fetch tickets with filters
+const fetchTickets = useCallback(async () => {
+  if (!user) return;
+  setIsFetching(true);
+  try {
+    const params = new URLSearchParams();
+    params.set("state", state);
+    if (fromDate) params.set("start", fromDate);
+    if (toDate) params.set("end", toDate);
+    
+    // ✅ ADD THIS - Search param
+    if (search && search.trim() !== "") {
+      params.set("search", search.trim());
     }
-  }, [user, state, fromDate, toDate, filters]);
+
+    // ✅ Only add filters for Admin users
+    if (user?.role === "Admin") {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value && value.trim() !== "") {
+          params.set(key, value);
+        }
+      });
+    }
+
+    console.log("📤 Fetching tickets with params:", params.toString());
+
+    const res = await fetch(`/api/ticket/tickets?${params.toString()}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message);
+    
+    console.log("📥 Received tickets:", data.tickets?.length || 0);
+    setTickets(data.tickets || []);
+  } catch (err) {
+    console.error("Fetch error:", err);
+    toast({
+      title: "Tickets लोड नहीं हो सके",
+      description: err.message,
+      status: "error",
+    });
+  } finally {
+    setIsFetching(false);
+  }
+}, [user, state, fromDate, toDate, filters, search]); // ✅ search dependency add karo
 
   useEffect(() => {
     if (searchParams.get("id")) return;
@@ -485,11 +491,17 @@ const handleFilterChange = (key, value) => {
   }, [fetchTickets]);
 
   // ✅ Apply filters
+// ✅ Apply filters
 const applyFilters = useCallback(() => {
   const params = new URLSearchParams();
   params.set("state", state);
   if (fromDate) params.set("start", fromDate);
   if (toDate) params.set("end", toDate);
+  
+  // ✅ ADD THIS - Search param
+  if (search && search.trim() !== "") {
+    params.set("search", search.trim());
+  }
   
   if (user?.role === "Admin") {
     Object.entries(filters).forEach(([key, value]) => {
@@ -501,8 +513,7 @@ const applyFilters = useCallback(() => {
   
   router.replace(`/tickets?${params.toString()}`);
   fetchTickets();
-}, [router, state, fromDate, toDate, filters, fetchTickets, user]);
-
+}, [router, state, fromDate, toDate, filters, fetchTickets, user, search]); // ✅ search dependency add karo
   // ✅ Clear all filters
   const clearFilters = useCallback(() => {
     setFilters({
@@ -531,16 +542,18 @@ const applyFilters = useCallback(() => {
   );
 
   // ✅ Filter tickets by search
-  const filtered = useMemo(() => {
-    return tickets.filter(
-      (t) =>
-        !search.trim() ||
-        t.title?.toLowerCase().includes(search.toLowerCase()) ||
-        t._id?.toLowerCase().includes(search.toLowerCase()) ||
-        t.userDetails?.name?.toLowerCase().includes(search.toLowerCase()) ||
-        t.userDetails?.phone?.includes(search)
-    );
-  }, [tickets, search]);
+// ✅ Filter tickets by search
+const filtered = useMemo(() => {
+  return tickets.filter(
+    (t) =>
+      !search.trim() ||
+      t.title?.toLowerCase().includes(search.toLowerCase()) ||
+      t._id?.toLowerCase().includes(search.toLowerCase()) ||
+      t.userDetails?.name?.toLowerCase().includes(search.toLowerCase()) ||
+      // ✅ Phone ko string mein convert karo
+      (t.userDetails?.phone && t.userDetails.phone.toString().includes(search))
+  );
+}, [tickets, search]);
 
 const getAssignedDepartmentOptions = (tickets) => {
   const depts = tickets

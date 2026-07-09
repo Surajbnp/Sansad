@@ -232,6 +232,8 @@ if (!districtData.policeStations.includes(policeStation)) {
 
     return response;
   } catch (error) {
+      console.error(error);
+  console.error(error.stack);
     console.error("signup error:", error);
 
     // handle duplicate key error cleanly
