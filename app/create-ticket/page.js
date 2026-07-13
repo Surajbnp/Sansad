@@ -475,6 +475,9 @@ if (
           {/* DESCRIPTION */}
           <FormControl isInvalid={!!errors.description}>
             <FieldLabel>विवरण (Description)</FieldLabel>
+              <Text fontSize="sm" color="gray.600" my={1}>
+    💡 नोट: कृपया अपनी समस्या यथासंभव हिंदी में दर्ज करें।
+  </Text>
             <Textarea
               value={formData.description}
               onChange={(e) => handleChange("description", e.target.value)}
@@ -487,6 +490,7 @@ if (
               rows={4}
               resize="vertical"
             />
+
             <FormErrorMessage fontSize="xs">
               {errors.description}
             </FormErrorMessage>

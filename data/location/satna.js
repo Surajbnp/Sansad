@@ -1,90 +1,86 @@
 const satna = {
-  district: "Satna",
+  district: "सतना",
 
   vidhansabhas: [
-    "Satna",
-    "Raigaon",
-    "Rampur Baghelan",
-    "Nagod",
-    "Chitrakoot",
+"सतना",
+    "रैगांव",
+    "रामपुर बघेलान",
+    "नागोद",
+    "चित्रकूट",
   ],
 
   tehsils: [
-    "Raghuraj Nagar",
-    "Kothi",
-    "Kotar",
-    "Unchehara",
-    "Majhgawan",
-    "Birsinghpur",
-    "Rampur",
-    "Nagod",
+    "रघुराज नगर",
+    "कोठी",
+    "कोटर",
+    "उनचेहरा",
+    "मझगंवा",
+    "बीरसिंहपुर",
+    "रामपुर",
+    "नागोद",
   ],
 
 upTehsils: [
-    "Ramsthan",      // रामस्थान (वृत्त)
-    "Sohawal",       // सोहावल
-    "Hati",         // हाटी
-    "Chhibaura",         // छिबौरा / वृत्त
-    "Chorhata",      // चोरहटा
-    "Sajjanpur",     // सज्जनपुर
-    "Jaso",          // जसो
-    "Singhpur",      // सिंहपुर 
-    "Shivrajpur",    // शिवराजपुर
-    "Parsamaniya",   // परसमनिया
-    "Atra",          // अटरा
-    "Lagargawan",    // लगरगंवा
-    "Chitrakoot",    // चित्रकूट
-    "Jaitwara",      // जैतवारा
-    "Baroundha",     // बरौंधा
+    "रामस्थान",      
+    "सोहावल",       
+    "हाटी",         
+    "छिबौरा",         
+    "चोरहटा",      
+    "सज्जनपुर",     
+    "जसो",         
+    "सिंहपुर",      
+    "शिवराजपुर",    
+    "परसमनिया",   
+    "अटरा",        
+    "लगरगंवा",    
+    "चित्रकूट",    
+    "जैतवारा",      
+    "बरौंधा",     
 ]
 ,
 
   janpads: [
-    "Sohawal",
-    "Nagod",
-    "Unchehara",
-    "Majhgawan",
-    "Rampur Baghelan",
+    "सोहावल",
+    "नागोद",
+    "उनचेहरा",
+    "मझगंवा",
+    "रामपुर बघेलान",
   ],
 
 policeStations: [
-    // ① सतना क्षेत्र (Satna Area)
-    "Kolgawan",            // कोलगंवा
-    "City Kotwali",        // सिटी कोतवाली (City Kotwali)
-    "Civil Line",          // सिविल लाइन
-"Yatayat thana",       // यातायात थाना
-"Mahila thana",        // महिला थाना
-"Harijan thana", // हरिजन थाना
-    "Babupur Chowki",      // बाबूपुर चौकी (नोट में 'बापूपुर' या 'बाबूपुर' लिखा है.. बाबूपुर लिखा है)
+    "कोलगंवा",            
+    "सिटी कोतवाली",       
+    "सिविल लाइन",         
+"यातायात थाना",       
+"महिला थाना",       
+"हरिजन थाना", 
+    "बाबूपुर चौकी ",    
 
-    // ② रामपुर क्षेत्र (Rampur Area)
-    "Rampur",              // रामपुर
-    "Kotar",               // कोटर
-    "Chhiboura Chowki",    // छिबौरा चौकी (नोट में 'छिबॉश' या 'छिबौरा' लिखा ही है)
-    "Mankahari Chowki",    // मनकहरी चौकी
-    "Sajjanpur Chowki",    // सज्जनपुर चौकी
-    "Bela Chowki",         // बेला चौकी
+    "रामपुर",              
+    "कोटर",            
+    "छिबौरा चौकी",    
+    "मनकहरी चौकी",   
+    "सज्जनपुर चौकी",    
+    "बेला चौकी",        
 
-    // ③ चित्रकूट क्षेत्र (Chitrakoot Area)
-    "Majhgawan",           // मझगंवा
-    "Nayagaon",            // नयागांव (चित्रकूट)
-    "Sabhapur",            // सभापुर (बिरसिंहपुर)
-    "Jaitwara",            // जैतवारा
-    "Dharkundi",           // धारकुण्डी
-    "Baroundha",           // बरौधा
+   
+    "मझगंवा",         
+    "नयागांव",           
+    "सभापुर",           
+    "जैतवारा",          
+    "धारकुण्डी",          
+    "बरौधा",        
 
-    // ④ नागोद क्षेत्र (Nagod Area)
-    "Nagod",               //  नागौद 
-    "Jaso",                // जसो
-    "Unchehara",           // उचेहरा
-    "Podi Chowki",         // पोडी चौकी
-    "Parsamaniya Chowki",  // परसमनिया  चौकी
+    "नागोद",               
+    "जसो",            
+    "उनचेहरा",          
+    "पोडी चौकी",         
+    "परसमनिया  चौकी", 
 
-    // ⑤ रैगांव क्षेत्र (Raigaon Area)
-    "Raigaon",             // रैगांव
-    "Singhpur",            // सिंहपुर
-    "Sohawal Chowki",      // सोहावल चौकी
-    "Kothi Thana",         // कोठी थाना
+    "रैगांव",            
+    "सिंहपुर",           
+    "सोहावल चौकी",     
+    "कोठी थाना",      
 ]
 
 };
