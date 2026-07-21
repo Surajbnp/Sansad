@@ -88,6 +88,8 @@ export async function POST(req) {
       complaintType,
       fileUrl,
       assignedDept,
+      division,
+      distributionCentre,
     } = await req.json();
 
     const newTicket = new TicketModel({
@@ -97,6 +99,8 @@ export async function POST(req) {
       complaintType: complaintType || null,
       fileUrl: fileUrl || null,
       assignedDept: assignedDept || null,
+      division: division || null,
+      distributionCentre: distributionCentre || null,
     });
 
     await newTicket.save();
