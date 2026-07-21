@@ -581,7 +581,9 @@ const Page = () => {
                 <div className="ts-meta-id">Ticket #{ticket._id}</div>
                 <div className="ts-meta-date">
                   अंतिम अपडेट:{" "}
-                  {new Date(ticket.updatedAt).toLocaleString("hi-IN")}
+                  {new Date(ticket.updatedAt).toLocaleString("hi-IN", {
+                    timeZone: "Asia/Kolkata",
+                  })}
                 </div>
               </div>
               <hr className="ts-divider" />

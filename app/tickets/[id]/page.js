@@ -52,6 +52,7 @@ const fmtDate = (d) =>
     day: "2-digit",
     month: "short",
     year: "numeric",
+    timeZone: "Asia/Kolkata",
   });
 const fmtDateTime = (d) =>
   new Date(d).toLocaleString("en-IN", {
@@ -60,6 +61,7 @@ const fmtDateTime = (d) =>
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Asia/Kolkata",
   });
 
 /* ── info chip ── */
@@ -284,7 +286,7 @@ export default function TicketDetailsPage() {
         resourceType: "image",
         multiple: false,
         clientAllowedFormats: ["jpg", "jpeg", "png"],
-        maxFileSize: 1000000,
+        maxFileSize: 5000000,
         folder: "tickets",
         sources: ["local", "camera"],
       },

@@ -73,6 +73,7 @@ const fmtDate = (d) =>
     day: "numeric",
     month: "short",
     year: "numeric",
+    timeZone: "Asia/Kolkata",
   });
 
 const PARAM_TO_OPTION = {
@@ -464,7 +465,11 @@ export default function Page() {
       params.set("state", state);
       if (fromDate) params.set("start", fromDate);
       if (toDate) params.set("end", toDate);
-      
+
+      if (searchTrigger && searchTrigger.trim() !== "") {
+        params.set("search", searchTrigger.trim());
+      }
+
       if (user?.role === "Admin") {
         Object.entries(filters).forEach(([key, value]) => {
           if (value && value.trim() !== "") {
@@ -489,7 +494,11 @@ export default function Page() {
         doc.setFontSize(16);
         doc.text('Tickets Report', 14, 20);
         doc.setFontSize(10);
-        doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 28);
+        doc.text(
+          `Generated: ${new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}`,
+          14,
+          28,
+        );
         doc.text(`Total Tickets: ${data.total}`, 14, 34);
         const headers = ['S.No', 'Ticket ID', 'Name', 'Phone', 'District', 'Tehsil', 'Janpad', 'Status', 'Department'];
         const rows = data.data.map(row => [

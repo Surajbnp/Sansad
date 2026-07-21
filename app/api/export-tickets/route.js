@@ -7,8 +7,22 @@ import jwt from "jsonwebtoken";
 import database from "@/lib/database";
 import TicketModel from "@/models/Ticket.model";
 import UserModel from "@/models/User.model";
+import { PREDEFINED_TYPES } from "@/constants/ticketTypes";
 
 export const dynamic = "force-dynamic";
+
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const STATE_STATUS_MAP = {
+  submitted: ["Submitted"],
+  assigned: ["Assigned"],
+  inprogress: [
+    "In Progress",
+    "Awaiting User Response",
+    "User Respond Received",
+  ],
+  completed: ["Resolved", "Closed"],
+};
 
 export async function GET(request) {
   try {
@@ -25,6 +39,8 @@ export async function GET(request) {
     /* ── 2. Get all filters from URL ── */
     const { searchParams } = new URL(request.url);
     const format = searchParams.get("format") || "excel";
+    const state = searchParams.get("state");
+    const search = searchParams.get("search");
     const start = searchParams.get("start");
     const end = searchParams.get("end");
     const district = searchParams.get("district");
@@ -51,6 +67,26 @@ export async function GET(request) {
         );
       }
       q.assignedDept = decoded.department;
+    }
+
+    if (state && state.toLowerCase() !== "all") {
+      const statuses = STATE_STATUS_MAP[state.toLowerCase()];
+      if (!statuses) {
+        return NextResponse.json(
+          { success: false, message: "Invalid state filter" },
+          { status: 400 }
+        );
+      }
+      q.status = { $in: statuses };
+    }
+
+    if (search && search.trim() !== "") {
+      const regex = new RegExp(escapeRegex(search.trim()), "i");
+      q.$or = [
+        { title: regex },
+        { "user.name": regex },
+        { "user.phone": regex },
+      ];
     }
 
     if (start || end) {
@@ -97,8 +133,12 @@ export async function GET(request) {
         q.assignedDept = department;
       }
       if (complaintType) {
-        q.complaintType = complaintType;
-      } 
+        if (complaintType === "अन्य (Others)") {
+          q.complaintType = { $nin: PREDEFINED_TYPES };
+        } else {
+          q.complaintType = complaintType;
+        }
+      }
     }
 
     /* ── 5. Fetch tickets ── */
@@ -134,10 +174,14 @@ export async function GET(request) {
           "Assigned Department": ticket.assignedDept || "",
           "File URL": ticket.fileUrl || "",
           "Created At": ticket.createdAt
-            ? new Date(ticket.createdAt).toLocaleString("en-IN")
+            ? new Date(ticket.createdAt).toLocaleString("en-IN", {
+                timeZone: "Asia/Kolkata",
+              })
             : "",
           "Updated At": ticket.updatedAt
-            ? new Date(ticket.updatedAt).toLocaleString("en-IN")
+            ? new Date(ticket.updatedAt).toLocaleString("en-IN", {
+                timeZone: "Asia/Kolkata",
+              })
             : "",
         };
       })
