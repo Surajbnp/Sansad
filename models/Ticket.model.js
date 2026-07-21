@@ -37,6 +37,22 @@ const ticketSchema = new mongoose.Schema(
       required: true,
     },
 
+    division: {
+      type: String,
+      required: function () {
+        return this.complaintType === "विद्युत विभाग";
+      },
+      default: null,
+    },
+
+    distributionCentre: {
+      type: String,
+      required: function () {
+        return this.complaintType === "विद्युत विभाग";
+      },
+      default: null,
+    },
+
     status: {
       type: String,
       enum: [

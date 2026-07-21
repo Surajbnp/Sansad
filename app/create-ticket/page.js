@@ -25,6 +25,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useTitle } from "@/hooks/useTitle";
 
+const ELECTRICITY_TYPE = "विद्युत विभाग";
+
 const TICKET_TYPES = [
   "जिला पंचायत / जनपद पंचायत",
   "सामाजिक न्याय एवं निशक्त जन कल्याण विभाग",
@@ -46,9 +48,11 @@ const TICKET_TYPES = [
   "जल विभाग (PHE)",
   "विद्युत विभाग",
   "रेलवे विभाग",
-  "रोजगार",
+  "नगर निगम / जिला पंचायत",
+  "पब्लिक हेल्थ इंजीनियरिंग (PHE)",
   "अन्य (Others)",
 ];
+
 const TITLE_OPTIONS = [
   "प्रधानमंत्री राहत कोष से सहायता प्रदान करने हेतु आवेदन",
   "मुख्यमंत्री सहायता निधि से सहायता प्रदान करने हेतु आवेदन",
@@ -85,6 +89,35 @@ const TITLE_OPTIONS = [
   "भूमि / राजस्व संबंधी आवेदन",
   "अन्य (Others)",
 ];
+
+const DIVISION_DISTRIBUTION_MAP = {
+  "रामपुर": [
+    "झोटा",
+    "बैरहना",
+    "बिरसिंहपुर",
+    "कोटर",
+    "छिबौरा",
+    "रामपुर",
+    "सज्जनपुर",
+    "माधवगढ़",
+  ],
+  "सतना ग्रामीण": [
+    "जैतवारा",
+    "मझगवाँ",
+    "चित्रकूट",
+    "कोठी",
+    "बाबूपुर",
+    "सितपुरा",
+    "सोहावल",
+  ],
+  "नागौद": ["सिंहपुर", "नागौद", "जसो", "हरदुआ"],
+  "मैहर": ["उचेहरा", "विहटा", "नादन", "घुनवारा", "मैहर", "बदेरा"],
+  "अमरपाटन": ["मर्यादपुर", "ताला", "कठहा", "अमरपाटन", "रामनगर"],
+};
+
+const DIVISIONS = Object.keys(DIVISION_DISTRIBUTION_MAP);
+
+
 const initialState = {
   title: "",
   otherTitle: "",
@@ -92,6 +125,8 @@ const initialState = {
   type: "",
   otherType: "",
   fileUrl: "",
+  division: "",
+  distributionCentre: "",
 };
 
 /* ─── field label ─── */
@@ -150,6 +185,7 @@ useTitle("Create Ticket");
 
   const isOthers = formData.type === "अन्य (Others)";
   const isOtherTitle = formData.title === "अन्य (Others)";
+  const isElectricity = formData.type === ELECTRICITY_TYPE;
 
   const handleChange = (key, value) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -171,6 +207,11 @@ if (
     if (!formData.type) newErrors.type = "शिकायत का प्रकार चुनें";
     if (isOthers && !formData.otherType.trim())
       newErrors.otherType = "कृपया प्रकार निर्दिष्ट करें";
+    if (isElectricity) {
+      if (!formData.division) newErrors.division = "डिवीजन चुनें";
+      if (!formData.distributionCentre)
+        newErrors.distributionCentre = "वितरण केन्द्र चुनें";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -190,6 +231,10 @@ if (
         description: formData.description,
         complaintType: isOthers ? formData.otherType : formData.type,
         fileUrl: formData.fileUrl,
+        division: isElectricity ? formData.division : undefined,
+        distributionCentre: isElectricity
+          ? formData.distributionCentre
+          : undefined,
         user: { name: user?.name, userId: user?._id, phone : user?.phone },
       };
       const response = await fetch("/api/ticket/create", {
@@ -400,20 +445,24 @@ if (
             <Select
               value={formData.type}
               onChange={(e) => {
-                handleChange("type", e.target.value);
-                // clear otherType when switching away from Others
-                if (e.target.value !== "अन्य (Others)") {
-                  setFormData((prev) => ({
-                    ...prev,
-                    type: e.target.value,
-                    otherType: "",
-                  }));
-                  setErrors((prev) => ({
-                    ...prev,
-                    type: false,
-                    otherType: false,
-                  }));
-                }
+                const newType = e.target.value;
+                setFormData((prev) => ({
+                  ...prev,
+                  type: newType,
+                  // clear otherType when switching away from Others
+                  otherType: newType === "अन्य (Others)" ? prev.otherType : "",
+                  // clear division/distributionCentre when switching away from Electricity Dept
+                  division: newType === ELECTRICITY_TYPE ? prev.division : "",
+                  distributionCentre:
+                    newType === ELECTRICITY_TYPE ? prev.distributionCentre : "",
+                }));
+                setErrors((prev) => ({
+                  ...prev,
+                  type: false,
+                  otherType: false,
+                  division: false,
+                  distributionCentre: false,
+                }));
               }}
               placeholder="— विभाग / प्रकार चुनें —"
               bg="gray.50"
@@ -432,6 +481,83 @@ if (
             </Select>
             <FormErrorMessage fontSize="xs">{errors.type}</FormErrorMessage>
           </FormControl>
+
+          {/* DIVISION — shown only for Electricity Department */}
+          {isElectricity && (
+            <FormControl isInvalid={!!errors.division}>
+              <FieldLabel>डिवीजन (Division)</FieldLabel>
+              <Select
+                value={formData.division}
+                onChange={(e) => {
+                  const newDivision = e.target.value;
+                  setFormData((prev) => ({
+                    ...prev,
+                    division: newDivision,
+                    distributionCentre: "",
+                  }));
+                  setErrors((prev) => ({
+                    ...prev,
+                    division: false,
+                    distributionCentre: false,
+                  }));
+                }}
+                placeholder="— डिवीजन चुनें —"
+                bg="gray.50"
+                borderColor="gray.200"
+                rounded="lg"
+                _focus={focusStyle}
+                fontSize="sm"
+                color={formData.division ? "gray.800" : "gray.400"}
+                iconColor="#fa7602"
+              >
+                {DIVISIONS.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </Select>
+              <FormErrorMessage fontSize="xs">
+                {errors.division}
+              </FormErrorMessage>
+            </FormControl>
+          )}
+
+          {/* DISTRIBUTION CENTRE — shown only for Electricity Department, depends on Division */}
+          {isElectricity && (
+            <FormControl isInvalid={!!errors.distributionCentre}>
+              <FieldLabel>विद्युत वितरण केन्द्र (Distribution Centre)</FieldLabel>
+              <Select
+                value={formData.distributionCentre}
+                onChange={(e) =>
+                  handleChange("distributionCentre", e.target.value)
+                }
+                placeholder={
+                  formData.division
+                    ? "— वितरण केन्द्र चुनें —"
+                    : "पहले डिवीजन चुनें"
+                }
+                isDisabled={!formData.division}
+                bg="gray.50"
+                borderColor="gray.200"
+                rounded="lg"
+                _focus={focusStyle}
+                fontSize="sm"
+                color={formData.distributionCentre ? "gray.800" : "gray.400"}
+                iconColor="#fa7602"
+              >
+                {(DIVISION_DISTRIBUTION_MAP[formData.division] || []).map(
+                  (c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  )
+                )}
+              </Select>
+              <FormErrorMessage fontSize="xs">
+                {errors.distributionCentre}
+              </FormErrorMessage>
+            </FormControl>
+          )}
 
           {/* OTHERS — conditional extra input */}
           {isOthers && (
