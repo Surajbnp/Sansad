@@ -168,7 +168,7 @@ export default function Contact() {
                 <div className={styles.addressLineIcon}>📞</div>
                 <div className={styles.addressLineText}>
                   <strong>Phone</strong><br />
-                  <a href="tel:+919425172508">+91 94251 72508</a>
+                  <a href="tel:+919238859999">+91 94251 72508</a>
                 </div>
               </div>
 
@@ -251,7 +251,7 @@ export default function Contact() {
           <div className={styles.reachStripActions}>
 
             <a
-              href="tel:+919425172508"
+              href="tel:+919238859999"
               className={`${styles.reachBtn} ${styles.reachBtnCall}`}
             >
               📞 +91 94251 72508

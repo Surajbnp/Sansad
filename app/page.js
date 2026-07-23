@@ -185,7 +185,7 @@ export default function Home() {
           fontWeight={600}
             className="headingHindi"
         >
-          हेल्पलाइन: +91 9425172508
+          हेल्पलाइन: +91 9238859999
         </Text>
       </Box>
     </Box>
