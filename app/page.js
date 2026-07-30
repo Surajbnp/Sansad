@@ -11,6 +11,9 @@ import {
 } from "@chakra-ui/react";
 import styles from "./page.module.css";
 import { useTitle } from "@/hooks/useTitle";
+import Features from "@/components/Features";
+import Process from "@/components/Process";
+import CallToAction from "@/components/CallToAction";
 
 export default function Home() {
   useTitle("सांसद सुविधा केंद्र – सतना-मैहर");
@@ -19,21 +22,25 @@ export default function Home() {
       <Box className={styles.heroWrapper} w="100%">
         <Image
           src="/Satna_SSK_Homebanner_Mobile.png"
-          display={{ base: "block", md: "none" }} 
+          display={{ base: "block", md: "none" }}
           w="100%"
           alt="Hero Mobile"
         />
         <Box
           className={styles.hero}
-          display={{ base: "none", md: "block" }} 
+          display={{ base: "none", md: "block" }}
           w="100%"
           minH="90vh"
           position="relative"
         />
       </Box>
-
+    <div className={styles.sectionsWrapper}>
+      <Features className="mt-5"/>
+      <Process />
+      <CallToAction />
+    </div>
       {/* ICONS SECTION */}
-      <Box w="100%" className={styles.iconsWrapper}>
+      {/* <Box w="100%" className={styles.iconsWrapper}>
         <Flex
           direction={{ base: "column", md: "row" }}
           align="center"
@@ -58,9 +65,9 @@ export default function Home() {
             w={{ base: "170px", md: "200px" }}
           />
         </Flex>
-      </Box>
+      </Box> */}
 
-      <HStack
+      {/* <HStack
         justify="center"
         spacing={4}
         maxW="80%"
@@ -80,10 +87,10 @@ export default function Home() {
             flexShrink={0}
           />
         ))}
-      </HStack>
+      </HStack> */}
 
       {/* TEXT SECTION */}
-      <Box
+      {/* <Box
         p={8}
         maxW="800px"
         m="auto"
@@ -142,7 +149,7 @@ export default function Home() {
             onClick={() => (window.location.href = "/login")}
             _hover={{ bg: "#e66a00" }}
             fontSize={{ base: "18px", md: "30px" }}
-            // Padding and Sizing
+      
             px={{ base: 12, md: 10 }}
             py={{ base: 2, md: 5 }}
             h="auto"
@@ -153,7 +160,7 @@ export default function Home() {
             लॉग इन / रजिस्टर
           </Button>
 
-          {/* Vertical Blue Line */}
+    
           <Box
             h={{ base: "60px", md: "100px" }}
             borderLeft="3px solid"
@@ -167,7 +174,7 @@ export default function Home() {
             onClick={() => (window.location.href = "/ticket-status")}
             _hover={{ bg: "#289409" }}
             fontSize={{ base: "18px", md: "30px" }}
-            // Padding and Sizing
+           
             px={{ base: 12, md: 12 }}
             py={{ base: 2, md: 5 }}
             h="auto"
@@ -187,7 +194,7 @@ export default function Home() {
         >
           हेल्पलाइन: +91 9238859999
         </Text>
-      </Box>
+      </Box> */}
     </Box>
   );
 }

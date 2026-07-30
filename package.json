@@ -25,6 +25,7 @@
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
+    "lucide-react": "^1.28.0",
     "mongoose": "^8.16.5",
     "next": "15.4.8",
     "next-i18next": "^15.4.2",

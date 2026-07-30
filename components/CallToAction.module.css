@@ -1,0 +1,235 @@
+.section {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2.25rem;
+  border: 1px solid rgba(253, 230, 138, 0.6);
+  background: linear-gradient(
+    to bottom right,
+    #fff,
+    rgba(255, 251, 235, 0.7),
+    rgba(236, 253, 245, 0.6)
+  );
+  padding: 2rem;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.08);
+}
+
+@media (min-width: 1024px) {
+  .section {
+    padding: 3rem;
+  }
+}
+
+.bgWrap {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+.blob1 {
+  position: absolute;
+  left: -6rem;
+  top: 0;
+  height: 18rem;
+  width: 18rem;
+  border-radius: 9999px;
+  background: rgba(253, 230, 138, 0.3);
+  filter: blur(40px);
+}
+
+.blob2 {
+  position: absolute;
+  right: -6rem;
+  bottom: 0;
+  height: 18rem;
+  width: 18rem;
+  border-radius: 9999px;
+  background: rgba(167, 243, 208, 0.3);
+  filter: blur(40px);
+}
+
+.radialOverlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at top right,
+    rgba(255, 255, 255, 0.9),
+    transparent 45%
+  );
+}
+
+.contentRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  .contentRow {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  border: 1px solid #fcd34d;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: #92400e;
+  backdrop-filter: blur(4px);
+}
+
+.heading {
+  margin-top: 1.5rem;
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #0f172a;
+}
+
+.headingGradientSpan {
+  margin-top: 0.5rem;
+  display: block;
+  background: linear-gradient(to right, #8b5a2b, #d97706);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.description {
+  margin-top: 1.5rem;
+  max-width: 42rem;
+  font-size: 1.125rem;
+  line-height: 2rem;
+  color: #475569;
+}
+
+.buttonsRow {
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.primaryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  background: #8b5a2b;
+  padding: 0.875rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, background 0.3s;
+  text-decoration: none;
+}
+
+.primaryBtn:hover {
+  transform: translateY(-4px);
+  background: #6d4522;
+}
+
+.primaryBtnArrow {
+  transition: transform 0.2s;
+}
+
+.primaryBtn:hover .primaryBtnArrow {
+  transform: translateX(4px);
+}
+
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid #fcd34d;
+  background: #fff;
+  padding: 0.875rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #8b5a2b;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.3s, box-shadow 0.3s;
+  text-decoration: none;
+}
+
+.secondaryBtn:hover {
+  border-color: #8b5a2b;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.infoCard {
+  border-radius: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.8);
+  padding: 1.75rem;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(24px);
+}
+
+.phoneRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.phoneIconWrap {
+  display: flex;
+  height: 3.5rem;
+  width: 3.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  background: #fef3c7;
+  color: #8b5a2b;
+}
+
+.helplineLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #b45309;
+}
+
+.helplineNumber {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-decoration: none;
+}
+
+.helplineNumber:hover {
+  color: #8b5a2b;
+}
+
+.divider {
+  margin: 1.5rem 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #fde68a, transparent);
+}
+
+.noteBox {
+  border-radius: 1rem;
+  border: 1px solid #fef3c7;
+  background: linear-gradient(to bottom right, #fffbeb, #fff);
+  padding: 1.25rem;
+}
+
+.noteText {
+  font-size: 0.875rem;
+  line-height: 1.75rem;
+  color: #334155;
+}
+
+.noteHighlight {
+  font-weight: 600;
+  color: #8b5a2b;
+}
