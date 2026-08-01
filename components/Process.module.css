@@ -75,6 +75,22 @@
   }
 }
 
+@media (max-width: 639px) {
+  .section {
+    gap: 1.5rem;
+  }
+
+  .stepsRow {
+    row-gap: 0;
+    padding: 0 0.5rem;
+  }
+
+  .imageWrap {
+    height: 11rem;
+    width: 11rem;
+  }
+}
+
 .stepCard {
   display: flex;
   width: 100%;

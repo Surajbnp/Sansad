@@ -182,6 +182,7 @@
 
 .phoneIconWrap {
   display: flex;
+  flex-shrink: 0;
   height: 3.5rem;
   width: 3.5rem;
   align-items: center;
@@ -200,7 +201,9 @@
 }
 
 .helplineNumber {
-  font-size: 1.5rem;
+  display: inline-block;
+  white-space: nowrap;
+  font-size: clamp(1.125rem, 5.5vw, 1.5rem);
   font-weight: 700;
   color: #0f172a;
   text-decoration: none;
@@ -208,6 +211,25 @@
 
 .helplineNumber:hover {
   color: #8b5a2b;
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .infoCard {
+    padding: 1.25rem;
+  }
+
+  .phoneRow {
+    gap: 0.75rem;
+  }
+
+  .phoneIconWrap {
+    height: 3rem;
+    width: 3rem;
+  }
 }
 
 .divider {
